@@ -277,12 +277,14 @@ int main(int argc, char *argv[]) {
 	// Set the tolerance value used for checking results
 	const float tolerance = 1e-2;
 
+	// Allocate memory for the exhaustive calculation of nearest neighbours
+	test_kdtree::kd_neighbour *nearest = new test_kdtree::kd_neighbour[N_train];
+
 	// Process each test case
 	bool ok = true;
 	for(int i=0; i < (int) N_test; ++i) {
 
 		// Create a vector of point-distance tuples to current test point
-		test_kdtree::kd_neighbour nearest[N_train];
 		for(int n=0; n < (int) N_train; ++n) {
 			float distance = 0.0f;
 			for(unsigned int d=0; d<D; ++d) distance += (train[n][d] - test[i][d]) * (train[n][d] - test[i][d]);
@@ -362,15 +364,16 @@ int main(int argc, char *argv[]) {
 
 		// Check number of points in range
 		if(in_range != points_in_range.size()) {
-			fprintf(stderr, "Wrong number of neighbours within range %.3f (found %d, expected %d)\n",
-				squared_search_range, points_in_range.size(), in_range);
+			fprintf(stderr, "Wrong number of neighbours within range %.3f (found %d, expected %d) in test case %d\n",
+				squared_search_range, points_in_range.size(), in_range, i);
 			ok = false;
 		}
 	}
 
-	// Release random samples
+	// Release random samples and auxiliar data
 	delete []train;
 	delete []test;
+	delete []nearest;
 
 	// Report results
 	if(ok) printf("All tests OK!\n");
