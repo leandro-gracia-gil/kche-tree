@@ -274,6 +274,15 @@ int main(int argc, char *argv[]) {
 	in_file >> kdtree;
 	in_file.close();
 
+	// Test the subscript operator
+	bool ok = true;
+	for(int i=0; i < (int) N_train; ++i) {
+		if(train[i] != kdtree[i]) {
+			fprintf(stderr, "Non-matching subscript operator value for index %d (error in 1st axis: %.6g)\n", i, fabs(train[i][0] - kdtree[i][0]));
+			ok = false;
+		}
+	}
+
 	// Set the tolerance value used for checking results
 	const float tolerance = 1e-2;
 
@@ -281,7 +290,6 @@ int main(int argc, char *argv[]) {
 	test_kdtree::kd_neighbour *nearest = new test_kdtree::kd_neighbour[N_train];
 
 	// Process each test case
-	bool ok = true;
 	for(int i=0; i < (int) N_test; ++i) {
 
 		// Create a vector of point-distance tuples to current test point

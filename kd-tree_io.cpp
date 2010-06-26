@@ -113,6 +113,10 @@ std::istream & operator >> (std::istream &in, kd_tree<T, D, S> &kdtree) {
 	in.read(reinterpret_cast<char *>(kdtree.permutation), kdtree.num_elements * sizeof(unsigned int));
 	if(!in.good()) throw std::runtime_error("error reading kd-tree data permutation");
 
+	// Build the inverse permutation array
+	kdtree.inverse_perm = new unsigned int [kdtree.num_elements];
+	for(unsigned int i=0; i<kdtree.num_elements; ++i) kdtree.inverse_perm[kdtree.permutation[i]] = i;
+
 	// Allocate and read kd-tree data array
 	kdtree.data = new point_type [kdtree.num_elements];
 	in.read(reinterpret_cast<char *>(kdtree.data), kdtree.num_elements * sizeof(point_type));

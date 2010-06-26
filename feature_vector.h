@@ -53,6 +53,10 @@ struct feature_vector {
 	const T & operator [] (unsigned int index) const { return data[index]; } 	///< Const subscript operator.
 	T & operator [] (unsigned int index) { return data[index]; } 			///< Subscript operator.
 
+	// Comparison operators
+	bool operator == (const feature_vector &p) const; 			///< Equality comparison operator.
+	bool operator != (const feature_vector &p) const; 			///< Non-equality comparison operator.
+
 	// Squared distance operators for two D-dimensional points of type T.
 	inline T distance_to(const feature_vector &p) const; 			///< Squared distance to a point.
 	inline T distance_to(const feature_vector &p, T upper_bound) const; 	///< Squared distance to a point with an upper bound.

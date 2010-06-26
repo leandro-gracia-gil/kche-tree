@@ -35,7 +35,8 @@
  * Creates an empty and uninitialized kd-tree.
  */
 template <typename T, const unsigned int D, typename S>
-kd_tree<T, D, S>::kd_tree() : root(NULL), data(NULL), permutation(NULL), num_elements(0) {}
+kd_tree<T, D, S>::kd_tree() : root(NULL), data(NULL), permutation(NULL),
+	inverse_perm(NULL), num_elements(0) {}
 
 /**
  * Default kd-tree desstructor.
@@ -48,7 +49,7 @@ kd_tree<T, D, S>::~kd_tree() {
 }
 
 /**
- *
+ * Release any existing contents in the kd-tree.
  */
 template <typename T, const unsigned int D, typename S>
 void kd_tree<T, D, S>::release() {
@@ -57,14 +58,27 @@ void kd_tree<T, D, S>::release() {
 	delete root;
 	delete []data;
 	delete []permutation;
+	delete []inverse_perm;
 
 	// Set NULL pointers
 	root = NULL;
 	data = NULL;
 	permutation = NULL;
+	inverse_perm = NULL;
 
 	// Reset number of elements
 	num_elements = 0;
+}
+
+/**
+ * Subscripting operator to access kd-tree data.
+ *
+ * \param index Index of the data being accessed.
+ * \return Reference to the index-th element provided when building the tree (internal copy).
+ */
+template <typename T, const unsigned int D, typename S>
+const typename kd_tree<T, D, S>::kd_point & kd_tree<T, D, S>::operator [] (unsigned int index) const {
+	return data[inverse_perm[index]];
 }
 
 /**
@@ -92,9 +106,13 @@ bool kd_tree<T, D, S>::build(const kd_point *points, unsigned int num_points, un
 	num_elements = 0;
 	root = kd_node::build(points, permutation, num_points, NULL, bucket_size, num_elements);
 	
-	// Make a permutated copy of the input data
+	// Make a permutated copy of the input data and calculate the inverse permutation
 	data = new kd_point[num_points];
-	for(unsigned int i=0; i<num_points; ++i) data[i] = points[permutation[i]];
+	inverse_perm = new unsigned int[num_points];
+	for(unsigned int i=0; i<num_points; ++i) {
+		data[i] = points[permutation[i]];
+		inverse_perm[permutation[i]] = i;
+	}
 
 	return true;
 }

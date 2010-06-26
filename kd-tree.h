@@ -128,8 +128,8 @@ public:
 	void knn(const kd_point &p, unsigned int K, std::vector<kd_neighbour> &output, T epsilon = (T) 0) const; 	///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
 	void all_in_range(const kd_point &p, T distance, std::vector<kd_neighbour> &output) const; 			///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
 
-	/// Subscript operator for accesing stored data
-	const T & operator [] (unsigned int index) const { return data[permutation[index]]; }
+	// Subscript operator for accesing stored data (will fail on non-built kd-trees)
+	const kd_point & operator [] (unsigned int index) const;
 
 	// Stream operators
 	template <typename T_, const unsigned int D_, typename S_>
@@ -276,6 +276,7 @@ protected:
 	kd_node *root; 			///< Root node of the tree. Will be \c NULL in empty trees.
 	kd_point *data; 		///< Data of the kd-tree. Copied with element permutations during the tree building.
 	unsigned int *permutation; 	///< Permutation indices applied to kd-tree data to enhance cache behaviour.
+	unsigned int *inverse_perm; 	///< Inverse of the permutation applied to indices in the permutation array.
 	unsigned int num_elements; 	///< Number of elements currently in the tree.
 
 	// File serialization settings

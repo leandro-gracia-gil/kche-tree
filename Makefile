@@ -4,7 +4,10 @@ CFLAGS=-O3 -Wall
 SSE_FLAGS=-msse -DSSE
 FILE_FLAGS=-DFROM_FILE
 
-TEMPLATE_FILES=kd-tree.h kd-tree.cpp kd-tree_io.cpp k-heap.h k-heap.cpp indirect_heap.h indirect_heap.cpp k-vector.h kd-tree_sse_24d.h
+TEMPLATE_FILES= kd-tree.h kd-tree.cpp kd-tree_io.cpp kd-tree_sse_24d.h
+TEMPLATE_FILES+= k-heap.h k-heap.cpp indirect_heap.h indirect_heap.cpp
+TEMPLATE_FILES+= k-vector.h k-vector.cpp
+TEMPLATE_FILES+= feature_vector.h feature_vector.cpp
 
 SPEED=speed_kdtree
 TEST=test_kdtree

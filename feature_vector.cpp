@@ -64,6 +64,38 @@ void feature_vector<T, D>::operator delete [] (void *p) {
 }
 
 /**
+ * Check if two feature vectors are exactly equal.
+ *
+ * \param p Feature vector being compared to.
+ * \return \c true if equal, \c false otherwise.
+ */
+template <typename T, const unsigned int D>
+bool feature_vector<T, D>::operator == (const feature_vector &p) const {
+
+	// Check that all dimensions have the same value
+	for(unsigned int d=0; d<D; ++d) {
+		if(data[d] != p.data[d]) return false;
+	}
+	return true;
+}
+
+/**
+ * Check if two feature vectors are different equal.
+ *
+ * \param p Feature vector being compared to.
+ * \return \c true if different, \c false otherwise.
+ */
+template <typename T, const unsigned int D>
+bool feature_vector<T, D>::operator != (const feature_vector &p) const {
+
+	// Check if any dimension has a different value
+	for(unsigned int d=0; d<D; ++d) {
+		if(data[d] != p.data[d]) return true;
+	}
+	return false;
+}
+
+/**
  * Generic squared euclidean distance operator for two D-dimensional numeric kd_points.
  * Redefinitions and specializations of this operator are welcome.
  *
