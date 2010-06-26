@@ -19,17 +19,15 @@
  ***************************************************************************/
 
 /**
- * \file 	test_kdtree.cpp
- * \brief 	Testing tool for kd-trees.
+ * \file 	speed_kdtree.cpp
+ * \brief 	Benchmark tool for kd-trees.
  * \author	Leandro Graciá Gil
  */
 
-// Includes from C Standard Library and C++ STL
+// Includes from C Standard Library
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
-#include <cmath>
-#include <fstream>
 
 // Include the generic kd-tree template or its SSE-enabled specialization for floats and 24 dimensions
 #ifdef SSE
@@ -45,13 +43,8 @@ const unsigned int D = 24;
 typedef kd_tree<float, D> test_kdtree;
 
 
-// Bring some things from STL namespace
-using std::ofstream;
-using std::ifstream;
+// Bring STL vectors from the STL namespace
 using std::vector;
-using std::min;
-using std::max;
-
 
 #ifdef FROM_FILE
 /**
@@ -167,44 +160,11 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	// Find the maximum and minimum points (used to estimate range searching values)
-	test_kdtree::kd_point min_point = train[0];
-	test_kdtree::kd_point max_point = train[0];
-	for(unsigned int i=1; i<N_train; ++i) {
-		for(unsigned int d=0; d<D; ++d) {
-			min_point[d] = min(min_point[d], train[i][d]);
-			max_point[d] = max(max_point[d], train[i][d]);
-		}
-	}
-
-	// Find the points nearest to maximum and minimum points
-	unsigned int min_nearest = 0, max_nearest = 0;
-	float min_distance = min_point.distance_to(train[min_nearest]);
-	float max_distance = max_point.distance_to(train[max_nearest]);
-
-	for(unsigned int i=1; i<N_train; ++i) {
-
-		float dist = min_point.distance_to(train[i]);
-		if(dist < min_distance) {
-			min_nearest = i;
-			min_distance = dist;
-		}
-
-		dist = max_point.distance_to(train[i]);
-		if(dist < max_distance) {
-			max_nearest = i;
-			max_distance = dist;
-		}
-	}
-
-	// Estimate range
-	float range = sqrt(train[min_nearest].distance_to(train[max_nearest])) / M_SQRT1_2;
-
 	#else
 	// Set default parameters
 	int K, N_train, N_test;
-	int random_seed = -1;
 	float range = 100.0f;
+	int random_seed = -1;
 	float epsilon = 0.0f;
 
 	// Read params
@@ -261,131 +221,36 @@ int main(int argc, char *argv[]) {
 	#endif
 
 	// Build the kd-tree
+	clock_t t1_build = clock();
 	test_kdtree kdtree;
 	kdtree.build(train, N_train);
-
-	// Try to save the kd-tree to a file
-	ofstream out_file("kd-tree.test", std::ios::binary | std::ios::out);
-	out_file << kdtree;
-	out_file.close();
-
-	// Read the tree back
-	ifstream in_file("kd-tree.test", std::ios::binary | std::ios::in);
-	in_file >> kdtree;
-	in_file.close();
-
-	// Test the subscript operator
-	bool ok = true;
-	for(int i=0; i < (int) N_train; ++i) {
-		if(train[i] != kdtree[i]) {
-			fprintf(stderr, "Non-matching subscript operator value for index %d (error in 1st axis: %.6g)\n", i, fabs(train[i][0] - kdtree[i][0]));
-			ok = false;
-		}
-	}
-
-	// Set the tolerance value used for checking results
-	const float tolerance = 1e-2;
-
-	// Allocate memory for the exhaustive calculation of nearest neighbours
-	test_kdtree::kd_neighbour *nearest = new test_kdtree::kd_neighbour[N_train];
+	clock_t t2_build = clock();
 
 	// Process each test case
+	clock_t t1_test = clock();
 	for(int i=0; i < (int) N_test; ++i) {
-
-		// Create a vector of point-distance tuples to current test point
-		for(int n=0; n < (int) N_train; ++n) {
-			float distance = 0.0f;
-			for(unsigned int d=0; d<D; ++d) distance += (train[n][d] - test[i][d]) * (train[n][d] - test[i][d]);
-			nearest[n] = test_kdtree::kd_neighbour(n, distance);
-		}
-
-		// Sort the training set vectors by its distance to the test point
-		sort(nearest, nearest + N_train, nearest[0]);
 
 		// Get the K nearest neighbours
 		vector<test_kdtree::kd_neighbour> knn;
 		kdtree.knn(test[i], K, knn, epsilon);
-
-		// Check the k nearest neighbours returned
-		int num_elems = min((int) N_train, (int) K);
-
-		for(int k=0; k<num_elems; ++k) {
-
-			// Check if distances match with expected ones
-			if(fabs(knn[k].squared_distance - nearest[k].squared_distance) >= tolerance) {
-				fprintf(stderr, "Nearest neighbour %d-th failed: index %d (%.3f), expected index %d (%.3f) in test case %d\n",
-					k, nearest[k].index, nearest[k].squared_distance, knn[k].index, knn[k].squared_distance, i);
-				ok = false;
-			}
-
-			// Check if distance calculations are correct
-			float dist1 = sqrt(train[knn[k].index].distance_to(test[i]));
-			float dist2 = sqrt(nearest[k].squared_distance);
-
-			if(fabs(dist1 - dist2) >= tolerance) {
-				fprintf(stderr, "Nearest neighbour %d-th failed: returned distance doesn't match (%.6f != %.6f) in test case %d\n",
-					k, dist1, dist2, i);
-				ok = false;
-			}
-		}
-
-		// Check vector size
-		if((int) knn.size() != num_elems) {
-			fprintf(stderr, "Wrong nearest neighbour vector size (%d, expected %d) in test case %d\n", (int)knn.size(), num_elems, i);
-			ok = false;
-		}
-
-		// Calculate a random search range (distance)
-		float search_range = (rand() / (float) RAND_MAX + 0.3f) * range;
-		float squared_search_range = search_range * search_range;
-
-		// Get all the neighbours in a random range
-		vector<test_kdtree::kd_neighbour> points_in_range;
-		kdtree.all_in_range(test[i], search_range, points_in_range);
-
-		// Check the returned neighbours within the range
-		for(unsigned int k=0; k<points_in_range.size(); ++k) {
-
-			// Check point lies within the range
-			if(points_in_range[k].squared_distance > squared_search_range + tolerance ) {
-			   	fprintf(stderr, "In-range point failed: index %d (%.3f) greater than requested squared distance %.3f in test case %d\n",
-					points_in_range[k].index, points_in_range[i].squared_distance, squared_search_range, i);
-				ok = false;
-			}
-
-			// Check if returned distances were properly calculated
-			float dist1 = sqrt(train[points_in_range[k].index].distance_to(test[i]));
-			float dist2 = sqrt(points_in_range[k].squared_distance);
-
-			if(fabs(dist1 - dist2) >= tolerance) {
-				fprintf(stderr, "In-range point failed: returned squared distance doesnt't match (%.6f != %.6f) in test case %d\n",
-					dist1, dist2, i);
-				ok = false;
-			}
-		}
-
-		// Count number of points in range
-		unsigned int in_range = 0;
-		for(int n=0; n < (int) N_train; ++n) {
-			if(nearest[n].squared_distance <= squared_search_range + tolerance) ++in_range;
-		}
-
-		// Check number of points in range
-		if(in_range != points_in_range.size()) {
-			fprintf(stderr, "Wrong number of neighbours within range %.3f (found %d, expected %d) in test case %d\n",
-				squared_search_range, points_in_range.size(), in_range, i);
-			ok = false;
-		}
 	}
+	clock_t t2_test = clock();
 
-	// Release random samples and auxiliar data
+	// Release random samples
 	delete []train;
 	delete []test;
-	delete []nearest;
+
+	// Calculate times
+	double time_build = (t2_build - t1_build) / (double) CLOCKS_PER_SEC;
+	double time_test  = (t2_test  - t1_test ) / (double) CLOCKS_PER_SEC;
 
 	// Report results
-	if(ok) printf("All tests OK!\n");
-	else printf("Problems found during testing...\n");
+	printf("Kd-tree testing with D = %d, %d neighbours, epsilon %.2f, training set size %d, test set size %d\n", D, K, epsilon, N_train, N_test);
+	printf("Build time: %.3f sec (%.2f%%)\n", time_build, 100.0 * time_build / (time_build + time_test));
+	printf("Test  time: %.3f sec (%.2f%%) -- average per test: %.4f sec\n", time_test , 100.0 * time_test  / (time_build + time_test),
+		time_test / (double) N_test);
+
+	printf("Total time: %.3f sec\n", time_build + time_test);
 
 	return 0;
 }
