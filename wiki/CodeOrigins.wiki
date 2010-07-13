@@ -2,7 +2,7 @@
 
 = Where this code comes from =
 
-All the code and ideas that are part of the project are completely of public domain. As it seems that some people like to think that some parts are based on propietary code and _stolen_ ideas, this page has been created to clearly show that it is not to anyone who cares on reading.
+All the code and ideas that are part of the project are completely of public domain. As it seems that some people like to think that some parts are based on proprietary code and _stolen_ ideas, this page has been created to clearly show that it is not to anyone who cares on reading.
 
 
 = Implemented ideas =
