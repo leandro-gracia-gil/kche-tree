@@ -1,9 +1,0 @@
-#summary Thread-safeness.
-#labels thread-safe
-
-= Introduction =
-Re-factor to thread-safe code, this is a major milestone.
-
-= Details =
-
-What shall we do with functin 'release'? and many many things.
