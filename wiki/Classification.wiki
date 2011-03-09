@@ -5,8 +5,10 @@ belonging class label. We DON'T intend to implement any classification method, w
 
 = Details =
 
-First of all, we have to point out that it makes sense to derive a new class of kd-trees, so anyone not interested into using classification kd-trees can benefit from original work.
+First of all, we have to point out that it makes sense to derive a new class of kd-trees, so anyone not interested into using kd-trees for classification purposes, can still benefit from original work.
  
-That said, an attribute for storing the class of 'feature vectors' is required, this attribute is of type 'int', if no class is specified such attribute will hold the -1 value.
+That said, an new attribute for storing the class of 'feature vectors' is required, this attribute is of type 'int', if no class is specified such attribute will hold the -1 value.
 
-We must provide new in/out stream operators. Hence, we have to define a new file format for such classification kd-trees. That's pretty much all what waiting to be carried out.
+We have to define a new file format for such classification kd-trees.
+hence, we must provide new in/out stream operators.
+This would be an initial approach.
