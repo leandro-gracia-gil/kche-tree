@@ -34,49 +34,47 @@
 
 #include <functional>
 
-namespace kdt
+template <typename T, const unsigned int D>
+class Metric;
+
+template <typename T, const unsigned int D>
+class FeatureVector
 {
-  template <typename T, const unsigned int D>
-  class Metric;
+ public:
+  FeatureVector();
+  ~FeatureVector();
+  FeatureVector(T);
+  bool operator == (const FeatureVector&) const;   ///< Equality comparison operator.
+  bool operator != (const FeatureVector&) const;   ///< Non-equality comparison operator.
+  T distance(const FeatureVector&) const; ///< Distance operator. Strategy pattern.
+  void* operator new [] (size_t); 	///< Standard allocation for arrays of feature vectors.
+  void  operator delete [] (void*); 	///< Standard deallocation for arrays of feature vectors.
+  const T & operator [] (unsigned int) const; ///< Const subscript operator.
+  T & operator [] (unsigned int); 		///< Subscript operator.
+ private:
+  T data[D];
+  Metric<T,D> metric;
+};
 
-  template <typename T, const unsigned int D>
-  class FeatureVector
-  {
-  public:
-    FeatureVector();
-    ~FeatureVector();
-    FeatureVector(T);
 
-    bool operator == (const FeatureVector&) const;   ///< Equality comparison operator.
-    bool operator != (const FeatureVector&) const;   ///< Non-equality comparison operator.
-    T distance(const FeatureVector&) const; ///< Distance operator. Strategy pattern.
-    void* operator new [] (size_t); 	///< Standard allocation for arrays of feature vectors.
-    void  operator delete [] (void*); 	///< Standard deallocation for arrays of feature vectors.
-    const T & operator [] (unsigned int) const; ///< Const subscript operator.
-    T & operator [] (unsigned int); 		///< Subscript operator.
-  private:
-    T data[D];
-    Metric<T, D> metric;
-  }// __attribute__((packed));
- 
-  
-  template <typename T, const unsigned int D>
-  class Metric
-  {
-  public:
-    T distance(const FeatureVector<T, D> &) const;
-  }
-  
-  template <typename T, const unsigned int D>
-  class FVDistance : public std::binary_function <FVDistance<T,D>, FVDistance<T,D>, bool>
-  {
-  public:
-    FVDistance();
-    FVDistance(unsigned int, T distance);
-    bool operator() (const FVDistance<T,D>&, const FVDistance<T,D>&) const;
-  private:
-    unsigned int index; ///< Index of the feature vector in the data set.
-    T distance; 	  ///< Distance of the referenced element to an implicit point.
-  }
-}
+template <typename T, const unsigned int D>
+class Metric
+{
+ public:
+  T distance(const FeatureVector<T, D> &) const;
+};
+
+
+template <typename T, const unsigned int D>
+class FVDistance : public std::binary_function<FVDistance<T,D>, FVDistance<T,D>, bool>
+{
+ public:
+  FVDistance();
+  FVDistance(unsigned int, T distance);
+  bool operator() (const FVDistance<T,D>&, const FVDistance<T,D>&) const;
+ private:
+  unsigned int index; ///< Index of the feature vector in the data set.
+  T distance;         ///< Distance of the referenced element to an implicit point.
+};
+
 #endif
