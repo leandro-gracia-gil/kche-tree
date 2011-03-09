@@ -57,7 +57,7 @@ namespace kdt
   private:
     T data[D];
     Metric<T, D> metric;
-  } __attribute__((packed));
+  }// __attribute__((packed));
  
   
   template <typename T, const unsigned int D>
