@@ -116,6 +116,6 @@ T & FeatureVector<T, D>::operator [] (unsigned int i)
 
 
 template <typename T, const unsigned int D>
-T SquaredMetric<T, D>::distance(const FeatureVector<T, D>&) const
+T SquaredMetric<T, D>::distance(const FeatureVector<T, D>&, const FeatureVector<T, D>&) const
 {
 };
