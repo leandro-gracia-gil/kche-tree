@@ -35,7 +35,7 @@
 
 #include <cstdlib>
 #include <new>
-#include "feature_vector.h"
+#include "vector.h"
 
 /**
  * Generic memory allocator operator for feature vector arrays.
@@ -114,9 +114,12 @@ T & kdt::Vector<T, D>::operator [] (unsigned int i)
   return data[i];
 }
 
-
 template <typename T, const unsigned int D>
-T kdt::SquaredMetric<T, D>::distance(const Vector<T, D>&, const Vector<T, D>&) const
+T kdt::SquaredMetric<T, D>::distance(const Vector<T, D>& a, const Vector<T, D>& b) const
 {
-
+  // Standard squared distance between two D-dimensional vectors
+  T acc = (T) 0;
+  for (unsigned int i=0; i<D; ++i)
+    acc += (a[i] - b[i]) * (a[i] - b[i]);
+  return acc;
 };
