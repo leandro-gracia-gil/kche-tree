@@ -75,7 +75,7 @@ void FeatureVector<T, D>::operator delete [] (void *p)
  * \return \c true if equal, \c false otherwise.
  */
 template <typename T, const unsigned int D>
-bool FeatureVector<T, D>::operator == (const FeatureVector &p) const
+bool FeatureVector<T, D>::operator== (const FeatureVector &p) const
 {
   // Check that all components have the same value
   for (unsigned int d=0; d<D; ++d)
@@ -92,7 +92,7 @@ bool FeatureVector<T, D>::operator == (const FeatureVector &p) const
  * \return \c true if different, \c false otherwise.
  */
 template <typename T, const unsigned int D>
-bool FeatureVector<T, D>::operator != (const FeatureVector &p) const
+bool FeatureVector<T, D>::operator!= (const FeatureVector &p) const
 {
   for(unsigned int d=0; d<D; ++d)
     if(data[d] != p.data[d])
@@ -100,3 +100,23 @@ bool FeatureVector<T, D>::operator != (const FeatureVector &p) const
  
   return false;
 }
+
+
+template <typename T, const unsigned int D>
+const T & FeatureVector<T, D>::operator [] (unsigned int i) const
+{
+  return data[i];
+}
+
+template <typename T, const unsigned int D>
+T & FeatureVector<T, D>::operator [] (unsigned int i)
+{
+  return data[i];
+}
+
+/*
+template <typename T, const unsigned int D>
+T SquaredMetric::distance(const FeatureVector<T, D>&) const
+{
+};
+*/

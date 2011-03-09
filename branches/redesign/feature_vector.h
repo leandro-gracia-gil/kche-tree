@@ -44,8 +44,8 @@ class FeatureVector
   FeatureVector();
   ~FeatureVector();
   FeatureVector(T);
-  bool operator == (const FeatureVector&) const;   ///< Equality comparison operator.
-  bool operator != (const FeatureVector&) const;   ///< Non-equality comparison operator.
+  bool operator== (const FeatureVector&) const;   ///< Equality comparison operator.
+  bool operator!= (const FeatureVector&) const;   ///< Non-equality comparison operator.
   T distance(const FeatureVector&) const; ///< Distance operator. Strategy pattern.
   void* operator new [] (size_t); 	///< Standard allocation for arrays of feature vectors.
   void  operator delete [] (void*); 	///< Standard deallocation for arrays of feature vectors.
@@ -76,7 +76,7 @@ class Metric
 };
 
 template <typename T, const unsigned int D>
-  class SquaredMetric : public Metric<T,D>
+class SquaredMetric : public Metric<T,D>
 {
  public:
   T distance(const FeatureVector<T, D>&) const;
