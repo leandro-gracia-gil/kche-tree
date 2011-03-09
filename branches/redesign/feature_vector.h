@@ -56,15 +56,6 @@ class FeatureVector
   Metric<T,D> metric;
 };
 
-
-template <typename T, const unsigned int D>
-class Metric
-{
- public:
-  T distance(const FeatureVector<T, D> &) const;
-};
-
-
 template <typename T, const unsigned int D>
 class FVDistance : public std::binary_function<FVDistance<T,D>, FVDistance<T,D>, bool>
 {
@@ -75,6 +66,20 @@ class FVDistance : public std::binary_function<FVDistance<T,D>, FVDistance<T,D>,
  private:
   unsigned int index; ///< Index of the feature vector in the data set.
   T distance;         ///< Distance of the referenced element to an implicit point.
+};
+
+template <typename T, const unsigned int D>
+class Metric
+{
+ public:
+  T distance(const FeatureVector<T, D>&) const;
+};
+
+template <typename T, const unsigned int D>
+  class SquaredMetric : public Metric<T,D>
+{
+ public:
+  T distance(const FeatureVector<T, D>&) const;
 };
 
 #endif
