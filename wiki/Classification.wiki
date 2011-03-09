@@ -1,4 +1,4 @@
-#labels classification
+#labels Classification
 We intend to aid classification tasks based on kd-trees, in order to do this, we simply have to add an extra field to the 'feature vector' class, to hold the
 belonging class label. We DON'T intend to implement any classification method, which could be easily derived from our work.
 
