@@ -34,8 +34,8 @@
 
 #include <functional>
 
-//namespace kdt
-//{
+namespace kdt
+{
   template <typename T, const unsigned int D>
   class Metric;
 
@@ -78,5 +78,5 @@
     unsigned int index; ///< Index of the feature vector in the data set.
     T distance; 	  ///< Distance of the referenced element to an implicit point.
   }
-
+}
 #endif
