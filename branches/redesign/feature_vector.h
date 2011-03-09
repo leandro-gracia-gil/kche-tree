@@ -34,12 +34,12 @@
 
 #include <functional>
 
-namespace kdt
-{
-  template <class T, const unsigned int D>
+//namespace kdt
+//{
+  template <typename T, const unsigned int D>
   class Metric;
 
-  template <class T, const unsigned int D>
+  template <typename T, const unsigned int D>
   class FeatureVector
   {
   public:
@@ -59,23 +59,24 @@ namespace kdt
     Metric<T, D> metric;
   } __attribute__((packed));
  
-  template <class T, const unsigned int D>
+  
+  template <typename T, const unsigned int D>
   class Metric
   {
   public:
-    T distance(const FeatureVector&) const;
+    T distance(const FeatureVector<T, D> &) const;
+  }
+  
+  template <typename T, const unsigned int D>
+  class FVDistance : public std::binary_function <FVDistance<T,D>, FVDistance<T,D>, bool>
+  {
+  public:
+    FVDistance();
+    FVDistance(unsigned int, T distance);
+    bool operator() (const FVDistance<T,D>&, const FVDistance<T,D>&) const;
+  private:
+    unsigned int index; ///< Index of the feature vector in the data set.
+    T distance; 	  ///< Distance of the referenced element to an implicit point.
   }
 
-  template <class T, const unsigned int D>
-  class FVDistance : public std::binary_function <FVDistance<T,D>, FVDistance<T,D>, bool>
-    {
-    public:
-      FVDistance();
-      FVDistance(unsigned int, T distance);
-      bool operator () (const FVDistance<T,D>&, const FVDistance<T,D>&) const;
-    private:
-      unsigned int index; ///< Index of the feature vector in the data set.
-      T distance; 	  ///< Distance of the referenced element to an implicit point.
-    }
-}
 #endif
