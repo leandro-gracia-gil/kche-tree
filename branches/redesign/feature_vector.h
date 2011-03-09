@@ -63,7 +63,7 @@ namespace kdt
   class Metric
   {
   public:
-    T distance(const FeatureVector<T, D> &) const;
+    T distance(const FeatureVector&) const;
   }
 
   template <class T, const unsigned int D>
@@ -76,6 +76,6 @@ namespace kdt
     private:
       unsigned int index; ///< Index of the feature vector in the data set.
       T distance; 	  ///< Distance of the referenced element to an implicit point.
-    }  
+    }
 }
 #endif
