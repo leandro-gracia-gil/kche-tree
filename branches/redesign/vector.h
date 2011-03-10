@@ -33,9 +33,10 @@
 #define _FEATURE_VECTOR_H_
 
 #include <functional>
+#include <new>
 
-namespace kdt
-{
+//namespace kdt
+//{
 
 template <typename T, const unsigned int D>
 class Metric;
@@ -44,28 +45,27 @@ template <typename T, const unsigned int D>
 class Vector
 {
  public:
-  Vector();
-  ~Vector();
-  Vector(T);
-  bool operator== (const Vector&) const;   ///< Equality comparison operator.
-  bool operator!= (const Vector&) const;   ///< Non-equality comparison operator.
+  Vector() {};
+  bool operator == (const Vector&) const;   ///< Equality comparison operator.
+  bool operator != (const Vector&) const;   ///< Non-equality comparison operator.
+  void* operator new[] (size_t size); 	///< Standard allocation for arrays of feature vectors.
+  void  operator delete[] (void*); 	///< Standard deallocation for arrays of feature vectors.
+  const T & operator[] (unsigned int) const; ///< Const subscript operator.
+  T & operator[] (unsigned int); 		///< Subscript operator.
   T distance(const Vector&, const Vector&) const; ///< Distance operator. Strategy pattern.
-  void* operator new [] (size_t); 	///< Standard allocation for arrays of feature vectors.
-  void  operator delete [] (void*); 	///< Standard deallocation for arrays of feature vectors.
-  const T & operator [] (unsigned int) const; ///< Const subscript operator.
-  T & operator [] (unsigned int); 		///< Subscript operator.
+  
  private:
   T data[D];
-  Metric<T,D> metric;
+  Metric<T, D> metric;
 };
 
 template <typename T, const unsigned int D>
-class FVDistance : public std::binary_function<FVDistance<T,D>, FVDistance<T,D>, bool>
+class VDistance : public std::binary_function<VDistance<T,D>, VDistance<T,D>, bool>
 {
  public:
-  FVDistance();
-  FVDistance(unsigned int, T distance);
-  bool operator() (const FVDistance<T,D>&, const FVDistance<T,D>&) const;
+  VDistance();
+  VDistance(unsigned int, T distance);
+  bool operator() (const VDistance<T,D>&, const VDistance<T,D>&) const;
  private:
   unsigned int index; ///< Index of the feature vector in the data set.
   T distance;         ///< Distance of the referenced element to an implicit point.
@@ -85,5 +85,5 @@ class SquaredMetric : public Metric<T,D>
   T distance(const Vector<T, D>&, const Vector<T, D>&) const;
 };
 
-}
+//}
 #endif

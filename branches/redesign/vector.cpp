@@ -31,11 +31,10 @@
  * \email       juanvi.puertos@gmail.com
 */
 
-
-
 #include <cstdlib>
 #include <new>
 #include "vector.h"
+
 
 /**
  * Generic memory allocator operator for feature vector arrays.
@@ -44,9 +43,9 @@
  * \param size  Total size in bytes of the objects to allocate.
  * \return Address to the new allocated memory.
  */
-template <typename T, const unsigned int D>
 
-void* kdt::Vector<T, D>::operator new [] (size_t size)
+template <typename T, const unsigned int D>
+void* Vector<T, D>::operator new [] (size_t size)
 { 
   void *p = malloc(size);
   if (p == NULL) {
@@ -58,12 +57,14 @@ void* kdt::Vector<T, D>::operator new [] (size_t size)
 
 /**
  * Generic memory deallocator operator for feature vector arrays.
- * Defined as complement of operator new [] so that memory-aligned specializations can be defined if required.
+ * Defined as complement of operator new [] so that memory-aligned
+ * specializations can be defined if required.
  *
  * \param p     Pointer to the address to release.
  */
+
 template <typename T, const unsigned int D>
-void kdt::Vector<T, D>::operator delete [] (void *p)
+void Vector<T, D>::operator delete [] (void *p)
 {        
   free(p);
 }
@@ -75,7 +76,7 @@ void kdt::Vector<T, D>::operator delete [] (void *p)
  * \return \c true if equal, \c false otherwise.
  */
 template <typename T, const unsigned int D>
-bool kdt::Vector<T, D>::operator== (const Vector &p) const
+bool Vector<T, D>::operator== (const Vector &p) const
 {
   // Check that all components have the same value
   for (unsigned int d=0; d<D; ++d)
@@ -92,7 +93,7 @@ bool kdt::Vector<T, D>::operator== (const Vector &p) const
  * \return \c true if different, \c false otherwise.
  */
 template <typename T, const unsigned int D>
-bool kdt::Vector<T, D>::operator!= (const Vector &p) const
+bool Vector<T, D>::operator!= (const Vector &p) const
 {
   for(unsigned int d=0; d<D; ++d)
     if(data[d] != p.data[d])
@@ -101,21 +102,21 @@ bool kdt::Vector<T, D>::operator!= (const Vector &p) const
   return false;
 }
 
-
 template <typename T, const unsigned int D>
-const T & kdt::Vector<T, D>::operator [] (unsigned int i) const
+const T & Vector<T, D>::operator [] (unsigned int i) const
 {
   return data[i];
 }
 
 template <typename T, const unsigned int D>
-T & kdt::Vector<T, D>::operator [] (unsigned int i)
+T & Vector<T, D>::operator [] (unsigned int i)
 {
   return data[i];
 }
 
 template <typename T, const unsigned int D>
-T kdt::SquaredMetric<T, D>::distance(const Vector<T, D>& a, const Vector<T, D>& b) const
+T SquaredMetric<T, D>::distance(const Vector<T, D>& a,
+				     const Vector<T, D>& b) const
 {
   // Standard squared distance between two D-dimensional vectors
   T acc = (T) 0;
