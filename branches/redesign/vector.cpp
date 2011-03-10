@@ -35,7 +35,6 @@
 #include <new>
 #include "vector.h"
 
-
 /**
  * Generic memory allocator operator for feature vector arrays.
  * Defined so that memory-aligned specializations can be defined if required.
@@ -44,8 +43,8 @@
  * \return Address to the new allocated memory.
  */
 
-template <typename T, const unsigned int D>
-void* Vector<T, D>::operator new [] (size_t size)
+template <typename T, const unsigned int D, int M>
+void* Vector<T, D, M>::operator new [] (size_t size)
 { 
   void *p = malloc(size);
   if (p == NULL) {
@@ -63,8 +62,8 @@ void* Vector<T, D>::operator new [] (size_t size)
  * \param p     Pointer to the address to release.
  */
 
-template <typename T, const unsigned int D>
-void Vector<T, D>::operator delete [] (void *p)
+template <typename T, const unsigned int D, int M>
+void Vector<T, D, M>::operator delete [] (void *p)
 {        
   free(p);
 }
@@ -75,8 +74,8 @@ void Vector<T, D>::operator delete [] (void *p)
  * \param p Feature vector being compared to.
  * \return \c true if equal, \c false otherwise.
  */
-template <typename T, const unsigned int D>
-bool Vector<T, D>::operator== (const Vector &p) const
+template <typename T, const unsigned int D, int M>
+bool Vector<T, D, M>::operator== (const Vector &p) const
 {
   // Check that all components have the same value
   for (unsigned int d=0; d<D; ++d)
@@ -92,8 +91,8 @@ bool Vector<T, D>::operator== (const Vector &p) const
  * \param p Feature vector being compared to.
  * \return \c true if different, \c false otherwise.
  */
-template <typename T, const unsigned int D>
-bool Vector<T, D>::operator!= (const Vector &p) const
+template <typename T, const unsigned int D, int M>
+bool Vector<T, D, M>::operator!= (const Vector &p) const
 {
   for(unsigned int d=0; d<D; ++d)
     if(data[d] != p.data[d])
@@ -101,26 +100,11 @@ bool Vector<T, D>::operator!= (const Vector &p) const
  
   return false;
 }
-template <typename T, const unsigned int D>
-void Vector<T,D>::set_metric()
-{
-  delete metric;
-  // metric = new SquaredMetric;
-}
 
-template <typename T, const unsigned int D>
-T SquaredMetric<T, D>::distance(const Vector<T, D>& a,
-				     const Vector<T, D>& b) const
+/*
+template <typename T, const unsigned int D, int M>
+T Vector<T, D, M>::distance_to(const Vector<T, D, M>& b) const
 {
-  // Standard squared distance between two D-dimensional vectors
-  T acc = (T) 0;
-  for (unsigned int i=0; i<D; ++i)
-    acc += (a[i] - b[i]) * (a[i] - b[i]);
-  return acc;
-};
-
-template <typename T, const unsigned int D>
-T Vector<T, D>::distance(const Vector<T,D>& b) const
-{
-  return metric.distance(this,b);
+  return metric.distance_to(this,b);
 }
+*/

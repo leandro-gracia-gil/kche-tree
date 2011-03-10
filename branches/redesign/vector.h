@@ -35,31 +35,50 @@
 #include <functional>
 #include <new>
 
-//namespace kdt
-//{
+enum MetricType {
+  Squared,
+};
 
-template <typename T, const unsigned int D>
-class Metric;
+template <typename T, typename D>
+T Vector<typename T, D, Squared>::distance_to
 
-template <typename T, const unsigned int D>
+
+
+template <typename T, const unsigned int D, int M>
+class Metric
+{
+ public:
+  T distance_to(const Vector<T,D,M>& a, const Vector<T,D,M>& b) const
+  {
+    T acc = (T) 0;
+    for (unsigned int i=0; i<D; ++i)
+      acc += (a[i] - b[i]) * (a[i] - b[i]);
+    return acc;
+  }
+};
+
+
+template <typename T, const unsigned int D, int M>
 class Vector
 {
  public:
-  Vector() {};
+  Vector(); // {}// { metric = new SquaredMetric; }
   bool operator == (const Vector&) const;   ///< Equality comparison operator.
   bool operator != (const Vector&) const;   ///< Non-equality comparison operator.
   void* operator new[] (size_t size); 	///< Standard allocation for arrays of feature vectors.
   void  operator delete[] (void*); 	///< Standard deallocation for arrays of feature vectors.
   const T & operator[] (unsigned int i) const { return data[i]; } ///< Const subscript operator.
-  T & operator[] (unsigned int i) { return data[i]; } 		  ///< Subscript operator.
-  T distance(const Vector&) const; ///< Distance operator. Strategy pattern.
-  void set_metric();
-
+  T & operator[] (unsigned int i) { return data[i]; } 		  ///< Subscript 
+  T distance_to(const Vector& b) const
+  {
+    return metric.distance_to(this,b);
+  }
  private:
   T data[D];
-  Metric<T, D> *metric;
+  Metric<T,D,M> metric;
 };
 
+/*
 template <typename T, const unsigned int D>
 class VDistance : public std::binary_function<VDistance<T,D>, VDistance<T,D>, bool>
 {
@@ -71,22 +90,6 @@ class VDistance : public std::binary_function<VDistance<T,D>, VDistance<T,D>, bo
   unsigned int index; ///< Index of the feature vector in the data set.
   T distance;         ///< Distance of the referenced element to an implicit point.
 };
+*/
 
-template <typename T, const unsigned int D>
-class Metric
-{
- public:
-  Metric(){}
-  T distance(const Vector<T, D>&, const Vector<T, D>&) const;
-};
-
-template <typename T, const unsigned int D>
-class SquaredMetric : public Metric<T,D>
-{
- public:
-  SquaredMetric(){}
-  T distance(const Vector<T, D>&, const Vector<T, D>&) const;
-};
-
-//}
 #endif
