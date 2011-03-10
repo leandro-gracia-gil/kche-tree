@@ -103,18 +103,6 @@ bool Vector<T, D>::operator!= (const Vector &p) const
 }
 
 template <typename T, const unsigned int D>
-const T & Vector<T, D>::operator [] (unsigned int i) const
-{
-  return data[i];
-}
-
-template <typename T, const unsigned int D>
-T & Vector<T, D>::operator [] (unsigned int i)
-{
-  return data[i];
-}
-
-template <typename T, const unsigned int D>
 T SquaredMetric<T, D>::distance(const Vector<T, D>& a,
 				     const Vector<T, D>& b) const
 {

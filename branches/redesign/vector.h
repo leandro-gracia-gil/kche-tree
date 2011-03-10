@@ -50,8 +50,8 @@ class Vector
   bool operator != (const Vector&) const;   ///< Non-equality comparison operator.
   void* operator new[] (size_t size); 	///< Standard allocation for arrays of feature vectors.
   void  operator delete[] (void*); 	///< Standard deallocation for arrays of feature vectors.
-  const T & operator[] (unsigned int) const; ///< Const subscript operator.
-  T & operator[] (unsigned int); 		///< Subscript operator.
+  const T & operator[] (unsigned int i) const { return data[i]; } ///< Const subscript operator.
+  T & operator[] (unsigned int i) { return data[i]; } 		  ///< Subscript operator.
   T distance(const Vector&, const Vector&) const; ///< Distance operator. Strategy pattern.
   
  private:
