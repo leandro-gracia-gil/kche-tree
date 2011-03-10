@@ -101,6 +101,12 @@ bool Vector<T, D>::operator!= (const Vector &p) const
  
   return false;
 }
+template <typename T, const unsigned int D>
+void Vector<T,D>::set_metric()
+{
+  delete metric;
+  // metric = new SquaredMetric;
+}
 
 template <typename T, const unsigned int D>
 T SquaredMetric<T, D>::distance(const Vector<T, D>& a,
@@ -112,3 +118,9 @@ T SquaredMetric<T, D>::distance(const Vector<T, D>& a,
     acc += (a[i] - b[i]) * (a[i] - b[i]);
   return acc;
 };
+
+template <typename T, const unsigned int D>
+T Vector<T, D>::distance(const Vector<T,D>& b) const
+{
+  return metric.distance(this,b);
+}

@@ -52,11 +52,12 @@ class Vector
   void  operator delete[] (void*); 	///< Standard deallocation for arrays of feature vectors.
   const T & operator[] (unsigned int i) const { return data[i]; } ///< Const subscript operator.
   T & operator[] (unsigned int i) { return data[i]; } 		  ///< Subscript operator.
-  T distance(const Vector&, const Vector&) const; ///< Distance operator. Strategy pattern.
-  
+  T distance(const Vector&) const; ///< Distance operator. Strategy pattern.
+  void set_metric();
+
  private:
   T data[D];
-  Metric<T, D> metric;
+  Metric<T, D> *metric;
 };
 
 template <typename T, const unsigned int D>
@@ -75,6 +76,7 @@ template <typename T, const unsigned int D>
 class Metric
 {
  public:
+  Metric(){}
   T distance(const Vector<T, D>&, const Vector<T, D>&) const;
 };
 
@@ -82,6 +84,7 @@ template <typename T, const unsigned int D>
 class SquaredMetric : public Metric<T,D>
 {
  public:
+  SquaredMetric(){}
   T distance(const Vector<T, D>&, const Vector<T, D>&) const;
 };
 
