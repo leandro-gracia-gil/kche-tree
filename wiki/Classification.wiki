@@ -1,14 +1,15 @@
 #labels Classification
-We intend to aid classification tasks based on kd-trees, in order to do this, we simply have to add an extra field to the 'feature vector' class, to hold the
-belonging class label. We DON'T intend to implement any classification method, which could be easily derived from our work.
+We intend to aid classification tasks based on kd-trees, in order to do this, we simply have to add an extra field to the 'feature vector' class, to hold the belonging class label. We DON'T intend to implement any classification method, which could be easily derived from our work.
 
 
 = Details =
 
 First of all, we have to point out that it makes sense to derive a new class of kd-trees, so anyone not interested into using kd-trees for classification purposes, can still benefit from original work.
  
-That said, an new attribute for storing the class of 'feature vectors' is required, this attribute is of type 'int', if no class is specified such attribute will hold the -1 value.
+That said, an new attribute for storing the class of 'feature vectors' is required, this attribute is of type 'int', if no class is specified such attribute will hold the -1 value. Modification and addition of new methos is very likely to happen.
 
 We have to define a new file format for such classification kd-trees.
 hence, we must provide new in/out stream operators.
 This would be an initial approach.
+
+This shall be done, right after the "design pattern" refactor.
