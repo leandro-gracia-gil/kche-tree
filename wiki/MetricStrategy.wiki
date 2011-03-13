@@ -1,20 +1,15 @@
-#summary Code re-design, preserving original insight.
+#summary Use of the strategy pattern for metric function.
 #labels Phase-Design
 
 = Introduction =
 
-For the sake of code maintenance and clarity, we have decided to refactor the whole thing. We intend to make use of design patterns where necessary. This shall improve reusability. 
-
+We intend to make use of design patterns where necessary. This shall improve reusability. 
 
 = Details =
 
-After reviewing the code due to maintenance and support tasks, we believe that it would be valuable to put some effort reviewing some design concepts of the library. 
+After reviewing the code due to maintenance and support tasks, we believe that it would be valuable to put some effort reviewing some design concepts of the library. First task that should be carried out, is to make use of the "Strategy pattern" to allow the use of different metric functions, when searching for neighbours.
  
-  * KD-Trees for classification purposes.
-  * Greather modularity and more unit-testing.
-  * Autoconf.
-
-We are planning to incluse some UML class diagrams, in the documentation.
+We are also planning to include some UML class diagrams, in the documentation.
 
 That said, it is important to keep in mind that we intend to preserve
-original insight provided by original author.
+original insight provided by original author, and that the core architecture is not very likely to be changed.
