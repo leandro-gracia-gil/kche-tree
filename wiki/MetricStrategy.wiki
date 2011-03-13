@@ -1,0 +1,20 @@
+#summary Code re-design, preserving original insight.
+#labels Phase-Design
+
+= Introduction =
+
+For the sake of code maintenance and clarity, we have decided to refactor the whole thing. We intend to make use of design patterns where necessary. This shall improve reusability. 
+
+
+= Details =
+
+After reviewing the code due to maintenance and support tasks, we believe that it would be valuable to put some effort reviewing some design concepts of the library. 
+ 
+  * KD-Trees for classification purposes.
+  * Greather modularity and more unit-testing.
+  * Autoconf.
+
+We are planning to incluse some UML class diagrams, in the documentation.
+
+That said, it is important to keep in mind that we intend to preserve
+original insight provided by original author.
