@@ -42,7 +42,8 @@ template <typename T, const unsigned int D, typename M>
 class IMetric
 {
   IMetric() {};
-  virtual T distance_to(const Vector<T,D,M>&, const Vector<T,D,M>&) const;
+  //virtual T distance_to(const Vector<T,D,M>&, const Vector<T,D,M>&) const;
+  virtual T distance_to(const Vector&, const Vector&) const;
 };
 
 
@@ -50,7 +51,8 @@ template <typename T, const unsigned int D, typename M>
   class SquaredMetric : public IMetric<T,D,M>
 {
  public:
-  virtual T distance_to(const Vector<T,D,M>& a, const Vector<T,D,M>& b) const
+  //virtual T distance_to(const Vector<T,D,M>& a, const Vector<T,D,M>& b) const
+  virtual T distance_to(const Vector& a, const Vector& b) const
   {
     T acc = (T) 0;
     for (unsigned int i=0; i<D; ++i)
