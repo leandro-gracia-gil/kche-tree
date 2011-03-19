@@ -43,7 +43,7 @@
  * \return Address to the new allocated memory.
  */
 
-template <typename T, const unsigned int D, int M>
+template <typename T, const unsigned int D, typename M>
 void* Vector<T, D, M>::operator new [] (size_t size)
 { 
   void *p = malloc(size);
@@ -62,7 +62,7 @@ void* Vector<T, D, M>::operator new [] (size_t size)
  * \param p     Pointer to the address to release.
  */
 
-template <typename T, const unsigned int D, int M>
+template <typename T, const unsigned int D, typename M>
 void Vector<T, D, M>::operator delete [] (void *p)
 {        
   free(p);
@@ -74,7 +74,7 @@ void Vector<T, D, M>::operator delete [] (void *p)
  * \param p Feature vector being compared to.
  * \return \c true if equal, \c false otherwise.
  */
-template <typename T, const unsigned int D, int M>
+template <typename T, const unsigned int D, typename M>
 bool Vector<T, D, M>::operator== (const Vector &p) const
 {
   // Check that all components have the same value
@@ -91,7 +91,7 @@ bool Vector<T, D, M>::operator== (const Vector &p) const
  * \param p Feature vector being compared to.
  * \return \c true if different, \c false otherwise.
  */
-template <typename T, const unsigned int D, int M>
+template <typename T, const unsigned int D, typename M>
 bool Vector<T, D, M>::operator!= (const Vector &p) const
 {
   for(unsigned int d=0; d<D; ++d)
@@ -101,10 +101,9 @@ bool Vector<T, D, M>::operator!= (const Vector &p) const
   return false;
 }
 
-/*
-template <typename T, const unsigned int D, int M>
+template <typename T, const unsigned int D, typename M>
 T Vector<T, D, M>::distance_to(const Vector<T, D, M>& b) const
 {
   return metric.distance_to(this,b);
 }
-*/
+

@@ -35,20 +35,22 @@
 #include <functional>
 #include <new>
 
-enum MetricType {
-  Squared,
+template <typename T, const unsigned int D, typename M>
+  class Vector;
+
+template <typename T, const unsigned int D, typename M>
+class IMetric
+{
+  IMetric() {};
+  virtual T distance_to(const Vector<T,D,M>&, const Vector<T,D,M>&) const;
 };
 
-template <typename T, typename D>
-T Vector<typename T, D, Squared>::distance_to
 
-
-
-template <typename T, const unsigned int D, int M>
-class Metric
+template <typename T, const unsigned int D, typename M>
+  class SquaredMetric : public IMetric<T,D,M>
 {
  public:
-  T distance_to(const Vector<T,D,M>& a, const Vector<T,D,M>& b) const
+  virtual T distance_to(const Vector<T,D,M>& a, const Vector<T,D,M>& b) const
   {
     T acc = (T) 0;
     for (unsigned int i=0; i<D; ++i)
@@ -57,8 +59,7 @@ class Metric
   }
 };
 
-
-template <typename T, const unsigned int D, int M>
+template <typename T, const unsigned int D, typename M>
 class Vector
 {
  public:
@@ -69,13 +70,12 @@ class Vector
   void  operator delete[] (void*); 	///< Standard deallocation for arrays of feature vectors.
   const T & operator[] (unsigned int i) const { return data[i]; } ///< Const subscript operator.
   T & operator[] (unsigned int i) { return data[i]; } 		  ///< Subscript 
-  T distance_to(const Vector& b) const
-  {
-    return metric.distance_to(this,b);
-  }
+  void set_metric();
+  T distance_to(const Vector& b) const;
+
  private:
   T data[D];
-  Metric<T,D,M> metric;
+  M *metric;
 };
 
 /*
@@ -91,5 +91,7 @@ class VDistance : public std::binary_function<VDistance<T,D>, VDistance<T,D>, bo
   T distance;         ///< Distance of the referenced element to an implicit point.
 };
 */
+
+#include "vector.cpp"
 
 #endif
