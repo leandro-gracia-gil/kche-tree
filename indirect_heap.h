@@ -19,15 +19,15 @@
  ***************************************************************************/
 
 /**
- * \file 	indirect_heap.h
- * \brief 	Template for index-based indirect heaps.
- * \author	Leandro Graciá Gil
+ * \file indirect_heap.h
+ * \brief Template for index-based indirect heaps.
+ * \author Leandro Graciá Gil
 */
 
 #ifndef _INDIRECT_HEAP_H_
 #define _INDIRECT_HEAP_H_
 
-// Include 'less' comparison template (used by default)
+// Include 'less' comparison template (used by default).
 #include <functional>
 
 /**
@@ -44,68 +44,67 @@ template <typename T, typename Compare = std::less<T>, typename idx = unsigned i
 class indirect_heap {
 protected:
 
-	mutable const T *data; 	///< Array of stored elements. Shifted to be 1-indexed.
-	idx *heap; 		///< Heap structure built as indices to data.
-	idx *inverse; 		///< Inverse heap position indices.
+  mutable const T *data; ///< Array of stored elements. Shifted to be 1-indexed.
+  idx *heap; ///< Heap structure built as indices to data.
+  idx *inverse; ///< Inverse heap position indices.
 
-	unsigned int size; 	///< Heap maximum size.
-	unsigned int used; 	///< Number of elements used in the heap.
-	unsigned int last; 	///< Position in the data array where last element is (1-indexed).
+  unsigned int size; ///< Heap maximum size.
+  unsigned int used; ///< Number of elements used in the heap.
+  unsigned int last; ///< Position in the data array where last element is (1-indexed).
 
-	const Compare &compare; 	///< Comparison object.
-	static const idx root = 1; 	///< Root index of the heap.
+  const Compare &compare; ///< Comparison object.
+  static const idx root = 1; ///< Root index of the heap.
 
-	inline idx parent_idx(idx index) { return index >> 1; } 	///< Get the index of the parent of a node.
-	inline idx left_idx (idx index) { return index << 1; } 		///< Get the index of the left child of a node.
-	inline idx right_idx(idx index) { return (index << 1) + 1; } 	///< Get the index of the right child of a node.
+  inline idx parent_idx(idx index) { return index >> 1; } ///< Get the index of the parent of a node.
+  inline idx left_idx (idx index) { return index << 1; } ///< Get the index of the left child of a node.
+  inline idx right_idx(idx index) { return (index << 1) + 1; } ///< Get the index of the right child of a node.
 
-	inline void swap_elements(idx i1, idx i2); 	///< Swap indices and references from a pair of elements.
-	inline void heapify_element(idx index); 	///< Adjust the heap structure after inserting a new element in \a index.
-	bool heapify_upwards(idx index); 		///< Adjust the heap structure upwards after inserting a new element in \a index.
-	void heapify_downwards(idx index); 		///< Adjust the heap structure downwards after inserting a new element in \a index.
+  inline void swap_elements(idx i1, idx i2); ///< Swap indices and references from a pair of elements.
+  inline void heapify_element(idx index); ///< Adjust the heap structure after inserting a new element in \a index.
+  bool heapify_upwards(idx index); ///< Adjust the heap structure upwards after inserting a new element in \a index.
+  void heapify_downwards(idx index); ///< Adjust the heap structure downwards after inserting a new element in \a index.
 
 public:
 
-	// Constructors and destructors
-	indirect_heap(const T *data, unsigned int size, unsigned int maxSize = 0, const Compare &c = Compare());
-	indirect_heap(const indirect_heap &heap);
-	~indirect_heap();
+  // Constructors and destructors.
+  indirect_heap(const T *data, unsigned int size, unsigned int maxSize = 0, const Compare &c = Compare());
+  indirect_heap(const indirect_heap &heap);
+  ~indirect_heap();
 
-	// Assignment operator (only the heap structure is copied, not the data pointer)
-	indirect_heap &operator =(const indirect_heap &heap);
+  // Assignment operator (only the heap structure is copied, not the data pointer).
+  indirect_heap &operator = (const indirect_heap &heap);
 
-	// Comparison operator (only heap structure is compared, not data pointers or data itself)
-	bool operator ==(const indirect_heap &heap) const;
+  // Comparison operator (only heap structure is compared, not data pointers or data itself).
+  bool operator == (const indirect_heap &heap) const;
 
-	// Data pointer adjustment
-	void setData(const T *data); 		///< Update the pointer to data. Same size and structure is assumed. May require to rebuild the heap.
+  // Data pointer adjustment.
+  void setData(const T *data); ///< Update the pointer to data. Same size and structure is assumed. May require to rebuild the heap.
 
-	// Usual heap operations
-	bool push(idx index); 			///< Push an element into the heap. Cost: O(log n).
-	T &pop(); 				///< Pop the top element from the heap. Cost: O(log n).
+  // Usual heap operations.
+  bool push(idx index); ///< Push an element into the heap. Cost: O(log n).
+  T &pop(); ///< Pop the top element from the heap. Cost: O(log n).
 
-	// Extended heap operations
-	bool inHeap(idx index) const; 		///< Check if an object is the heap. Cost: O(1).
-	bool remove(idx index); 		///< Remove an object from the heap. Cost: O(log n).
-	bool update(idx index); 		///< Update the heap with the new value of an object. Cost: O(log n).
-	void updateAll(); 			///< Build the heap stucture again. Cost: O(n).
-	bool swap(idx index1, idx index2); 	///< Update the heap to reflect the swap of two elements in the data array. Cost: O(1).
+  // Extended heap operations.
+  bool inHeap(idx index) const; ///< Check if an object is the heap. Cost: O(1).
+  bool remove(idx index); ///< Remove an object from the heap. Cost: O(log n).
+  bool update(idx index); ///< Update the heap with the new value of an object. Cost: O(log n).
+  void updateAll(); ///< Build the heap stucture again. Cost: O(n).
+  bool swap(idx index1, idx index2); ///< Update the heap to reflect the swap of two elements in the data array. Cost: O(1).
 
-	// Subscript operators
-	const T & operator [](idx index) const;
-	T & operator [](idx index);
+  // Subscript operators.
+  const T & operator [](idx index) const;
+  T & operator [](idx index);
 
-	// Heap properties
-	unsigned int maxSize() const;
-	unsigned int dataSize() const;
-	unsigned int count() const;
-	bool empty() const;
-	idx topIndex() const;
-	T &top() const;
+  // Heap properties.
+  unsigned int maxSize() const;
+  unsigned int dataSize() const;
+  unsigned int count() const;
+  bool empty() const;
+  idx topIndex() const;
+  T &top() const;
 };
 
-// Template implementation
+// Template implementation.
 #include "indirect_heap.cpp"
 
 #endif
-

@@ -19,19 +19,19 @@
  ***************************************************************************/
 
 /**
- * \file 	test_kdtree.cpp
- * \brief 	Testing tool for kd-trees.
- * \author	Leandro Graciá Gil
+ * \file test_kdtree.cpp
+ * \brief Testing tool for kd-trees.
+ * \author Leandro Graciá Gil
  */
 
-// Includes from C Standard Library and C++ STL
+// Includes from C Standard Library and C++ STL.
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
 #include <fstream>
 
-// Include the generic kd-tree template or its SSE-enabled specialization for floats and 24 dimensions
+// Include the generic kd-tree template or its SSE-enabled specialization for floats and 24 dimensions.
 #ifdef SSE
 #include "kd-tree_sse_24d.h"
 #else
@@ -40,12 +40,12 @@
 
 /// Number of dimensions to use in this test.
 const unsigned int D = 24;
-	
+
 /// Alias for the specific kd_tree type being used.
 typedef kd_tree<float, D> test_kdtree;
 
 
-// Bring some things from STL namespace
+// Bring some things from STL namespace.
 using std::ofstream;
 using std::ifstream;
 using std::vector;
@@ -57,70 +57,70 @@ using std::max;
 /**
  * Load a set of feature vectors from an input binary file.
  *
- * \param filename 	Name of the file containing the feature vectors.
- * \param dimensions 	Required number of dimensions of the vectors.
- * \param num_vectors 	Reference to an integer where the number of feature vectors will be set (output).
+ * \param filename Name of the file containing the feature vectors.
+ * \param dimensions Required number of dimensions of the vectors.
+ * \param num_vectors Reference to an integer where the number of feature vectors will be set (output).
  * \return An array of contiguous feature vectors if successfully loaded, \c NULL otherwise.
  */
 test_kdtree::kd_point *load_feature_vectors(const char *filename, unsigned int dimensions, unsigned int &num_vectors) {
 
-	// Try to open the file
-	FILE *input = fopen(filename, "rb");
-	if(input == NULL) {
-		fprintf(stderr, "Error opening file '%s'\n", filename);
-		return NULL;
-	}
+  // Try to open the file.
+  FILE *input = fopen(filename, "rb");
+  if (input == NULL) {
+    fprintf(stderr, "Error opening file '%s'\n", filename);
+    return NULL;
+  }
 
-	// Read the number of vectors
-	if(fread(&num_vectors, sizeof(unsigned int), 1, input) != 1) {
-		fprintf(stderr, "Error reading number of vectors from file '%s'\n", filename);
-		fclose(input);
-		return NULL;
-	}
+  // Read the number of vectors.
+  if (fread(&num_vectors, sizeof(unsigned int), 1, input) != 1) {
+    fprintf(stderr, "Error reading number of vectors from file '%s'\n", filename);
+    fclose(input);
+    return NULL;
+  }
 
-	// Check number of vectors
-	if(num_vectors == 0) {
-		fprintf(stderr, "Invalid number of vectors in file '%s'\n", filename);
-		fclose(input);
-		return NULL;
-	}
+  // Check number of vectors.
+  if (num_vectors == 0) {
+    fprintf(stderr, "Invalid number of vectors in file '%s'\n", filename);
+    fclose(input);
+    return NULL;
+  }
 
-	// Read the number of dimensions of each vector
-	unsigned int file_dimensions;
-	if(fread(&file_dimensions, sizeof(unsigned int), 1, input) != 1) {
-		fprintf(stderr, "Error reading number of dimensions from file '%s'\n", filename);
-		fclose(input);
-		return NULL;
-	}
+  // Read the number of dimensions of each vector.
+  unsigned int file_dimensions;
+  if (fread(&file_dimensions, sizeof(unsigned int), 1, input) != 1) {
+    fprintf(stderr, "Error reading number of dimensions from file '%s'\n", filename);
+    fclose(input);
+    return NULL;
+  }
 
-	// Check number of dimensions
-	if(file_dimensions != dimensions) {
-		fprintf(stderr, "Non-compatible number of dimensions in data (found %d, expected %d)\n", file_dimensions, dimensions);
-		fclose(input);
-		return NULL;
-	}
-	
-	// Allocate memory for the feature vectors
-	test_kdtree::kd_point *vectors = new test_kdtree::kd_point[num_vectors];
-	if(vectors == NULL) {
-		fprintf(stderr, "Error allocating memory for %d feature vectors\n", num_vectors);
-		fclose(input);
-		return NULL;
-	}
+  // Check number of dimensions.
+  if (file_dimensions != dimensions) {
+    fprintf(stderr, "Non-compatible number of dimensions in data (found %d, expected %d)\n", file_dimensions, dimensions);
+    fclose(input);
+    return NULL;
+  }
 
-	// Read feature vector data
-	if(fread(vectors, sizeof(test_kdtree::kd_point), num_vectors, input) != num_vectors) {
-		fprintf(stderr, "Error reading feature vector data from file '%s'\n", filename);
-		delete [] vectors;
-		fclose(input);
-		return NULL;
-	}
+  // Allocate memory for the feature vectors.
+  test_kdtree::kd_point *vectors = new test_kdtree::kd_point[num_vectors];
+  if (vectors == NULL) {
+    fprintf(stderr, "Error allocating memory for %d feature vectors\n", num_vectors);
+    fclose(input);
+    return NULL;
+  }
 
-	// Close input file
-	fclose(input);
+  // Read feature vector data.
+  if (fread(vectors, sizeof(test_kdtree::kd_point), num_vectors, input) != num_vectors) {
+    fprintf(stderr, "Error reading feature vector data from file '%s'\n", filename);
+    delete [] vectors;
+    fclose(input);
+    return NULL;
+  }
 
-	// Return feature vectors
-	return vectors;
+  // Close input file.
+  fclose(input);
+
+  // Return feature vectors.
+  return vectors;
 }
 #endif
 
@@ -130,263 +130,270 @@ test_kdtree::kd_point *load_feature_vectors(const char *filename, unsigned int d
  */
 int main(int argc, char *argv[]) {
 
-	#ifdef FROM_FILE
-	// Set default parameters
-	int K;
-	unsigned int N_train, N_test;
-	float epsilon = 0.0f;
+  #ifdef FROM_FILE
+  // Set default parameters.
+  int K;
+  unsigned int N_train, N_test;
+  float epsilon = 0.0f;
 
-	// Declare arrays of feature vectors
-	test_kdtree::kd_point *train = NULL, *test = NULL;
+  // Declare arrays of feature vectors.
+  test_kdtree::kd_point *train = NULL, *test = NULL;
 
-	// Read params
-	switch(argc) {
-	case 5:
-		// Set the epsilon value (search tolerance, 0 = deterministic)
-		epsilon = atof(argv[4]);
+  // Read params.
+  switch (argc) {
+  case 5:
+    // Set the epsilon value (search tolerance, 0 = deterministic).
+    epsilon = atof(argv[4]);
 
-	case 4:
-		// Set pointers to training and testing sets
-		if((train = load_feature_vectors(argv[2], D, N_train)) == NULL) return 1;
-		if((test  = load_feature_vectors(argv[3], D, N_test)) == NULL) return 1;
+  case 4:
+    // Set pointers to training and testing sets.
+    if ((train = load_feature_vectors(argv[2], D, N_train)) == NULL)
+      return 1;
+    if ((test = load_feature_vectors(argv[3], D, N_test)) == NULL)
+      return 1;
 
-		// Set the number of neighbours to look for
-		K = atoi(argv[1]);
+    // Set the number of neighbours to look for.
+    K = atoi(argv[1]);
+    break;
 
-		break;
+  default:
+    // Wrong number of parameters.
+    fprintf(stderr, "Usage: %s K train_file test_file [epsilon = 0.0]\n", argv[0]);
+    return 1;
+  }
 
-	default:
-		// Wrong number of parameters
-		fprintf(stderr, "Usage: %s K train_file test_file [epsilon = 0.0]\n", argv[0]);
-		return 1;
-	}
+  // Check params.
+  if (N_train <= 0 || N_test <= 0 || K <= 0) {
+    fprintf(stderr, "Error: invalid params\n");
+    return 1;
+  }
 
-	// Check params
-	if(N_train <= 0 || N_test <= 0 || K <= 0) {
-		fprintf(stderr, "Error: invalid params\n");
-		return 1;
-	}
+  // Find the maximum and minimum points (used to estimate range searching values).
+  test_kdtree::kd_point min_point = train[0];
+  test_kdtree::kd_point max_point = train[0];
+  for (unsigned int i=1; i<N_train; ++i) {
+    for (unsigned int d=0; d<D; ++d) {
+      min_point[d] = min(min_point[d], train[i][d]);
+      max_point[d] = max(max_point[d], train[i][d]);
+    }
+  }
 
-	// Find the maximum and minimum points (used to estimate range searching values)
-	test_kdtree::kd_point min_point = train[0];
-	test_kdtree::kd_point max_point = train[0];
-	for(unsigned int i=1; i<N_train; ++i) {
-		for(unsigned int d=0; d<D; ++d) {
-			min_point[d] = min(min_point[d], train[i][d]);
-			max_point[d] = max(max_point[d], train[i][d]);
-		}
-	}
+  // Find the points nearest to maximum and minimum points.
+  unsigned int min_nearest = 0, max_nearest = 0;
+  float min_distance = min_point.distance_to(train[min_nearest]);
+  float max_distance = max_point.distance_to(train[max_nearest]);
 
-	// Find the points nearest to maximum and minimum points
-	unsigned int min_nearest = 0, max_nearest = 0;
-	float min_distance = min_point.distance_to(train[min_nearest]);
-	float max_distance = max_point.distance_to(train[max_nearest]);
+  for (unsigned int i=1; i<N_train; ++i) {
 
-	for(unsigned int i=1; i<N_train; ++i) {
+    float dist = min_point.distance_to(train[i]);
+    if (dist < min_distance) {
+      min_nearest = i;
+      min_distance = dist;
+    }
 
-		float dist = min_point.distance_to(train[i]);
-		if(dist < min_distance) {
-			min_nearest = i;
-			min_distance = dist;
-		}
+    dist = max_point.distance_to(train[i]);
+    if (dist < max_distance) {
+      max_nearest = i;
+      max_distance = dist;
+    }
+  }
 
-		dist = max_point.distance_to(train[i]);
-		if(dist < max_distance) {
-			max_nearest = i;
-			max_distance = dist;
-		}
-	}
+  // Estimate range.
+  float range = sqrt(train[min_nearest].distance_to(train[max_nearest])) / M_SQRT1_2;
 
-	// Estimate range
-	float range = sqrt(train[min_nearest].distance_to(train[max_nearest])) / M_SQRT1_2;
+  #else
+  // Set default parameters.
+  int K, N_train, N_test;
+  int random_seed = -1;
+  float range = 100.0f;
+  float epsilon = 0.0f;
 
-	#else
-	// Set default parameters
-	int K, N_train, N_test;
-	int random_seed = -1;
-	float range = 100.0f;
-	float epsilon = 0.0f;
+  // Read params.
+  switch (argc) {
+  case 7:
+    // Set the random seed used to generate data (time is used if not provided).
+    random_seed = atoi(argv[6]);
 
-	// Read params
-	switch(argc) {
-	case 7:
-		// Set the random seed used to generate data (time is used if not provided)
-		random_seed = atoi(argv[6]);
+  case 6:
+    // Set the range of the random feature vectors (from 0 to range).
+    range = atof(argv[5]);
 
-	case 6:
-		// Set the range of the random feature vectors (from 0 to range)
-		range = atof(argv[5]);
+  case 5:
+    // Set the epsilon value (search tolerance, 0 = deterministic).
+    epsilon = atof(argv[4]);
 
-	case 5:
-		// Set the epsilon value (search tolerance, 0 = deterministic)
-		epsilon = atof(argv[4]);
+  case 4:
+    // Set the training and test set sizes.
+    N_test  = atoi(argv[3]);
+    N_train = atoi(argv[2]);
 
-	case 4:
-		// Set the training and test set sizes
-		N_test  = atoi(argv[3]);
-		N_train = atoi(argv[2]);
+    // Set the number of neighbours to look for.
+    K = atoi(argv[1]);
+    break;
 
-		// Set the number of neighbours to look for
-		K = atoi(argv[1]);
+  default:
+    // Wrong number of parameters.
+    fprintf(stderr, "Usage: %s K N_train N_test [epsilon = 0.0] [range = 100.0] [random_seed]\n", argv[0]);
+    return 1;
+  }
 
-		break;
+  // Check params.
+  if (N_train <= 0 || N_test <= 0 || K <= 0 || range == 0.0f) {
+    fprintf(stderr, "Error: invalid params\n");
+    return 1;
+  }
 
-	default:
-		// Wrong number of parameters
-		fprintf(stderr, "Usage: %s K N_train N_test [epsilon = 0.0] [range = 100.0] [random_seed]\n", argv[0]);
-		return 1;
-	}
+  // Initialize random seed.
+  if (random_seed == -1)
+    srand(time(NULL));
+  else
+    srand(random_seed);
 
-	// Check params
-	if(N_train <= 0 || N_test <= 0 || K <= 0 || range == 0.0f) {
-		fprintf(stderr, "Error: invalid params\n");
-		return 1;
-	}
+  // Build training random samples.
+  test_kdtree::kd_point *train = new test_kdtree::kd_point[N_train];
+  for (int i=0; i<N_train; ++i) {
+    for (unsigned int d=0; d<D; ++d)
+      train[i][d] = (rand() / (float) RAND_MAX) * range;
+  }
 
-	// Initialize random seed
-	if(random_seed == -1) srand(time(NULL));
-	else srand(random_seed);
+  // Build testing random samples.
+  test_kdtree::kd_point *test = new test_kdtree::kd_point[N_test];
+  for (int i=0; i<N_test; ++i) {
+    for (unsigned int d=0; d<D; ++d)
+      test[i][d] = (rand() / (float) RAND_MAX) * range;
+  }
+  #endif
 
-	// Build training random samples
-	test_kdtree::kd_point *train = new test_kdtree::kd_point[N_train];
-	for(int i=0; i<N_train; ++i) {
-		for(unsigned int d=0; d<D; ++d) train[i][d] = (rand() / (float) RAND_MAX) * range;
-	}
+  // Build the kd-tree.
+  test_kdtree kdtree;
+  kdtree.build(train, N_train);
 
-	// Build testing random samples
-	test_kdtree::kd_point *test = new test_kdtree::kd_point[N_test];
-	for(int i=0; i<N_test; ++i) {
-		for(unsigned int d=0; d<D; ++d) test[i][d] = (rand() / (float) RAND_MAX) * range;
-	}
-	#endif
+  // Try to save the kd-tree to a file.
+  ofstream out_file("kd-tree.test", std::ios::binary | std::ios::out);
+  out_file << kdtree;
+  out_file.close();
 
-	// Build the kd-tree
-	test_kdtree kdtree;
-	kdtree.build(train, N_train);
+  // Read the tree back.
+  ifstream in_file("kd-tree.test", std::ios::binary | std::ios::in);
+  in_file >> kdtree;
+  in_file.close();
 
-	// Try to save the kd-tree to a file
-	ofstream out_file("kd-tree.test", std::ios::binary | std::ios::out);
-	out_file << kdtree;
-	out_file.close();
+  // Test the subscript operator.
+  bool ok = true;
+  for (int i=0; i < (int) N_train; ++i) {
+    if (train[i] != kdtree[i]) {
+      fprintf(stderr, "Non-matching subscript operator value for index %d (error in 1st axis: %.6g)\n", i, fabs(train[i][0] - kdtree[i][0]));
+      ok = false;
+    }
+  }
 
-	// Read the tree back
-	ifstream in_file("kd-tree.test", std::ios::binary | std::ios::in);
-	in_file >> kdtree;
-	in_file.close();
+  // Set the tolerance value used for checking results.
+  const float tolerance = 1e-2;
 
-	// Test the subscript operator
-	bool ok = true;
-	for(int i=0; i < (int) N_train; ++i) {
-		if(train[i] != kdtree[i]) {
-			fprintf(stderr, "Non-matching subscript operator value for index %d (error in 1st axis: %.6g)\n", i, fabs(train[i][0] - kdtree[i][0]));
-			ok = false;
-		}
-	}
+  // Allocate memory for the exhaustive calculation of nearest neighbours.
+  test_kdtree::kd_neighbour *nearest = new test_kdtree::kd_neighbour[N_train];
 
-	// Set the tolerance value used for checking results
-	const float tolerance = 1e-2;
+  // Process each test case.
+  for (int i=0; i < (int) N_test; ++i) {
 
-	// Allocate memory for the exhaustive calculation of nearest neighbours
-	test_kdtree::kd_neighbour *nearest = new test_kdtree::kd_neighbour[N_train];
+    // Create a vector of point-distance tuples to current test point.
+    for (int n=0; n < (int) N_train; ++n) {
+      float distance = 0.0f;
+      for (unsigned int d=0; d<D; ++d)
+        distance += (train[n][d] - test[i][d]) * (train[n][d] - test[i][d]);
+      nearest[n] = test_kdtree::kd_neighbour(n, distance);
+    }
 
-	// Process each test case
-	for(int i=0; i < (int) N_test; ++i) {
+    // Sort the training set vectors by its distance to the test point.
+    sort(nearest, nearest + N_train, nearest[0]);
 
-		// Create a vector of point-distance tuples to current test point
-		for(int n=0; n < (int) N_train; ++n) {
-			float distance = 0.0f;
-			for(unsigned int d=0; d<D; ++d) distance += (train[n][d] - test[i][d]) * (train[n][d] - test[i][d]);
-			nearest[n] = test_kdtree::kd_neighbour(n, distance);
-		}
+    // Get the K nearest neighbours.
+    vector<test_kdtree::kd_neighbour> knn;
+    kdtree.knn(test[i], K, knn, epsilon);
 
-		// Sort the training set vectors by its distance to the test point
-		sort(nearest, nearest + N_train, nearest[0]);
+    // Check the k nearest neighbours returned.
+    int num_elems = min((int) N_train, (int) K);
 
-		// Get the K nearest neighbours
-		vector<test_kdtree::kd_neighbour> knn;
-		kdtree.knn(test[i], K, knn, epsilon);
+    for (int k=0; k<num_elems; ++k) {
 
-		// Check the k nearest neighbours returned
-		int num_elems = min((int) N_train, (int) K);
+      // Check if distances match with expected ones.
+      if (fabs(knn[k].squared_distance - nearest[k].squared_distance) >= tolerance) {
+        fprintf(stderr, "Nearest neighbour %d failed: index %d (%.3f), expected index %d (%.3f) in test case %d\n",
+          k, nearest[k].index, nearest[k].squared_distance, knn[k].index, knn[k].squared_distance, i);
+        ok = false;
+      }
 
-		for(int k=0; k<num_elems; ++k) {
+      // Check if distance calculations are correct.
+      float dist1 = sqrt(train[knn[k].index].distance_to(test[i]));
+      float dist2 = sqrt(nearest[k].squared_distance);
 
-			// Check if distances match with expected ones
-			if(fabs(knn[k].squared_distance - nearest[k].squared_distance) >= tolerance) {
-				fprintf(stderr, "Nearest neighbour %d-th failed: index %d (%.3f), expected index %d (%.3f) in test case %d\n",
-					k, nearest[k].index, nearest[k].squared_distance, knn[k].index, knn[k].squared_distance, i);
-				ok = false;
-			}
+      if (fabs(dist1 - dist2) >= tolerance) {
+        fprintf(stderr, "Nearest neighbour %d failed: returned distance doesn't match (%.6f != %.6f) in test case %d\n",
+          k, dist1, dist2, i);
+        ok = false;
+      }
+    }
 
-			// Check if distance calculations are correct
-			float dist1 = sqrt(train[knn[k].index].distance_to(test[i]));
-			float dist2 = sqrt(nearest[k].squared_distance);
+    // Check vector size.
+    if ((int) knn.size() != num_elems) {
+      fprintf(stderr, "Wrong nearest neighbour vector size (%d, expected %d) in test case %d\n", (int)knn.size(), num_elems, i);
+      ok = false;
+    }
 
-			if(fabs(dist1 - dist2) >= tolerance) {
-				fprintf(stderr, "Nearest neighbour %d-th failed: returned distance doesn't match (%.6f != %.6f) in test case %d\n",
-					k, dist1, dist2, i);
-				ok = false;
-			}
-		}
+    // Calculate a random search range (distance).
+    float search_range = (rand() / (float) RAND_MAX + 0.3f) * range;
+    float squared_search_range = search_range * search_range;
 
-		// Check vector size
-		if((int) knn.size() != num_elems) {
-			fprintf(stderr, "Wrong nearest neighbour vector size (%d, expected %d) in test case %d\n", (int)knn.size(), num_elems, i);
-			ok = false;
-		}
+    // Get all the neighbours in a random range.
+    vector<test_kdtree::kd_neighbour> points_in_range;
+    kdtree.all_in_range(test[i], search_range, points_in_range);
 
-		// Calculate a random search range (distance)
-		float search_range = (rand() / (float) RAND_MAX + 0.3f) * range;
-		float squared_search_range = search_range * search_range;
+    // Check the returned neighbours within the range.
+    for (unsigned int k=0; k<points_in_range.size(); ++k) {
 
-		// Get all the neighbours in a random range
-		vector<test_kdtree::kd_neighbour> points_in_range;
-		kdtree.all_in_range(test[i], search_range, points_in_range);
+      // Check point lies within the range.
+      if (points_in_range[k].squared_distance > squared_search_range + tolerance) {
+        fprintf(stderr, "In-range point failed: index %d (%.3f) greater than requested squared distance %.3f in test case %d\n",
+          points_in_range[k].index, points_in_range[i].squared_distance, squared_search_range, i);
+        ok = false;
+      }
 
-		// Check the returned neighbours within the range
-		for(unsigned int k=0; k<points_in_range.size(); ++k) {
+      // Check if returned distances were properly calculated.
+      float dist1 = sqrt(train[points_in_range[k].index].distance_to(test[i]));
+      float dist2 = sqrt(points_in_range[k].squared_distance);
 
-			// Check point lies within the range
-			if(points_in_range[k].squared_distance > squared_search_range + tolerance ) {
-			   	fprintf(stderr, "In-range point failed: index %d (%.3f) greater than requested squared distance %.3f in test case %d\n",
-					points_in_range[k].index, points_in_range[i].squared_distance, squared_search_range, i);
-				ok = false;
-			}
+      if (fabs(dist1 - dist2) >= tolerance) {
+        fprintf(stderr, "In-range point failed: returned squared distance doesnt't match (%.6f != %.6f) in test case %d\n",
+          dist1, dist2, i);
+        ok = false;
+      }
+    }
 
-			// Check if returned distances were properly calculated
-			float dist1 = sqrt(train[points_in_range[k].index].distance_to(test[i]));
-			float dist2 = sqrt(points_in_range[k].squared_distance);
+    // Count number of points in range.
+    unsigned int in_range = 0;
+    for (int n=0; n < (int) N_train; ++n) {
+      if (nearest[n].squared_distance <= squared_search_range + tolerance)
+        ++in_range;
+    }
 
-			if(fabs(dist1 - dist2) >= tolerance) {
-				fprintf(stderr, "In-range point failed: returned squared distance doesnt't match (%.6f != %.6f) in test case %d\n",
-					dist1, dist2, i);
-				ok = false;
-			}
-		}
+    // Check number of points in range.
+    if (in_range != points_in_range.size()) {
+      fprintf(stderr, "Wrong number of neighbours within range %.3f (found %d, expected %d) in test case %d\n",
+        squared_search_range, points_in_range.size(), in_range, i);
+      ok = false;
+    }
+  }
 
-		// Count number of points in range
-		unsigned int in_range = 0;
-		for(int n=0; n < (int) N_train; ++n) {
-			if(nearest[n].squared_distance <= squared_search_range + tolerance) ++in_range;
-		}
+  // Release random samples and auxiliar data.
+  delete []train;
+  delete []test;
+  delete []nearest;
 
-		// Check number of points in range
-		if(in_range != points_in_range.size()) {
-			fprintf(stderr, "Wrong number of neighbours within range %.3f (found %d, expected %d) in test case %d\n",
-				squared_search_range, points_in_range.size(), in_range, i);
-			ok = false;
-		}
-	}
+  // Report results.
+  if (ok)
+    printf("All tests OK!\n");
+  else
+    printf("Problems found during testing...\n");
 
-	// Release random samples and auxiliar data
-	delete []train;
-	delete []test;
-	delete []nearest;
-
-	// Report results
-	if(ok) printf("All tests OK!\n");
-	else printf("Problems found during testing...\n");
-
-	return 0;
+  return 0;
 }
-
