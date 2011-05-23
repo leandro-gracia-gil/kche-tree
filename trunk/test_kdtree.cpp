@@ -316,7 +316,8 @@ int main(int argc, char *argv[]) {
     // Create a vector of point-distance tuples to current test point.
     for (int n=0; n < (int) N_train; ++n) {
       float distance = 0.0f;
-      for (unsigned int d=0; d<D; ++d) distance += (train[n][d] - test[i][d]) * (train[n][d] - test[i][d]);
+      for (unsigned int d=0; d<D; ++d)
+        distance += (train[n][d] - test[i][d]) * (train[n][d] - test[i][d]);
       if ((distance == 0.0f && test[i] != train[n]) || distance != 0.0f && test[i] == train[n])
         fprintf(stderr, "Warning: numerical precision problem. Distance from a point to itself not strictly zero.\n");
 
