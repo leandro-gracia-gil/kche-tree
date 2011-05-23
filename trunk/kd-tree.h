@@ -125,8 +125,8 @@ public:
 
   // Basic kd-tree operations.
   bool build(const kd_point *points, unsigned int num_points, unsigned int bucket_size = 32); ///< Build a kd-tree from a set of input points. Cost: O(n log² n).
-  void knn(const kd_point &p, unsigned int K, std::vector<kd_neighbour> &output, T epsilon = (T) 0, bool point_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
-  void all_in_range(const kd_point &p, T distance, std::vector<kd_neighbour> &output, bool point_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
+  void knn(const kd_point &p, unsigned int K, std::vector<kd_neighbour> &output, T epsilon = (T) 0, bool p_already_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
+  void all_in_range(const kd_point &p, T distance, std::vector<kd_neighbour> &output, bool p_already_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
 
   // Subscript operator for accesing stored data (will fail on non-built kd-trees).
   const kd_point & operator [] (unsigned int index) const;

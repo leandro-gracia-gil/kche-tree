@@ -239,17 +239,17 @@ kd_tree<T, D, S>::kd_node::~kd_node() {
  * \param K Number of nearest neighbours to retrieve.
  * \param output STL vector where the nearest neighbours will be appended. Sorted result depends on the template parameter S, enabled by default.
  * \param epsilon Acceptable distance margin to ignore regions during kd-tree exploration. Defaults to zero (deterministic).
- * \param point_in_tree Assume that \a p is contained in the tree and ignore it.
+ * \param p_already_in_tree Assume that \a p is contained in the tree and ignore it.
  */
 template <typename T, const unsigned int D, typename S>
-void kd_tree<T, D, S>::knn(const kd_point &p, unsigned int K, std::vector<kd_neighbour> &output, T epsilon, bool point_in_tree) const {
+void kd_tree<T, D, S>::knn(const kd_point &p, unsigned int K, std::vector<kd_neighbour> &output, T epsilon, bool p_already_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || num_elements == 0 || K == 0)
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle-hypersphere intersection calculation.
-  kd_search_data search_data(p, data, K, point_in_tree);
+  kd_search_data search_data(p, data, K, p_already_in_tree);
 
   // Convert epsilon to a squared distance and set it as initial hyperrectangle distance.
   search_data.hyperrect_distance = epsilon * epsilon;
@@ -276,17 +276,17 @@ void kd_tree<T, D, S>::knn(const kd_point &p, unsigned int K, std::vector<kd_nei
  * \param p Point whose \a K neighbours should be retrieved.
  * \param distance Euclidean distance margin used to retrieve all points within.
  * \param output STL vector where the neighbours within the specified range will be appended. Elements are not sorted by distance.
- * \param point_in_tree Assume that \a p is contained in the tree and ignore it.
+ * \param p_already_in_tree Assume that \a p is contained in the tree and ignore it.
  */
 template <typename T, const unsigned int D, typename S>
-void kd_tree<T, D, S>::all_in_range(const kd_point &p, T distance, std::vector<kd_neighbour> &output, bool point_in_tree) const {
+void kd_tree<T, D, S>::all_in_range(const kd_point &p, T distance, std::vector<kd_neighbour> &output, bool p_already_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || num_elements == 0 || distance <= (T) 0)
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle-hypersphere intersection calculation.
-  kd_search_data search_data(p, data, 0, point_in_tree);
+  kd_search_data search_data(p, data, 0, p_already_in_tree);
   search_data.farthest_distance = distance * distance;
 
   // Build a STL vector to hold all the points in range.
@@ -340,9 +340,9 @@ template <typename T, const unsigned int D, typename S>
 kd_tree<T, D, S>::kd_incremental::kd_incremental(const kd_node *node, const kd_node *parent, kd_search_data &search_data)
   : search_data(search_data),
     parent_axis(0),
+    modified(false),
     previous_axis_nearest((T) 0),
-    previous_hyperrect_distance((T) 0),
-    modified(false) {
+    previous_hyperrect_distance((T) 0) {
 
   // Check parent.
   if (parent == NULL)
