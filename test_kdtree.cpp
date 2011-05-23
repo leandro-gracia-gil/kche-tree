@@ -318,7 +318,7 @@ int main(int argc, char *argv[]) {
       float distance = 0.0f;
       for (unsigned int d=0; d<D; ++d)
         distance += (train[n][d] - test[i][d]) * (train[n][d] - test[i][d]);
-      if ((distance == 0.0f && test[i] != train[n]) || distance != 0.0f && test[i] == train[n])
+      if ((distance == 0.0f && test[i] != train[n]) || (distance != 0.0f && test[i] == train[n]))
         fprintf(stderr, "Warning: numerical precision problem. Distance from a point to itself not strictly zero.\n");
 
       if (points_in_tree && distance == 0.0f) {
@@ -429,6 +429,7 @@ int main(int argc, char *argv[]) {
 
   // TO FIX:.
   // - Case K = training set size.
+  // Remove: fprintf(stderr, "Forcing distance to inf: %d - %.3f\n", n, distance);
 
   // Release random samples and auxiliar data.
   delete []train;
