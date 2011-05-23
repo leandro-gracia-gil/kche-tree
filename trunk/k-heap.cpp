@@ -19,9 +19,9 @@
  ***************************************************************************/
 
 /**
- * \file 	k-heap.cpp
- * \brief 	Template implementations for k-heaps holding the best k elements.
- * \author	Leandro Graciá Gil
+ * \file k-heap.cpp
+ * \brief Template implementations for k-heaps holding the best k elements.
+ * \author Leandro Graciá Gil
 */
 
 #include <algorithm>
@@ -36,31 +36,37 @@ using std::swap;
  * \param K Maximum number of best elements to store in the heap.
 */
 template <typename T, typename C, typename idx>
-k_heap<T, C, idx>::k_heap(unsigned int K) :
-	K(K), data(new T[K]), compare(C()), bestHeap(data, 0, K, compare),
-	worstHeap(data, 0, K, std::binary_negate<C>(compare)) {}
+k_heap<T, C, idx>::k_heap(unsigned int K)
+  : K(K),
+    data(new T[K]),
+    compare(C()),
+    bestHeap(data, 0, K, compare),
+    worstHeap(data, 0, K, std::binary_negate<C>(compare)) {}
 
 /**
  * \brief Copy constructor.
  *
  * Initialize a k_heap copying another one.
  *
- * \param heap 	Element being copied.
+ * \param heap Element being copied.
  */
 template <typename T, typename C, typename idx>
 k_heap<T, C, idx>::k_heap(const k_heap &heap)
-	: data(NULL), compare(heap.compare), bestHeap(NULL, 0), worstHeap(NULL, 0, 0, std::binary_negate<C>(compare)) {
+  : data(NULL),
+    compare(heap.compare),
+    bestHeap(NULL, 0),
+    worstHeap(NULL, 0, 0, std::binary_negate<C>(compare)) {
 
-	// Use assignment operator
-	*this = heap;
+  // Use assignment operator.
+  *this = heap;
 }
 
 /// Default destructor.
 template <typename T, typename C, typename idx>
 k_heap<T, C, idx>::~k_heap() {
 
-	// Release data
-	delete []data;
+  // Release data.
+  delete []data;
 }
 
 /**
@@ -68,32 +74,34 @@ k_heap<T, C, idx>::~k_heap() {
  *
  * Copy the contents from another heap.
  *
- * \param heap 	Element being copied.
+ * \param heap Element being copied.
  */
 template <typename T, typename C, typename idx>
 k_heap<T, C, idx> &k_heap<T, C, idx>::operator = (const k_heap &heap) {
 
-	// Check self assignment
-	if(this == &heap) return *this;
+  // Check self assignment.
+  if (this == &heap)
+    return *this;
 
-	// Set size
-	K = heap.K;
+  // Set size.
+  K = heap.K;
 
-	// Reallocate data
-	if(data) delete []data;
-	assert(data = new T[K]);
+  // Reallocate data.
+  if (data)
+    delete []data;
+  assert(data = new T[K]);
 
-	// Copy data
-	memcpy(data, heap.data, K * sizeof(T));
-	bestHeap.setData(data);
-	worstHeap.setData(data);
+  // Copy data.
+  memcpy(data, heap.data, K * sizeof(T));
+  bestHeap.setData(data);
+  worstHeap.setData(data);
 
-	// Copy heap structure
-	bestHeap = heap.bestHeap;
-	worstHeap = heap.worstHeap;
+  // Copy heap structure.
+  bestHeap = heap.bestHeap;
+  worstHeap = heap.worstHeap;
 
-	// Return a reference to itself
-	return *this;
+  // Return a reference to itself.
+  return *this;
 }
 
 /**
@@ -106,19 +114,22 @@ k_heap<T, C, idx> &k_heap<T, C, idx>::operator = (const k_heap &heap) {
 template <typename T, typename C, typename idx>
 bool k_heap<T, C, idx>::operator == (const k_heap &heap) const {
 
-	// Compare K value
-	if(K != heap.K) return false;
+  // Compare K value.
+  if (K != heap.K)
+    return false;
 
-	// Compare data
-	for(unsigned int i=0; i<K; ++i) {
-		if(!(data[i] == heap.data[i])) return false;
-	}
+  // Compare data.
+  for (unsigned int i=0; i<K; ++i)
+    if (!(data[i] == heap.data[i]))
+      return false;
 
-	// Compare internal heaps
-	if(!(bestHeap == heap.bestHeap)) return false;
-	if(!(worstHeap == heap.worstHeap)) return false;
+  // Compare internal heaps.
+  if (!(bestHeap == heap.bestHeap))
+    return false;
+  if (!(worstHeap == heap.worstHeap))
+    return false;
 
-	return true;
+  return true;
 }
 
 /**
@@ -129,38 +140,38 @@ bool k_heap<T, C, idx>::operator == (const k_heap &heap) const {
 */
 template <typename T, typename C, typename idx>
 bool k_heap<T, C, idx>::push(const T &elem) {
-	
-	// Check if heaps are not yet full
-	if(bestHeap.count() < K) {
 
-		// Insert element into data vector
-		idx next = bestHeap.count();
-		data[next] = elem;
+  // Check if heaps are not yet full.
+  if (bestHeap.count() < K) {
 
-		// Insert element in both heaps
-		bestHeap.push(next);
-		worstHeap.push(next);
+    // Insert element into data vector.
+    idx next = bestHeap.count();
+    data[next] = elem;
 
-		return true;
-	}
-	// Heaps are full: should try to replace worst element
-	else {
-		// Check if new element is better than the actual worst one
-		if(compare(elem, worst())) {
+    // Insert element in both heaps.
+    bestHeap.push(next);
+    worstHeap.push(next);
 
-			// Replace worst element in the array
-			idx worstIndex = worstHeap.topIndex();
-			data[worstIndex] = elem;
-	
-			// Update heaps
-			bestHeap.update(worstIndex);
-			worstHeap.update(worstIndex);
-		
-			return true;
-		}
-		// Discard new element
-		else return false;
-	}
+    return true;
+  }
+  // Heaps are full: should try to replace worst element.
+  else {
+    // Check if new element is better than the actual worst one.
+    if (compare(elem, worst())) {
+
+      // Replace worst element in the array.
+      idx worstIndex = worstHeap.topIndex();
+      data[worstIndex] = elem;
+
+      // Update heaps.
+      bestHeap.update(worstIndex);
+      worstHeap.update(worstIndex);
+
+      return true;
+    }
+    // Discard new element.
+    return false;
+  }
 }
 
 /**
@@ -169,27 +180,28 @@ bool k_heap<T, C, idx>::push(const T &elem) {
 */
 template <typename T, typename C, typename idx>
 void k_heap<T, C, idx>::pop_best() {
-	
-	// Check size
-	if(bestHeap.empty()) return;
 
-	// Get the index of the best and the last elements
-	idx bestIndex = bestHeap.topIndex();
-	idx lastIndex = bestHeap.count() - 1;
+  // Check size.
+  if (bestHeap.empty())
+    return;
 
-	// Swap extracted element to the end in the data array and update heaps
-	if(bestIndex != lastIndex) {
-		swap(data[bestIndex], data[lastIndex]);
-		bestHeap.swap(bestIndex, lastIndex);
-		worstHeap.swap(bestIndex, lastIndex);
-		swap(bestIndex, lastIndex);
-	}
+  // Get the index of the best and the last elements.
+  idx bestIndex = bestHeap.topIndex();
+  idx lastIndex = bestHeap.count() - 1;
 
-	// Remove the element from the worst elements heap
-	worstHeap.remove(bestIndex);
+  // Swap extracted element to the end in the data array and update heaps.
+  if (bestIndex != lastIndex) {
+    swap(data[bestIndex], data[lastIndex]);
+    bestHeap.swap(bestIndex, lastIndex);
+    worstHeap.swap(bestIndex, lastIndex);
+    swap(bestIndex, lastIndex);
+  }
 
-	// Extract the topmost object from the best elements heap
-	bestHeap.pop();
+  // Remove the element from the worst elements heap.
+  worstHeap.remove(bestIndex);
+
+  // Extract the topmost object from the best elements heap.
+  bestHeap.pop();
 }
 
 /**
@@ -198,27 +210,28 @@ void k_heap<T, C, idx>::pop_best() {
 */
 template <typename T, typename C, typename idx>
 void k_heap<T, C, idx>::pop_worst() {
-	
-	// Check size
-	if(worstHeap.empty()) return;
 
-	// Get the index of the worst element
-	idx worstIndex = worstHeap.topIndex();
-	idx lastIndex = worstHeap.count() - 1;
+  // Check size.
+  if (worstHeap.empty())
+    return;
 
-	// Swap extracted element to the end in the data array and update heaps
-	if(worstIndex != lastIndex) {
-		swap(data[worstIndex], data[lastIndex]);
-		bestHeap.swap(worstIndex, lastIndex);
-		worstHeap.swap(worstIndex, lastIndex);
-		swap(worstIndex, lastIndex);
-	}
+  // Get the index of the worst element.
+  idx worstIndex = worstHeap.topIndex();
+  idx lastIndex = worstHeap.count() - 1;
 
-	// Remove the element from the best elements heap
-	bestHeap.remove(worstIndex);
+  // Swap extracted element to the end in the data array and update heaps.
+  if (worstIndex != lastIndex) {
+    swap(data[worstIndex], data[lastIndex]);
+    bestHeap.swap(worstIndex, lastIndex);
+    worstHeap.swap(worstIndex, lastIndex);
+    swap(worstIndex, lastIndex);
+  }
 
-	// Extract the topmost object from the worst elements heap
-	worstHeap.pop();
+  // Remove the element from the best elements heap.
+  bestHeap.remove(worstIndex);
+
+  // Extract the topmost object from the worst elements heap.
+  worstHeap.pop();
 }
 
 /**
@@ -228,7 +241,7 @@ void k_heap<T, C, idx>::pop_worst() {
 */
 template <typename T, typename C, typename idx>
 bool k_heap<T, C, idx>::full() const {
-	return bestHeap.count() == K;
+  return bestHeap.count() == K;
 }
 
 /**
@@ -238,7 +251,7 @@ bool k_heap<T, C, idx>::full() const {
 */
 template <typename T, typename C, typename idx>
 bool k_heap<T, C, idx>::empty() const {
-	return bestHeap.empty();
+  return bestHeap.empty();
 }
 
 /**
@@ -248,7 +261,7 @@ bool k_heap<T, C, idx>::empty() const {
 */
 template <typename T, typename C, typename idx>
 unsigned int k_heap<T, C, idx>::size() const {
-	return bestHeap.count();
+  return bestHeap.count();
 }
 
 /**
@@ -258,8 +271,9 @@ unsigned int k_heap<T, C, idx>::size() const {
 */
 template <typename T, typename C, typename idx>
 const T &k_heap<T, C, idx>::best() const {
-	if(empty()) return data[0];
-	else return bestHeap.top();
+  if (empty())
+    return data[0];
+  return bestHeap.top();
 }
 
 /**
@@ -269,8 +283,9 @@ const T &k_heap<T, C, idx>::best() const {
 */
 template <typename T, typename C, typename idx>
 const T &k_heap<T, C, idx>::worst() const {
-	if(empty()) return data[0];
-	else return worstHeap.top();
+  if (empty())
+    return data[0];
+  return worstHeap.top();
 }
 
 /**
@@ -280,7 +295,7 @@ const T &k_heap<T, C, idx>::worst() const {
 */
 template <typename T, typename C, typename idx>
 unsigned int k_heap<T, C, idx>::get_K() const {
-	return K;
+  return K;
 }
 
 /**
@@ -290,6 +305,5 @@ unsigned int k_heap<T, C, idx>::get_K() const {
 */
 template <typename T, typename C, typename idx>
 unsigned int k_heap<T, C, idx>::count() const {
-	return bestHeap.count();
+  return bestHeap.count();
 }
-

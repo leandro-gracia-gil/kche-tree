@@ -77,25 +77,25 @@
 */
 
 /**
- * \file 	kd-tree.h
- * \brief 	Template for generic kd-trees.
- * \author	Leandro Graciá Gil
+ * \file kd-tree.h
+ * \brief Template for generic kd-trees.
+ * \author Leandro Graciá Gil
 */
 
 #ifndef _KD_TREE_H_
 #define _KD_TREE_H_
 
-// Include STL vectors for K neighbours output
+// Include STL vectors for K neighbours output.
 #include <vector>
 
-// STL streams
+// STL streams.
 #include <iostream>
 
-// Include k-neighbours containers (k-heaps and k-vectors)
+// Include k-neighbours containers (k-heaps and k-vectors).
 #include "k-heap.h"
 #include "k-vector.h"
 
-// Include template for feature vectors
+// Include template for feature vectors.
 #include "feature_vector.h"
 
 
@@ -113,182 +113,179 @@
 template <typename T, const unsigned int D, typename S = k_vector<vector_distance<T>, vector_distance<T> > >
 class kd_tree {
 public:
-	/// Consider compatible feature vectors as D-dimensional points in the space.
-	typedef feature_vector<T, D> kd_point;
+  /// Consider compatible feature vectors as D-dimensional points in the space.
+  typedef feature_vector<T, D> kd_point;
 
-	/// Define the type used for kd-tree neighbours
-	typedef vector_distance<T> kd_neighbour;
+  /// Define the type used for kd-tree neighbours.
+  typedef vector_distance<T> kd_neighbour;
 
-	// Constructors and destructors
-	kd_tree();	///< Default constructor. Creates an empty and uninitialized kd-tree.
-	~kd_tree(); 	///< Default destructor.
-	
-	// Basic kd-tree operations
-	bool build(const kd_point *points, unsigned int num_points, unsigned int bucket_size = 32);			///< Build a kd-tree from a set of input points. Cost: O(n log² n).
-	void knn(const kd_point &p, unsigned int K, std::vector<kd_neighbour> &output, T epsilon = (T) 0) const; 	///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
-	void all_in_range(const kd_point &p, T distance, std::vector<kd_neighbour> &output) const; 			///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
+  // Constructors and destructors.
+  kd_tree(); ///< Default constructor. Creates an empty and uninitialized kd-tree.
+  ~kd_tree(); ///< Default destructor.
 
-	// Subscript operator for accesing stored data (will fail on non-built kd-trees)
-	const kd_point & operator [] (unsigned int index) const;
+  // Basic kd-tree operations.
+  bool build(const kd_point *points, unsigned int num_points, unsigned int bucket_size = 32); ///< Build a kd-tree from a set of input points. Cost: O(n log² n).
+  void knn(const kd_point &p, unsigned int K, std::vector<kd_neighbour> &output, T epsilon = (T) 0) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
+  void all_in_range(const kd_point &p, T distance, std::vector<kd_neighbour> &output) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
 
-	// Stream operators
-	template <typename T_, const unsigned int D_, typename S_>
-	friend std::istream & operator >> (std::istream &in, kd_tree<T_, D_, S_> &kdtree); 		///< Input operator (read from stream). Throws an exception in case of error.
+  // Subscript operator for accesing stored data (will fail on non-built kd-trees).
+  const kd_point & operator [] (unsigned int index) const;
 
-	template <typename T_, const unsigned int D_, typename S_>
-	friend std::ostream & operator << (std::ostream &out, const kd_tree<T_, D_, S_> &kdtree); 	///< Output operator (save to stream).
+  // Stream operators.
+  template <typename T_, const unsigned int D_, typename S_>
+  friend std::istream & operator >> (std::istream &in, kd_tree<T_, D_, S_> &kdtree); ///< Input operator (read from stream). Throws an exception in case of error.
 
-	// Kd-tree properties
-	unsigned int get_D() const { return D; } 			///< Get the number of dimensions of the input data.
-	unsigned int get_N() const { return num_elements; }		///< Get the number of elements stored in the tree.
+  template <typename T_, const unsigned int D_, typename S_>
+  friend std::ostream & operator << (std::ostream &out, const kd_tree<T_, D_, S_> &kdtree); ///< Output operator (save to stream).
+
+  // Kd-tree properties.
+  unsigned int get_D() const { return D; } ///< Get the number of dimensions of the input data.
+  unsigned int get_N() const { return num_elements; } ///< Get the number of elements stored in the tree.
 
 protected:
+  /// Structure holding data for incremental hyperrectangle-hypersphere intersection and nearest neighbour search.
+  struct kd_search_data {
 
-	/// Structure holding data for incremental hyperrectangle-hypersphere intersection and nearest neighbour search.
-	struct kd_search_data {
-		
-		const kd_point &p; 	///< Reference input point.
-		const kd_point *data; 	///< Pointer to permutated data array.
-		unsigned int K; 	///< Number of neighbours to retrieve.
+    const kd_point &p; ///< Reference input point.
+    const kd_point *data; ///< Pointer to permutated data array.
+    unsigned int K; ///< Number of neighbours to retrieve.
 
-		T hyperrect_distance; 	///< Distance to the current nearest point in the hyperrectangle.
-		T farthest_distance; 	///< Current distance from the farthest nearest neighbour to the reference point.
+    T hyperrect_distance; ///< Distance to the current nearest point in the hyperrectangle.
+    T farthest_distance; ///< Current distance from the farthest nearest neighbour to the reference point.
 
-		/// Axis-ordered point and hyperrectangle structure. Used internally to increase the cache hits.
-		struct axis_data {
-			T p; 		///< Per-axis reference input point.
-			T nearest; 	///< Per-axis nearest point in the current hyperrectangle.
-		} axis[D]; 		///< Per-axis data defined this way to reduce cache misses.
+    /// Axis-ordered point and hyperrectangle structure. Used internally to increase the cache hits.
+    struct axis_data {
+      T p; ///< Per-axis reference input point.
+      T nearest; ///< Per-axis nearest point in the current hyperrectangle.
+    } axis[D]; ///< Per-axis data defined this way to reduce cache misses.
 
-		/// Initialize data for a tree search with incremental intersection calculation.
-		kd_search_data(const kd_point &p, const kd_point *data, unsigned int K);
-	};
+    /// Initialize data for a tree search with incremental intersection calculation.
+    kd_search_data(const kd_point &p, const kd_point *data, unsigned int K);
+  };
 
-	/// Kd-tree leaf node.
-	struct kd_leaf {
-		unsigned int first_index; 	///< Index of the first element contained by the leaf node.
-		unsigned int num_elements; 	///< Number of elements contained by the node.
+  /// Kd-tree leaf node.
+  struct kd_leaf {
+    unsigned int first_index; ///< Index of the first element contained by the leaf node.
+    unsigned int num_elements; ///< Number of elements contained by the node.
 
-		/// Leaf constructor
-		kd_leaf(unsigned int first_index, unsigned int num_elements) :
-			first_index(first_index), num_elements(num_elements) {}
+    /// Leaf constructor.
+    kd_leaf(unsigned int first_index, unsigned int num_elements) :
+      first_index(first_index), num_elements(num_elements) {}
 
-		/// Construct from an input stream.
-		kd_leaf(std::istream &input);
+    /// Construct from an input stream.
+    kd_leaf(std::istream &input);
 
-		/// Process a leaf node with many buckets on it. Do not use any upper bounds on distance.
-		template <typename C> void explore(kd_search_data &data, C &candidates) const;
+    /// Process a leaf node with many buckets on it. Do not use any upper bounds on distance.
+    template <typename C> void explore(kd_search_data &data, C &candidates) const;
 
-		/// Process a leaf node with many buckets on it. Allows partial distance calculations.
-		template <typename C> void intersect(kd_search_data &data, C &candidates) const;
-	
-		/// Write to stream
-		bool write_to_binary_stream(std::ostream &out);
-	};
+    /// Process a leaf node with many buckets on it. Allows partial distance calculations.
+    template <typename C> void intersect(kd_search_data &data, C &candidates) const;
 
-	/// Kd-tree branch node.
-	struct kd_node {
+    /// Write to stream.
+    bool write_to_binary_stream(std::ostream &out);
+  };
 
-		union {
-			kd_node *left_branch; 	///< Left branch.
-			kd_leaf *left_leaf; 	///< Left leaf.
-		};
+  /// Kd-tree branch node.
+  struct kd_node {
 
-		union {
-			kd_node *right_branch; 	///< Right branch.
-			kd_leaf *right_leaf; 	///< Right leaf.
-		};
-		
-		T split_value; 			///< Value used to split the hyperspace in two.
+    union {
+      kd_node *left_branch; ///< Left branch.
+      kd_leaf *left_leaf; ///< Left leaf.
+    };
 
-		// The leaf flags use the two uppermost bits of the axis index. Won't handle more than 2^30 dimensions.
-		union {
-			unsigned int axis; 		///< Index of the current axis being split.
-			unsigned int is_leaf; 		///< Bitmask used to check if left and right nodes are leafs or branches.
-		};
+    union {
+      kd_node *right_branch; ///< Right branch.
+      kd_leaf *right_leaf; ///< Right leaf.
+    };
 
-		// Bit masks to access the leaf and axis information
-		static const unsigned int left_bit  = 0x80000000U; 	///< Mask used to access the left branch bit in is_leaf.
-		static const unsigned int right_bit = 0x40000000U; 	///< Mask used to access the right branch bit in is_leaf.
-		static const unsigned int axis_mask = 0x3FFFFFFFU; 	///< Mask used to access the axis bits.
+    T split_value; ///< Value used to split the hyperspace in two.
 
-		// Constructors and destructor
-		kd_node() : left_branch(NULL), right_branch(NULL), is_leaf(0) {} 	///< Default constructor.
-		kd_node(std::istream &input); 						///< Construct from an input stream.
-		~kd_node(); 								///< Default destructor.
+    // The leaf flags use the two uppermost bits of the axis index. Won't handle more than 2^30 dimensions.
+    union {
+      unsigned int axis; ///< Index of the current axis being split.
+      unsigned int is_leaf; ///< Bitmask used to check if left and right nodes are leafs or branches.
+    };
 
-		/// Per axis element comparison functor. Used to apply STL sorting algorithms to individual axes.
-		struct kd_axis_comparer {
-			const kd_point *data; 		///< Array of input data.
-			unsigned int axis; 		///< Current axis used for sorting
+    // Bit masks to access the leaf and axis information.
+    static const unsigned int left_bit  = 0x80000000U; ///< Mask used to access the left branch bit in is_leaf.
+    static const unsigned int right_bit = 0x40000000U; ///< Mask used to access the right branch bit in is_leaf.
+    static const unsigned int axis_mask = 0x3FFFFFFFU; ///< Mask used to access the axis bits.
 
-			/// Axis-th element comparison. Used to perform per-dimension data sorting.
-			bool operator () (const unsigned int &i1, const unsigned int &i2) const {
-				return data[i1][axis] < data[i2][axis];
-			}
-		};
+    // Constructors and destructor.
+    kd_node() : left_branch(NULL), right_branch(NULL), is_leaf(0) {} ///< Default constructor.
+    kd_node(std::istream &input); ///< Construct from an input stream.
+    ~kd_node(); ///< Default destructor.
 
-		// --- Training-related --- //
+    /// Per axis element comparison functor. Used to apply STL sorting algorithms to individual axes.
+    struct kd_axis_comparer {
+      const kd_point *data; ///< Array of input data.
+      unsigned int axis; ///< Current axis used for sorting.
 
-		/// Build the kd-tree recursively.
-		static kd_node *build(const kd_point *data, unsigned int *index, unsigned int n,
-				      kd_node *parent, unsigned int bucket_size, unsigned int &processed);
+      /// Axis-th element comparison. Used to perform per-dimension data sorting.
+      bool operator () (const unsigned int &i1, const unsigned int &i2) const {
+        return data[i1][axis] < data[i2][axis];
+      }
+    };
 
-		/// Find a pivot to split the space in two by a chosen dimension during training.
-		unsigned int split(unsigned int *index, unsigned int n, const kd_axis_comparer &comparer);
+    // --- Training-related --- //
 
-		// --- Search-related --- //
+    /// Build the kd-tree recursively.
+    static kd_node *build(const kd_point *data, unsigned int *index, unsigned int n,
+        kd_node *parent, unsigned int bucket_size, unsigned int &processed);
 
-		/// Traverse the kd-tree looking for nearest neighbours candidates based on Manhattan distances.
-		template <typename C> void explore(const kd_node *parent, kd_search_data &data, C &candidates) const;
+    /// Find a pivot to split the space in two by a chosen dimension during training.
+    unsigned int split(unsigned int *index, unsigned int n, const kd_axis_comparer &comparer);
 
-		/// Traverse the kd-tree checking hypersphere-hyperrectangle intersections to discard regions of the space.
-		template <typename C> void intersect(const kd_node *parent, kd_search_data &data, C &candidates) const;
+    // --- Search-related --- //
 
-		// --- IO-related --- //
+    /// Traverse the kd-tree looking for nearest neighbours candidates based on Manhattan distances.
+    template <typename C> void explore(const kd_node *parent, kd_search_data &data, C &candidates) const;
 
-		/// Write to stream
-		bool write_to_binary_stream(std::ostream &out);
-	};
-	
-	/// Incremental hyperrectangle-hypersphere intersection calculator. Designed so that the object lifespan handles increments.
-	class kd_incremental {
-	public:
-		/// Create an temporary incremental calculator object. Will update the current data according with the selected branch.
-		kd_incremental(const kd_node *node, const kd_node *parent, kd_search_data &data);
+    /// Traverse the kd-tree checking hypersphere-hyperrectangle intersections to discard regions of the space.
+    template <typename C> void intersect(const kd_node *parent, kd_search_data &data, C &candidates) const;
 
-		/// Destroy a temporary incremental calculator object. Will restore any previous modifications of the incremental data.
-		~kd_incremental();
+    // --- IO-related --- //
 
-	protected:
+    /// Write to stream.
+    bool write_to_binary_stream(std::ostream &out);
+  };
 
-		kd_search_data &search_data; 	///< Reference to the search data being used.
-		unsigned int parent_axis; 	///< Axis that defines the hyperspace splitting.
+  /// Incremental hyperrectangle-hypersphere intersection calculator. Designed so that the object lifespan handles increments.
+  class kd_incremental {
+  public:
+    /// Create an temporary incremental calculator object. Will update the current data according with the selected branch.
+    kd_incremental(const kd_node *node, const kd_node *parent, kd_search_data &data);
 
-		T previous_axis_nearest; 	///< Previous value of the local axis in the hyperrectangle.
-		T previous_hyperrect_distance; 	///< Previous value of the distance to the nearest point in the hyperrectangle.
-	};
+    /// Destroy a temporary incremental calculator object. Will restore any previous modifications of the incremental data.
+    ~kd_incremental();
 
-	// Internal methods
-	void release(); 		///< Release memory allocated by the kd-tree including tree nodes.
+  protected:
+    kd_search_data &search_data; ///< Reference to the search data being used.
+    unsigned int parent_axis; ///< Axis that defines the hyperspace splitting.
 
-	// Kd-tree data
-	kd_node *root; 			///< Root node of the tree. Will be \c NULL in empty trees.
-	kd_point *data; 		///< Data of the kd-tree. Copied with element permutations during the tree building.
-	unsigned int *permutation; 	///< Permutation indices applied to kd-tree data to enhance cache behaviour.
-	unsigned int *inverse_perm; 	///< Inverse of the permutation applied to indices in the permutation array.
-	unsigned int num_elements; 	///< Number of elements currently in the tree.
+    T previous_axis_nearest; ///< Previous value of the local axis in the hyperrectangle.
+    T previous_hyperrect_distance; ///< Previous value of the distance to the nearest point in the hyperrectangle.
+  };
 
-	// File serialization settings
-	static const char *file_header; 		///< Header written when serializing kd-trees.
-	static const unsigned short file_header_length;	///< Length in bytes of the header.
-	static const unsigned short file_version[2]; 	///< Tuple of major and minor version of the current kd-tree file format.
-	static const unsigned short signature; 		///< Signature value used to check the end of file according to the format.
+  // Internal methods.
+  void release(); ///< Release memory allocated by the kd-tree including tree nodes.
+
+  // Kd-tree data.
+  kd_node *root; ///< Root node of the tree. Will be \c NULL in empty trees.
+  kd_point *data; ///< Data of the kd-tree. Copied with element permutations during the tree building.
+  unsigned int *permutation; ///< Permutation indices applied to kd-tree data to enhance cache behaviour.
+  unsigned int *inverse_perm; ///< Inverse of the permutation applied to indices in the permutation array.
+  unsigned int num_elements; ///< Number of elements currently in the tree.
+
+  // File serialization settings.
+  static const char *file_header; ///< Header written when serializing kd-trees.
+  static const unsigned short file_header_length; ///< Length in bytes of the header.
+  static const unsigned short file_version[2]; ///< Tuple of major and minor version of the current kd-tree file format.
+  static const unsigned short signature; ///< Signature value used to check the end of file according to the format.
 };
 
-// Template implementation
+// Template implementation.
 #include "kd-tree.cpp"
 #include "kd-tree_io.cpp"
 
 #endif
-

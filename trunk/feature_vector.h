@@ -19,15 +19,15 @@
  ***************************************************************************/
 
 /**
- * \file 	feature_vector.h
- * \brief 	Template for generic D-dimensional feature vectors.
- * \author	Leandro Graciá Gil
+ * \file feature_vector.h
+ * \brief Template for generic D-dimensional feature vectors.
+ * \author Leandro Graciá Gil
 */
 
 #ifndef _FEATURE_VECTOR_H_
 #define _FEATURE_VECTOR_H_
 
-// Include STL binary predicates
+// Include STL binary predicates.
 #include <functional>
 
 /**
@@ -42,28 +42,31 @@
 template <typename T, const unsigned int D>
 struct feature_vector {
 
-	/// Data array
-	T data[D];
+  /// Data array.
+  T data[D];
 
-	// Constructors
-	feature_vector() {} 								///< Default constructor.
-	feature_vector(T value) { for(unsigned int d=0; d<D; ++d) data[d] = value; } 	///< Value initialization constructor.
-	
-	// Subscript operators
-	const T & operator [] (unsigned int index) const { return data[index]; } 	///< Const subscript operator.
-	T & operator [] (unsigned int index) { return data[index]; } 			///< Subscript operator.
+  // Constructors.
+  feature_vector() {} ///< Default constructor.
+  feature_vector(T value) {
+    for (unsigned int d=0; d<D; ++d)
+      data[d] = value;
+  } ///< Value initialization constructor.
 
-	// Comparison operators
-	bool operator == (const feature_vector &p) const; 			///< Equality comparison operator.
-	bool operator != (const feature_vector &p) const; 			///< Non-equality comparison operator.
+  // Subscript operators.
+  const T & operator [] (unsigned int index) const { return data[index]; } ///< Const subscript operator.
+  T & operator [] (unsigned int index) { return data[index]; } ///< Subscript operator.
 
-	// Squared distance operators for two D-dimensional points of type T.
-	inline T distance_to(const feature_vector &p) const; 			///< Squared distance to a point.
-	inline T distance_to(const feature_vector &p, T upper_bound) const; 	///< Squared distance to a point with an upper bound.
+  // Comparison operators.
+  bool operator == (const feature_vector &p) const; ///< Equality comparison operator.
+  bool operator != (const feature_vector &p) const; ///< Non-equality comparison operator.
 
-	// Memory operators: used to allow memory-aligned specializations. For example, for SSE optimizations.
-	void *operator new [] (size_t size); 	///< Standard allocation for arrays of feature vectors.
-	void  operator delete [] (void *p); 	///< Standard deallocation for arrays of feature vectors.
+  // Squared distance operators for two D-dimensional points of type T.
+  inline T distance_to(const feature_vector &p) const; ///< Squared distance to a point.
+  inline T distance_to(const feature_vector &p, T upper_bound) const; ///< Squared distance to a point with an upper bound.
+
+  // Memory operators: used to allow memory-aligned specializations. For example, for SSE optimizations.
+  void *operator new [] (size_t size); ///< Standard allocation for arrays of feature vectors.
+  void  operator delete [] (void *p); ///< Standard deallocation for arrays of feature vectors.
 
 } __attribute__((packed));
 
@@ -77,21 +80,20 @@ struct feature_vector {
 template <typename T>
 struct vector_distance : public std::binary_function <vector_distance<T>, vector_distance<T>, bool> {
 
-	unsigned int index; 	///< Index of the feature vector in the data set.
-	T squared_distance; 	///< Squared distance of the referenced element to an implicit point.
+  unsigned int index; ///< Index of the feature vector in the data set.
+  T squared_distance; ///< Squared distance of the referenced element to an implicit point.
 
-	// Default and convenience constructors
-	vector_distance() {}
-	vector_distance(unsigned int index, T squared_distance) : index(index), squared_distance(squared_distance) {}
+  // Default and convenience constructors.
+  vector_distance() {}
+  vector_distance(unsigned int index, T squared_distance) : index(index), squared_distance(squared_distance) {}
 
-	/// Distance comparison operator for vector_distances. Allows vector_distance objects to be used as STL comparison functors.
-	bool operator () (const vector_distance &v1, const vector_distance &v2) const {
-		return v1.squared_distance < v2.squared_distance;
-	}
+  /// Distance comparison operator for vector_distances. Allows vector_distance objects to be used as STL comparison functors.
+  bool operator () (const vector_distance &v1, const vector_distance &v2) const {
+    return v1.squared_distance < v2.squared_distance;
+  }
 };
 
-// Template implementation
+// Template implementation.
 #include "feature_vector.cpp"
 
 #endif
-

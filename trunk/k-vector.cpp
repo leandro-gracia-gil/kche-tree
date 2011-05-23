@@ -19,28 +19,29 @@
  ***************************************************************************/
 
 /**
- * \file 	k-vector.cpp
- * \brief 	Template implementations for k-vectors holding the best k elements (linear, but simpler).
- * \author	Leandro Graciá Gil
+ * \file k-vector.cpp
+ * \brief Template implementations for k-vectors holding the best k elements (linear, but simpler).
+ * \author Leandro Graciá Gil
 */
 
 /**
  * Build a k-vector of size K.
  *
- * \param K 	Size of the k-vector.
- * \param c 	Comparison object used for internal element sorting.
+ * \param K Size of the k-vector.
+ * \param c Comparison object used for internal element sorting.
  */
 template <typename T, typename Compare>
-k_vector<T, Compare>::k_vector(unsigned int K, const Compare &c) :
-	data(new T[K]), K(K), stored(0), compare(c) {}
-
+k_vector<T, Compare>::k_vector(unsigned int K, const Compare &c)
+  : data(new T[K]),
+    K(K),
+    stored(0),
+    compare(c) {}
 
 /** Default destructor */
 template <typename T, typename Compare>
 k_vector<T, Compare>::~k_vector() {
-	delete []data;
+  delete []data;
 }
-
 
 /**
  * Check if no elements are being stored in the k-vector.
@@ -49,7 +50,7 @@ k_vector<T, Compare>::~k_vector() {
  */
 template <typename T, typename Compare>
 bool k_vector<T, Compare>::empty() const {
-	return stored == 0;
+  return stored == 0;
 }
 
 /**
@@ -59,7 +60,7 @@ bool k_vector<T, Compare>::empty() const {
  */
 template <typename T, typename Compare>
 bool k_vector<T, Compare>::full() const {
-	return stored == K;
+  return stored == K;
 }
 
 /**
@@ -69,7 +70,7 @@ bool k_vector<T, Compare>::full() const {
  */
 template <typename T, typename Compare>
 unsigned int k_vector<T, Compare>::size() const {
-	return stored;
+  return stored;
 }
 
 /**
@@ -79,7 +80,7 @@ unsigned int k_vector<T, Compare>::size() const {
  */
 template <typename T, typename Compare>
 const T & k_vector<T, Compare>::front() const {
-	return data[0];
+  return data[0];
 }
 
 /**
@@ -89,7 +90,7 @@ const T & k_vector<T, Compare>::front() const {
  */
 template <typename T, typename Compare>
 const T & k_vector<T, Compare>::back() const {
-	return data[stored - 1];
+  return data[stored - 1];
 }
 
 /**
@@ -97,18 +98,21 @@ const T & k_vector<T, Compare>::back() const {
  */
 template <typename T, typename Compare>
 void k_vector<T, Compare>::pop_back() {
-	if(stored > 0) --stored;
+  if (stored > 0)
+    --stored;
 }
 
 /**
  * Push a new element into the k-vector.
  *
- * \param elem 	Element being pushed.
+ * \param elem Element being pushed.
  */
 template <typename T, typename Compare>
 void k_vector<T, Compare>::push_back(const T &elem) {
-	if(stored < K) push_not_full(elem);
-	else push_full(elem);
+  if (stored < K)
+    push_not_full(elem);
+  else
+    push_full(elem);
 }
 
 /**
@@ -118,19 +122,20 @@ void k_vector<T, Compare>::push_back(const T &elem) {
  *
  * \pre The k-vector object must not be full.
  *
- * \param elem 	Element being pushed.
+ * \param elem Element being pushed.
  */
 template <typename T, typename Compare>
 void k_vector<T, Compare>::push_not_full(const T &elem) {
 
-	// Look where the new candidate should be placed
-	unsigned int index;
-	for(index=0; index < stored && compare(elem, data[index]); ++index);
+  // Look where the new candidate should be placed.
+  unsigned int index;
+  for (index=0; index < stored && compare(elem, data[index]); ++index);
 
-	// Move later candidates and store the new one in its place
-	for(unsigned int i=stored; i>index; --i) data[i] = data[i-1];
-	data[index] = elem;
-	++stored;
+  // Move later candidates and store the new one in its place.
+  for (unsigned int i=stored; i>index; --i)
+    data[i] = data[i-1];
+  data[index] = elem;
+  ++stored;
 }
 
 /**
@@ -140,21 +145,22 @@ void k_vector<T, Compare>::push_not_full(const T &elem) {
  *
  * \pre The k-vector object must be already full.
  *
- * \param elem 	Element being pushed.
+ * \param elem Element being pushed.
  */
 template <typename T, typename Compare>
 void k_vector<T, Compare>::push_full(const T &elem) {
 
-	// Avoid further calculations if candidate is worst than the current worst one
-	if(!compare(elem, data[0])) return;
+  // Avoid further calculations if candidate is worst than the current worst one.
+  if (!compare(elem, data[0]))
+    return;
 
-	// Look where the new candidate should be placed
-	unsigned int index;
-	for(index=1; index < stored && compare(elem, data[index]); ++index);
+  // Look where the new candidate should be placed.
+  unsigned int index;
+  for (index=1; index < stored && compare(elem, data[index]); ++index);
 
-	// Move previous candidates and store the new one in its place
-	--index;
-	for(unsigned int i=0; i<index; ++i) data[i] = data[i+1];
-	data[index] = elem;
+  // Move previous candidates and store the new one in its place.
+  --index;
+  for (unsigned int i=0; i<index; ++i)
+    data[i] = data[i+1];
+  data[index] = elem;
 }
-
