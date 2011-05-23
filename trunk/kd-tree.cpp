@@ -471,16 +471,24 @@ void kd_tree<T, D, S>::kd_node::intersect(const kd_node *parent, kd_search_data 
     return;
 
   // Traverse left branch discarding regions of space.
-  if (is_leaf & left_bit)
-    left_leaf->intersect(search_data, candidates);
-  else
+  if (is_leaf & left_bit) {
+    if (search_data.ignore_null_distances)
+      left_leaf->intersect_ignoring_same(search_data, candidates);
+    else
+      left_leaf->intersect(search_data, candidates);
+  } else {
     left_branch->intersect(this, search_data, candidates);
+  }
 
   // Traverse right branch discarding regions of space.
-  if (is_leaf & right_bit)
-    right_leaf->intersect(search_data, candidates);
-  else
+  if (is_leaf & right_bit) {
+    if (search_data.ignore_null_distances)
+      right_leaf->intersect_ignoring_same(search_data, candidates);
+    else
+      right_leaf->intersect(search_data, candidates);
+  } else {
     right_branch->intersect(this, search_data, candidates);
+  }
 }
 
 /**
@@ -528,7 +536,34 @@ void kd_tree<T, D, S>::kd_leaf::intersect(kd_search_data &search_data, C &candid
     // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
     T new_distance = search_data.p.distance_to(search_data.data[i], search_data.farthest_distance);
 
-    if (new_distance == (T) 0 && search_data.ignore_null_distances)
+    // If less than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
+    if (new_distance <= search_data.farthest_distance) {
+
+      // Push it in the nearest neighbour container (will reject the previous farthest one).
+      candidates.push_back(kd_neighbour(i, new_distance));
+
+      // Update the distance to the new farthest nearest neighbour.
+      search_data.farthest_distance = candidates.front().squared_distance;
+    }
+  }
+}
+
+/**
+ * Process a leaf node that contains many buckets without trying to discard them.
+ * Ignore any points with distance 0.
+ *
+ * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
+ * \param candidates STL container-like object holding the current neighbour candidates.
+ */
+template <typename T, const unsigned int D, typename S> template <typename C>
+void kd_tree<T, D, S>::kd_leaf::intersect_ignoring_same(kd_search_data &search_data, C &candidates) const {
+
+  // Process all the buckets in the node.
+  for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
+
+    // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
+    T new_distance = search_data.p.distance_to(search_data.data[i], search_data.farthest_distance);
+    if (new_distance == (T) 0)
       continue;
 
     // If less than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
@@ -542,6 +577,7 @@ void kd_tree<T, D, S>::kd_leaf::intersect(kd_search_data &search_data, C &candid
     }
   }
 }
+
 
 #ifdef DEBUG_KDTREE
 template <typename T, const unsigned int D, typename S>

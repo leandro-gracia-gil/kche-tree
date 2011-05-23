@@ -185,6 +185,7 @@ protected:
 
     /// Process a leaf node with many buckets on it. Allows partial distance calculations.
     template <typename C> void intersect(kd_search_data &data, C &candidates) const;
+    template <typename C> void intersect_ignoring_same(kd_search_data &data, C &candidates) const;
 
     /// Write to stream.
     bool write_to_binary_stream(std::ostream &out);
