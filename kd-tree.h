@@ -125,8 +125,8 @@ public:
 
   // Basic kd-tree operations.
   bool build(const kd_point *points, unsigned int num_points, unsigned int bucket_size = 32); ///< Build a kd-tree from a set of input points. Cost: O(n log² n).
-  void knn(const kd_point &p, unsigned int K, std::vector<kd_neighbour> &output, T epsilon = (T) 0) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
-  void all_in_range(const kd_point &p, T distance, std::vector<kd_neighbour> &output) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
+  void knn(const kd_point &p, unsigned int K, std::vector<kd_neighbour> &output, T epsilon = (T) 0, bool point_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
+  void all_in_range(const kd_point &p, T distance, std::vector<kd_neighbour> &output, bool point_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
 
   // Subscript operator for accesing stored data (will fail on non-built kd-trees).
   const kd_point & operator [] (unsigned int index) const;
@@ -142,6 +142,10 @@ public:
   unsigned int get_D() const { return D; } ///< Get the number of dimensions of the input data.
   unsigned int get_N() const { return num_elements; } ///< Get the number of elements stored in the tree.
 
+#ifdef DEBUG_KDTREE
+  bool verify() const;
+#endif
+
 protected:
   /// Structure holding data for incremental hyperrectangle-hypersphere intersection and nearest neighbour search.
   struct kd_search_data {
@@ -152,6 +156,7 @@ protected:
 
     T hyperrect_distance; ///< Distance to the current nearest point in the hyperrectangle.
     T farthest_distance; ///< Current distance from the farthest nearest neighbour to the reference point.
+    bool ignore_null_distances;  ///< Used to exclude the source point if it's already in the tree.
 
     /// Axis-ordered point and hyperrectangle structure. Used internally to increase the cache hits.
     struct axis_data {
@@ -160,7 +165,7 @@ protected:
     } axis[D]; ///< Per-axis data defined this way to reduce cache misses.
 
     /// Initialize data for a tree search with incremental intersection calculation.
-    kd_search_data(const kd_point &p, const kd_point *data, unsigned int K);
+    kd_search_data(const kd_point &p, const kd_point *data, unsigned int K, bool p_already_in_tree);
   };
 
   /// Kd-tree leaf node.
@@ -183,6 +188,11 @@ protected:
 
     /// Write to stream.
     bool write_to_binary_stream(std::ostream &out);
+
+#ifdef DEBUG_KDTREE
+  bool verify_less_than(const kd_point* data, float value, int axis) const;
+  bool verify_more_than(const kd_point* data, float value, int axis) const;
+#endif
   };
 
   /// Kd-tree branch node.
@@ -215,6 +225,12 @@ protected:
     kd_node() : left_branch(NULL), right_branch(NULL), is_leaf(0) {} ///< Default constructor.
     kd_node(std::istream &input); ///< Construct from an input stream.
     ~kd_node(); ///< Default destructor.
+
+#ifdef DEBUG_KDTREE
+  bool verify(const kd_point* data, int axis) const;
+  bool verify_less_than(const kd_point* data, float value, int axis) const;
+  bool verify_more_than(const kd_point* data, float value, int axis) const;
+#endif
 
     /// Per axis element comparison functor. Used to apply STL sorting algorithms to individual axes.
     struct kd_axis_comparer {
@@ -263,6 +279,7 @@ protected:
     kd_search_data &search_data; ///< Reference to the search data being used.
     unsigned int parent_axis; ///< Axis that defines the hyperspace splitting.
 
+    bool modified; ///< Flag indicating if the values were modified as part of the incremental update.
     T previous_axis_nearest; ///< Previous value of the local axis in the hyperrectangle.
     T previous_hyperrect_distance; ///< Previous value of the distance to the nearest point in the hyperrectangle.
   };
