@@ -128,12 +128,23 @@ int main(int argc, char *argv[]) {
   int K;
   unsigned int N_train, N_test;
   float epsilon = 0.0f;
+  bool ignore_point_in_tree = false;
 
   // Declare arrays of feature vectors.
   test_kdtree::kd_point *train = NULL, *test = NULL;
 
   // Read params.
   switch (argc) {
+  case 6:
+    if (!strcmp(argv[5], "true")) {
+      ignore_point_in_tree = true;
+    } else if (!strcmp(argv[5], "false")) {
+      ignore_point_in_tree = false;
+    } else {
+      fprintf(stderr, "Invalid argument: '%s' should be true or false.\n", argv[5]);
+      return 1;
+    }
+
   case 5:
     // Set the epsilon value (search tolerance, 0 = deterministic).
     epsilon = atof(argv[4]);
@@ -151,7 +162,7 @@ int main(int argc, char *argv[]) {
 
   default:
     // Wrong number of parameters.
-    fprintf(stderr, "Usage: %s K train_file test_file [epsilon = 0.0]\n", argv[0]);
+    fprintf(stderr, "Usage: %s K train_file test_file [epsilon = 0.0] [ignore_point_in_tree = false]\n", argv[0]);
     return 1;
   }
 
@@ -167,12 +178,23 @@ int main(int argc, char *argv[]) {
   float range = 100.0f;
   int random_seed = -1;
   float epsilon = 0.0f;
+  bool ignore_point_in_tree = false;
 
   // Read params.
   switch (argc) {
-  case 7:
+  case 8:
     // Set the random seed used to generate data (time is used if not provided).
-    random_seed = atoi(argv[6]);
+    random_seed = atoi(argv[7]);
+
+  case 7:
+    if (!strcmp(argv[6], "true")) {
+      ignore_point_in_tree = true;
+    } else if (!strcmp(argv[6], "false")) {
+      ignore_point_in_tree = false;
+    } else {
+      fprintf(stderr, "Invalid argument: '%s' should be true or false.\n", argv[6]);
+      return 1;
+    }
 
   case 6:
     // Set the range of the random feature vectors (from 0 to range).
@@ -194,7 +216,7 @@ int main(int argc, char *argv[]) {
 
   default:
     // Wrong number of parameters.
-    fprintf(stderr, "Usage: %s K N_train N_test [epsilon = 0.0] [range = 100.0] [random_seed]\n", argv[0]);
+    fprintf(stderr, "Usage: %s K N_train N_test [epsilon = 0.0] [range = 100.0] [ignore_point_in_tree = false] [random_seed]\n", argv[0]);
     return 1;
   }
 
@@ -237,7 +259,7 @@ int main(int argc, char *argv[]) {
 
     // Get the K nearest neighbours.
     vector<test_kdtree::kd_neighbour> knn;
-    kdtree.knn(test[i], K, knn, epsilon);
+    kdtree.knn(test[i], K, knn, epsilon, ignore_point_in_tree);
   }
   clock_t t2_test = clock();
 
