@@ -45,46 +45,44 @@
 <a name="l00027"></a>00027 <span class="preprocessor">#ifndef _K_VECTOR_H_</span>
 <a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define _K_VECTOR_H_</span>
 <a name="l00029"></a>00029 <span class="preprocessor"></span>
-<a name="l00030"></a>00030 <span class="comment">// Include STL less comparison template (used by default)</span>
+<a name="l00030"></a>00030 <span class="comment">// Include STL less comparison template (used by default).</span>
 <a name="l00031"></a>00031 <span class="preprocessor">#include &lt;functional&gt;</span>
 <a name="l00032"></a>00032 
 <a name="l00041"></a>00041 <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Compare = std::less&lt;T&gt; &gt;
-<a name="l00042"></a><a class="code" href="classk__vector.html">00042</a> <span class="keyword">class </span><a class="code" href="classk__vector.html" title="Define an insertion-based vector to hold the K best elements pushed.">k_vector</a> {        
+<a name="l00042"></a><a class="code" href="classk__vector.html">00042</a> <span class="keyword">class </span><a class="code" href="classk__vector.html" title="Define an insertion-based vector to hold the K best elements pushed.">k_vector</a> {
 <a name="l00043"></a>00043 <span class="keyword">public</span>:
-<a name="l00045"></a>00045         <a class="code" href="classk__vector.html#aff13fc8c7aaff8c8dd15c2238c80f6ee" title="K-vector constructor.">k_vector</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classk__vector.html#a8163754b067d707a9189ad8ed84c9529" title="Maximum number of best elements stored (also maximum heap size).">K</a>, <span class="keyword">const</span> Compare &amp;c = Compare());
+<a name="l00045"></a>00045   <a class="code" href="classk__vector.html#aff13fc8c7aaff8c8dd15c2238c80f6ee" title="K-vector constructor.">k_vector</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classk__vector.html#a8163754b067d707a9189ad8ed84c9529" title="Maximum number of best elements stored (also maximum heap size).">K</a>, <span class="keyword">const</span> Compare &amp;c = Compare());
 <a name="l00046"></a>00046 
-<a name="l00048"></a>00048         <a class="code" href="classk__vector.html#abd99b7550f9a8590d265cf801e1f1bf6" title="Default destructor.">~k_vector</a>();
+<a name="l00048"></a>00048   <a class="code" href="classk__vector.html#abd99b7550f9a8590d265cf801e1f1bf6" title="Default destructor.">~k_vector</a>();
 <a name="l00049"></a>00049 
-<a name="l00050"></a>00050         <span class="comment">// K-vector properties</span>
-<a name="l00051"></a>00051         <span class="keywordtype">bool</span> <a class="code" href="classk__vector.html#aa49c83df3cda1100d8bd7fd86098b911" title="Check if the k-vector is empty. Cost: O(1).">empty</a>() <span class="keyword">const</span>;                     
-<a name="l00052"></a>00052         <span class="keywordtype">bool</span> <a class="code" href="classk__vector.html#a72f9f25cda44cd6b756260d375925ff4" title="Check if the k-vector is full (has K elements). Cost: O(1).">full</a>() <span class="keyword">const</span>;                      
-<a name="l00053"></a>00053         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classk__vector.html#a16b97160d9c4abea40276c0cf107e050" title="Get the number of elements currently in the k-vector. Cost: O(1).">size</a>() <span class="keyword">const</span>;              
+<a name="l00050"></a>00050   <span class="comment">// K-vector properties.</span>
+<a name="l00051"></a>00051   <span class="keywordtype">bool</span> <a class="code" href="classk__vector.html#aa49c83df3cda1100d8bd7fd86098b911" title="Check if the k-vector is empty. Cost: O(1).">empty</a>() <span class="keyword">const</span>; 
+<a name="l00052"></a>00052   <span class="keywordtype">bool</span> <a class="code" href="classk__vector.html#a72f9f25cda44cd6b756260d375925ff4" title="Check if the k-vector is full (has K elements). Cost: O(1).">full</a>() <span class="keyword">const</span>; 
+<a name="l00053"></a>00053   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classk__vector.html#a16b97160d9c4abea40276c0cf107e050" title="Get the number of elements currently in the k-vector. Cost: O(1).">size</a>() <span class="keyword">const</span>; 
 <a name="l00054"></a>00054 
-<a name="l00055"></a>00055         <span class="keyword">const</span> T &amp;<a class="code" href="classk__vector.html#a4fbaa342639de316657081f6e4b63559" title="Get the worst element stored in the k-vector. Cost: O(1).">front</a>() <span class="keyword">const</span>;                 
-<a name="l00056"></a>00056         <span class="keyword">const</span> T &amp;<a class="code" href="classk__vector.html#a5113ba6529837e464dc4a7bfabed76f6" title="Get the best element stored in the k-vector. Cost: O(1).">back</a>() <span class="keyword">const</span>;                  
+<a name="l00055"></a>00055   <span class="keyword">const</span> T &amp;<a class="code" href="classk__vector.html#a4fbaa342639de316657081f6e4b63559" title="Get the worst element stored in the k-vector. Cost: O(1).">front</a>() <span class="keyword">const</span>; 
+<a name="l00056"></a>00056   <span class="keyword">const</span> T &amp;<a class="code" href="classk__vector.html#a5113ba6529837e464dc4a7bfabed76f6" title="Get the best element stored in the k-vector. Cost: O(1).">back</a>() <span class="keyword">const</span>; 
 <a name="l00057"></a>00057 
-<a name="l00058"></a>00058         <span class="comment">// Operations</span>
-<a name="l00059"></a>00059         <span class="keywordtype">void</span> <a class="code" href="classk__vector.html#a3a129ae2377058185fb450191d5141d7" title="Pop the current worst element from the k-vector. Cost: O(K).">pop_back</a>();                        
-<a name="l00060"></a>00060         <span class="keywordtype">void</span> <a class="code" href="classk__vector.html#a5e132b178ed49ea0928e22f7affba1ed" title="Push a new element into the k-vector. Cost: O(K).">push_back</a>(<span class="keyword">const</span> T &amp;elem);          
+<a name="l00058"></a>00058   <span class="comment">// Operations.</span>
+<a name="l00059"></a>00059   <span class="keywordtype">void</span> <a class="code" href="classk__vector.html#a3a129ae2377058185fb450191d5141d7" title="Pop the current worst element from the k-vector. Cost: O(K).">pop_back</a>(); 
+<a name="l00060"></a>00060   <span class="keywordtype">void</span> <a class="code" href="classk__vector.html#a5e132b178ed49ea0928e22f7affba1ed" title="Push a new element into the k-vector. Cost: O(K).">push_back</a>(<span class="keyword">const</span> T &amp;elem); 
 <a name="l00061"></a>00061 
 <a name="l00062"></a>00062 <span class="keyword">protected</span>:
-<a name="l00063"></a>00063 
-<a name="l00064"></a><a class="code" href="classk__vector.html#a5f459362f719a74ff78de0895c5af067">00064</a>         T *<a class="code" href="classk__vector.html#a5f459362f719a74ff78de0895c5af067" title="Array of stored elements (sorted with worst one on the first position).">data</a>;                                
-<a name="l00065"></a><a class="code" href="classk__vector.html#a8163754b067d707a9189ad8ed84c9529">00065</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> K;                         
-<a name="l00066"></a><a class="code" href="classk__vector.html#a2c1ffd7b76e92265e67cd3bd2178f43c">00066</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classk__vector.html#a2c1ffd7b76e92265e67cd3bd2178f43c" title="Number of elements currently in the k-vector.">stored</a>;                    
-<a name="l00067"></a><a class="code" href="classk__vector.html#a881b417451ed3bd9c77e2db96b530ef4">00067</a>         <span class="keyword">const</span> Compare &amp;<a class="code" href="classk__vector.html#a881b417451ed3bd9c77e2db96b530ef4" title="Comparison object.">compare</a>;                 
-<a name="l00068"></a>00068 
-<a name="l00069"></a>00069         <span class="keywordtype">void</span> <a class="code" href="classk__vector.html#a6c664c08863d753956976262dc03f66a" title="Push a new element into the k-vector when the vector is still not full. Cost: O(K)...">push_not_full</a>(<span class="keyword">const</span> T &amp;elem);      
-<a name="l00070"></a>00070         <span class="keywordtype">void</span> <a class="code" href="classk__vector.html#a065f8eb9781445bd16f3b055c5cdfc83" title="Push a new element into the k-vector when the vector is already full. Cost: O(K)...">push_full</a>(<span class="keyword">const</span> T &amp;elem);          
-<a name="l00071"></a>00071 };
-<a name="l00072"></a>00072 
-<a name="l00073"></a>00073 <span class="comment">// Template implementation</span>
-<a name="l00074"></a>00074 <span class="preprocessor">#include &quot;<a class="code" href="k-vector_8cpp.html" title="Template implementations for k-vectors holding the best k elements (linear, but simpler)...">k-vector.cpp</a>&quot;</span>
-<a name="l00075"></a>00075 
-<a name="l00076"></a>00076 <span class="preprocessor">#endif</span>
-<a name="l00077"></a>00077 <span class="preprocessor"></span>
+<a name="l00063"></a><a class="code" href="classk__vector.html#a5f459362f719a74ff78de0895c5af067">00063</a>   T *<a class="code" href="classk__vector.html#a5f459362f719a74ff78de0895c5af067" title="Array of stored elements (sorted with worst one on the first position).">data</a>; 
+<a name="l00064"></a><a class="code" href="classk__vector.html#a8163754b067d707a9189ad8ed84c9529">00064</a>   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> K; 
+<a name="l00065"></a><a class="code" href="classk__vector.html#a2c1ffd7b76e92265e67cd3bd2178f43c">00065</a>   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classk__vector.html#a2c1ffd7b76e92265e67cd3bd2178f43c" title="Number of elements currently in the k-vector.">stored</a>; 
+<a name="l00066"></a><a class="code" href="classk__vector.html#a881b417451ed3bd9c77e2db96b530ef4">00066</a>   <span class="keyword">const</span> Compare &amp;<a class="code" href="classk__vector.html#a881b417451ed3bd9c77e2db96b530ef4" title="Comparison object.">compare</a>; 
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068   <span class="keywordtype">void</span> <a class="code" href="classk__vector.html#a6c664c08863d753956976262dc03f66a" title="Push a new element into the k-vector when the vector is still not full. Cost: O(K)...">push_not_full</a>(<span class="keyword">const</span> T &amp;elem); 
+<a name="l00069"></a>00069   <span class="keywordtype">void</span> <a class="code" href="classk__vector.html#a065f8eb9781445bd16f3b055c5cdfc83" title="Push a new element into the k-vector when the vector is already full. Cost: O(K)...">push_full</a>(<span class="keyword">const</span> T &amp;elem); 
+<a name="l00070"></a>00070 };
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072 <span class="comment">// Template implementation.</span>
+<a name="l00073"></a>00073 <span class="preprocessor">#include &quot;<a class="code" href="k-vector_8cpp.html" title="Template implementations for k-vectors holding the best k elements (linear, but simpler)...">k-vector.cpp</a>&quot;</span>
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075 <span class="preprocessor">#endif</span>
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed Jun 23 17:55:50 2010 for Kche-tree by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed May 25 01:08:26 2011 for Kche-tree by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

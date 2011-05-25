@@ -45,6 +45,8 @@
 <tr><td class="memTemplParams" colspan="2">template&lt;typename C &gt; </td></tr>
 <tr><td class="memTemplItemLeft" align="right" valign="top">void&nbsp;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structkd__tree_1_1kd__leaf.html#a892ed1ed0506652e3fb99494ad6b5d22">intersect</a> (<a class="el" href="structkd__tree_1_1kd__search__data.html">kd_search_data</a> &amp;<a class="el" href="classkd__tree.html#a13bb048566fd405d8dbfab17b8d9d7f6">data</a>, C &amp;candidates) const </td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Process a leaf node with many buckets on it. Allows partial distance calculations.  <a href="#a892ed1ed0506652e3fb99494ad6b5d22"></a><br/></td></tr>
+<tr><td class="memTemplParams" colspan="2">template&lt;typename C &gt; </td></tr>
+<tr><td class="memTemplItemLeft" align="right" valign="top">void&nbsp;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structkd__tree_1_1kd__leaf.html#a0d07d300ea3e34921af7820a4f2859f0">intersect_ignoring_same</a> (<a class="el" href="structkd__tree_1_1kd__search__data.html">kd_search_data</a> &amp;<a class="el" href="classkd__tree.html#a13bb048566fd405d8dbfab17b8d9d7f6">data</a>, C &amp;candidates) const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structkd__tree_1_1kd__leaf.html#a3fc24547815298a4f9c524a1110d660c">write_to_binary_stream</a> (std::ostream &amp;out)</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Write to stream.  <a href="#a3fc24547815298a4f9c524a1110d660c"></a><br/></td></tr>
 <tr><td colspan="2"><h2>Public Attributes</h2></td></tr>
@@ -203,6 +205,45 @@ template&lt;typename C &gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="a0d07d300ea3e34921af7820a4f2859f0"></a><!-- doxytag: member="kd_tree::kd_leaf::intersect_ignoring_same" ref="a0d07d300ea3e34921af7820a4f2859f0" args="(kd_search_data &amp;data, C &amp;candidates) const " -->
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , const unsigned int D, typename S &gt; </div>
+<div class="memtemplate">
+template&lt;typename C &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classkd__tree.html">kd_tree</a>&lt; T, <a class="el" href="test__kdtree_8cpp.html#aab36b7f3966dcaeea1db0699a6054709">D</a>, S &gt;::kd_leaf::intersect_ignoring_same </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structkd__tree_1_1kd__search__data.html">kd_search_data</a> &amp;&nbsp;</td>
+          <td class="paramname"> <em>search_data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">C &amp;&nbsp;</td>
+          <td class="paramname"> <em>candidates</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td> const<code> [inline]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Process a leaf node that contains many buckets without trying to discard them. Ignore any points with distance 0.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>search_data</em>&nbsp;</td><td>Auxiliar data structure used for tree traversal and incremental calculations. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>candidates</em>&nbsp;</td><td>STL container-like object holding the current neighbour candidates. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a3fc24547815298a4f9c524a1110d660c"></a><!-- doxytag: member="kd_tree::kd_leaf::write_to_binary_stream" ref="a3fc24547815298a4f9c524a1110d660c" args="(std::ostream &amp;out)" -->
 <div class="memitem">
 <div class="memproto">
@@ -274,7 +315,7 @@ template&lt;typename T, const unsigned int D, typename S = k_vector&lt;vector_di
 <li><a class="el" href="kd-tree__io_8cpp.html">kd-tree_io.cpp</a></li>
 </ul>
 </div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed Jun 23 17:55:50 2010 for Kche-tree by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed May 25 01:08:26 2011 for Kche-tree by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

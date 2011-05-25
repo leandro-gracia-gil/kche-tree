@@ -45,54 +45,60 @@
 <a name="l00027"></a>00027 <span class="preprocessor">#ifndef _FEATURE_VECTOR_H_</span>
 <a name="l00028"></a>00028 <span class="preprocessor"></span><span class="preprocessor">#define _FEATURE_VECTOR_H_</span>
 <a name="l00029"></a>00029 <span class="preprocessor"></span>
-<a name="l00030"></a>00030 <span class="comment">// Include STL binary predicates</span>
+<a name="l00030"></a>00030 <span class="comment">// Include STL binary predicates.</span>
 <a name="l00031"></a>00031 <span class="preprocessor">#include &lt;functional&gt;</span>
 <a name="l00032"></a>00032 
 <a name="l00042"></a>00042 <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, const <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> D&gt;
 <a name="l00043"></a><a class="code" href="structfeature__vector.html">00043</a> <span class="keyword">struct </span><a class="code" href="structfeature__vector.html" title="Template for D-dimensional feature vectors.">feature_vector</a> {
 <a name="l00044"></a>00044 
-<a name="l00046"></a><a class="code" href="structfeature__vector.html#a723752d5313703dfe340a2c5e1993806">00046</a>         T <a class="code" href="structfeature__vector.html#a723752d5313703dfe340a2c5e1993806" title="Data array.">data</a>[<a class="code" href="example_8cpp.html#aab36b7f3966dcaeea1db0699a6054709" title="Number of dimensions to use in this test.">D</a>];
+<a name="l00046"></a><a class="code" href="structfeature__vector.html#a723752d5313703dfe340a2c5e1993806">00046</a>   T <a class="code" href="structfeature__vector.html#a723752d5313703dfe340a2c5e1993806" title="Data array.">data</a>[<a class="code" href="example_8cpp.html#aab36b7f3966dcaeea1db0699a6054709" title="Number of dimensions to use in this test.">D</a>];
 <a name="l00047"></a>00047 
-<a name="l00048"></a>00048         <span class="comment">// Constructors</span>
-<a name="l00049"></a><a class="code" href="structfeature__vector.html#a7ed7ea70b09be372b12e0e086cd3456f">00049</a>         <a class="code" href="structfeature__vector.html#a7ed7ea70b09be372b12e0e086cd3456f" title="Default constructor.">feature_vector</a>() {}                                                             
-<a name="l00050"></a><a class="code" href="structfeature__vector.html#ada1c45d86254f506c5937e0873b17502">00050</a>         <a class="code" href="structfeature__vector.html#ada1c45d86254f506c5937e0873b17502" title="Value initialization constructor.">feature_vector</a>(T value) { <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> d=0; d&lt;<a class="code" href="example_8cpp.html#aab36b7f3966dcaeea1db0699a6054709" title="Number of dimensions to use in this test.">D</a>; ++d) <a class="code" href="structfeature__vector.html#a723752d5313703dfe340a2c5e1993806" title="Data array.">data</a>[d] = value; }    
-<a name="l00051"></a>00051         
-<a name="l00052"></a>00052         <span class="comment">// Subscript operators</span>
-<a name="l00053"></a><a class="code" href="structfeature__vector.html#ae38d8e2adbbe48fe2e185754d1d6b8ed">00053</a>         <span class="keyword">const</span> T &amp; <a class="code" href="structfeature__vector.html#ae38d8e2adbbe48fe2e185754d1d6b8ed" title="Const subscript operator.">operator [] </a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="structfeature__vector.html#a723752d5313703dfe340a2c5e1993806" title="Data array.">data</a>[index]; }        
-<a name="l00054"></a><a class="code" href="structfeature__vector.html#a3f63ce201e99ed3094d8e60679895ecb">00054</a>         T &amp; <a class="code" href="structfeature__vector.html#ae38d8e2adbbe48fe2e185754d1d6b8ed" title="Const subscript operator.">operator [] </a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index) { <span class="keywordflow">return</span> <a class="code" href="structfeature__vector.html#a723752d5313703dfe340a2c5e1993806" title="Data array.">data</a>[index]; }                    
-<a name="l00055"></a>00055 
-<a name="l00056"></a>00056         <span class="comment">// Squared distance operators for two D-dimensional points of type T.</span>
-<a name="l00057"></a>00057         <span class="keyword">inline</span> T <a class="code" href="structfeature__vector.html#a176faa4f6c9fc6013c9d744b621f22b9" title="Squared distance to a point.">distance_to</a>(<span class="keyword">const</span> <a class="code" href="structfeature__vector.html" title="Template for D-dimensional feature vectors.">feature_vector</a> &amp;p) <span class="keyword">const</span>;                    
-<a name="l00058"></a>00058         <span class="keyword">inline</span> T <a class="code" href="structfeature__vector.html#a176faa4f6c9fc6013c9d744b621f22b9" title="Squared distance to a point.">distance_to</a>(<span class="keyword">const</span> <a class="code" href="structfeature__vector.html" title="Template for D-dimensional feature vectors.">feature_vector</a> &amp;p, T upper_bound) <span class="keyword">const</span>;     
-<a name="l00059"></a>00059 
-<a name="l00060"></a>00060         <span class="comment">// Memory operators: used to allow memory-aligned specializations. For example, for SSE optimizations.</span>
-<a name="l00061"></a>00061         <span class="keywordtype">void</span> *<a class="code" href="structfeature__vector.html#abfd70dc3fab608d50a07f31a3b92f593" title="Standard allocation for arrays of feature vectors.">operator new [] </a>(<span class="keywordtype">size_t</span> size);    
-<a name="l00062"></a>00062         <span class="keywordtype">void</span>  <a class="code" href="structfeature__vector.html#a703958cad83931386b86e37d08701d97" title="Standard deallocation for arrays of feature vectors.">operator delete [] </a>(<span class="keywordtype">void</span> *p);     
-<a name="l00063"></a>00063 
-<a name="l00064"></a>00064 } __attribute__((<a class="code" href="feature__vector_8h.html#a9c423b8055aef93dadaa11800105b36e" title="Template for D-dimensional feature vectors.">packed</a>));
-<a name="l00065"></a>00065 
-<a name="l00073"></a>00073 <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;
-<a name="l00074"></a><a class="code" href="structvector__distance.html">00074</a> <span class="keyword">struct </span><a class="code" href="structvector__distance.html" title="Vector-distance structure. References a feature vector by its index and its squared...">vector_distance</a> : <span class="keyword">public</span> std::binary_function &lt;vector_distance&lt;T&gt;, vector_distance&lt;T&gt;, bool&gt; {
-<a name="l00075"></a>00075 
-<a name="l00076"></a><a class="code" href="structvector__distance.html#abe622b79d552266ad13c4485596ff424">00076</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structvector__distance.html#abe622b79d552266ad13c4485596ff424" title="Index of the feature vector in the data set.">index</a>;     
-<a name="l00077"></a><a class="code" href="structvector__distance.html#a8158283790076bab6add2b63c831b336">00077</a>         T <a class="code" href="structvector__distance.html#a8158283790076bab6add2b63c831b336" title="Squared distance of the referenced element to an implicit point.">squared_distance</a>;     
-<a name="l00078"></a>00078 
-<a name="l00079"></a>00079         <span class="comment">// Default and convenience constructors</span>
-<a name="l00080"></a><a class="code" href="structvector__distance.html#adda267a569a76d3a9a9489ef20aa37d9">00080</a>         <a class="code" href="structvector__distance.html#adda267a569a76d3a9a9489ef20aa37d9">vector_distance</a>() {}
-<a name="l00081"></a><a class="code" href="structvector__distance.html#ad3ebf519c44a5885450e7f5d0e83295d">00081</a>         <a class="code" href="structvector__distance.html#ad3ebf519c44a5885450e7f5d0e83295d">vector_distance</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structvector__distance.html#abe622b79d552266ad13c4485596ff424" title="Index of the feature vector in the data set.">index</a>, T <a class="code" href="structvector__distance.html#a8158283790076bab6add2b63c831b336" title="Squared distance of the referenced element to an implicit point.">squared_distance</a>) : index(index), squared_distance(squared_distance) {}
+<a name="l00048"></a>00048   <span class="comment">// Constructors.</span>
+<a name="l00049"></a><a class="code" href="structfeature__vector.html#a7ed7ea70b09be372b12e0e086cd3456f">00049</a>   <a class="code" href="structfeature__vector.html#a7ed7ea70b09be372b12e0e086cd3456f" title="Default constructor.">feature_vector</a>() {} 
+<a name="l00050"></a><a class="code" href="structfeature__vector.html#ada1c45d86254f506c5937e0873b17502">00050</a>   <a class="code" href="structfeature__vector.html#ada1c45d86254f506c5937e0873b17502" title="Value initialization constructor.">feature_vector</a>(T value) {
+<a name="l00051"></a>00051     <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> d=0; d&lt;<a class="code" href="example_8cpp.html#aab36b7f3966dcaeea1db0699a6054709" title="Number of dimensions to use in this test.">D</a>; ++d)
+<a name="l00052"></a>00052       <a class="code" href="structfeature__vector.html#a723752d5313703dfe340a2c5e1993806" title="Data array.">data</a>[d] = value;
+<a name="l00053"></a>00053   } 
+<a name="l00054"></a>00054 
+<a name="l00055"></a>00055   <span class="comment">// Subscript operators.</span>
+<a name="l00056"></a><a class="code" href="structfeature__vector.html#ae38d8e2adbbe48fe2e185754d1d6b8ed">00056</a>   <span class="keyword">const</span> T &amp; <a class="code" href="structfeature__vector.html#ae38d8e2adbbe48fe2e185754d1d6b8ed" title="Const subscript operator.">operator [] </a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="structfeature__vector.html#a723752d5313703dfe340a2c5e1993806" title="Data array.">data</a>[index]; } 
+<a name="l00057"></a><a class="code" href="structfeature__vector.html#a3f63ce201e99ed3094d8e60679895ecb">00057</a>   T &amp; <a class="code" href="structfeature__vector.html#ae38d8e2adbbe48fe2e185754d1d6b8ed" title="Const subscript operator.">operator [] </a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> index) { <span class="keywordflow">return</span> <a class="code" href="structfeature__vector.html#a723752d5313703dfe340a2c5e1993806" title="Data array.">data</a>[index]; } 
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059   <span class="comment">// Comparison operators.</span>
+<a name="l00060"></a>00060   <span class="keywordtype">bool</span> <a class="code" href="structfeature__vector.html#ab284335e8d7cf3570060adc0df2327fb" title="Equality comparison operator.">operator == </a>(<span class="keyword">const</span> <a class="code" href="structfeature__vector.html" title="Template for D-dimensional feature vectors.">feature_vector</a> &amp;p) <span class="keyword">const</span>; 
+<a name="l00061"></a>00061   <span class="keywordtype">bool</span> <a class="code" href="structfeature__vector.html#ad58c365abf786d4152e96b440ca316d0" title="Non-equality comparison operator.">operator != </a>(<span class="keyword">const</span> <a class="code" href="structfeature__vector.html" title="Template for D-dimensional feature vectors.">feature_vector</a> &amp;p) <span class="keyword">const</span>; 
+<a name="l00062"></a>00062 
+<a name="l00063"></a>00063   <span class="comment">// Squared distance operators for two D-dimensional points of type T.</span>
+<a name="l00064"></a>00064   <span class="keyword">inline</span> T <a class="code" href="structfeature__vector.html#a176faa4f6c9fc6013c9d744b621f22b9" title="Squared distance to a point.">distance_to</a>(<span class="keyword">const</span> <a class="code" href="structfeature__vector.html" title="Template for D-dimensional feature vectors.">feature_vector</a> &amp;p) <span class="keyword">const</span>; 
+<a name="l00065"></a>00065   <span class="keyword">inline</span> T <a class="code" href="structfeature__vector.html#a176faa4f6c9fc6013c9d744b621f22b9" title="Squared distance to a point.">distance_to</a>(<span class="keyword">const</span> <a class="code" href="structfeature__vector.html" title="Template for D-dimensional feature vectors.">feature_vector</a> &amp;p, T upper_bound) <span class="keyword">const</span>; 
+<a name="l00066"></a>00066 
+<a name="l00067"></a>00067   <span class="comment">// Memory operators: used to allow memory-aligned specializations. For example, for SSE optimizations.</span>
+<a name="l00068"></a>00068   <span class="keywordtype">void</span> *<a class="code" href="structfeature__vector.html#abfd70dc3fab608d50a07f31a3b92f593" title="Standard allocation for arrays of feature vectors.">operator new [] </a>(<span class="keywordtype">size_t</span> size); 
+<a name="l00069"></a>00069   <span class="keywordtype">void</span>  <a class="code" href="structfeature__vector.html#a703958cad83931386b86e37d08701d97" title="Standard deallocation for arrays of feature vectors.">operator delete [] </a>(<span class="keywordtype">void</span> *p); 
+<a name="l00070"></a>00070 
+<a name="l00071"></a>00071 } __attribute__((<a class="code" href="feature__vector_8h.html#a9c423b8055aef93dadaa11800105b36e" title="Template for D-dimensional feature vectors.">packed</a>));
+<a name="l00072"></a>00072 
+<a name="l00080"></a>00080 <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;
+<a name="l00081"></a><a class="code" href="structvector__distance.html">00081</a> <span class="keyword">struct </span><a class="code" href="structvector__distance.html" title="Vector-distance structure. References a feature vector by its index and its squared...">vector_distance</a> : <span class="keyword">public</span> std::binary_function &lt;vector_distance&lt;T&gt;, vector_distance&lt;T&gt;, bool&gt; {
 <a name="l00082"></a>00082 
-<a name="l00084"></a><a class="code" href="structvector__distance.html#a43cebd18cc4cbdcab4c3d272e7a8a79a">00084</a>         <span class="keywordtype">bool</span> <a class="code" href="structvector__distance.html#a43cebd18cc4cbdcab4c3d272e7a8a79a" title="Distance comparison operator for vector_distances. Allows vector_distance objects...">operator () </a>(<span class="keyword">const</span> <a class="code" href="structvector__distance.html" title="Vector-distance structure. References a feature vector by its index and its squared...">vector_distance</a> &amp;v1, <span class="keyword">const</span> <a class="code" href="structvector__distance.html" title="Vector-distance structure. References a feature vector by its index and its squared...">vector_distance</a> &amp;v2)<span class="keyword"> const </span>{
-<a name="l00085"></a>00085                 <span class="keywordflow">return</span> v1.<a class="code" href="structvector__distance.html#a8158283790076bab6add2b63c831b336" title="Squared distance of the referenced element to an implicit point.">squared_distance</a> &lt; v2.<a class="code" href="structvector__distance.html#a8158283790076bab6add2b63c831b336" title="Squared distance of the referenced element to an implicit point.">squared_distance</a>;
-<a name="l00086"></a>00086         }
-<a name="l00087"></a>00087 };
-<a name="l00088"></a>00088 
-<a name="l00089"></a>00089 <span class="comment">// Template implementation</span>
-<a name="l00090"></a>00090 <span class="preprocessor">#include &quot;<a class="code" href="feature__vector_8cpp.html" title="Template implementations for generic D-dimensional feature vectors.">feature_vector.cpp</a>&quot;</span>
-<a name="l00091"></a>00091 
-<a name="l00092"></a>00092 <span class="preprocessor">#endif</span>
-<a name="l00093"></a>00093 <span class="preprocessor"></span>
+<a name="l00083"></a><a class="code" href="structvector__distance.html#abe622b79d552266ad13c4485596ff424">00083</a>   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structvector__distance.html#abe622b79d552266ad13c4485596ff424" title="Index of the feature vector in the data set.">index</a>; 
+<a name="l00084"></a><a class="code" href="structvector__distance.html#a8158283790076bab6add2b63c831b336">00084</a>   T <a class="code" href="structvector__distance.html#a8158283790076bab6add2b63c831b336" title="Squared distance of the referenced element to an implicit point.">squared_distance</a>; 
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086   <span class="comment">// Default and convenience constructors.</span>
+<a name="l00087"></a><a class="code" href="structvector__distance.html#adda267a569a76d3a9a9489ef20aa37d9">00087</a>   <a class="code" href="structvector__distance.html#adda267a569a76d3a9a9489ef20aa37d9">vector_distance</a>() {}
+<a name="l00088"></a><a class="code" href="structvector__distance.html#ad3ebf519c44a5885450e7f5d0e83295d">00088</a>   <a class="code" href="structvector__distance.html#ad3ebf519c44a5885450e7f5d0e83295d">vector_distance</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structvector__distance.html#abe622b79d552266ad13c4485596ff424" title="Index of the feature vector in the data set.">index</a>, T <a class="code" href="structvector__distance.html#a8158283790076bab6add2b63c831b336" title="Squared distance of the referenced element to an implicit point.">squared_distance</a>) : index(index), squared_distance(squared_distance) {}
+<a name="l00089"></a>00089 
+<a name="l00091"></a><a class="code" href="structvector__distance.html#a43cebd18cc4cbdcab4c3d272e7a8a79a">00091</a>   <span class="keywordtype">bool</span> <a class="code" href="structvector__distance.html#a43cebd18cc4cbdcab4c3d272e7a8a79a" title="Distance comparison operator for vector_distances. Allows vector_distance objects...">operator () </a>(<span class="keyword">const</span> <a class="code" href="structvector__distance.html" title="Vector-distance structure. References a feature vector by its index and its squared...">vector_distance</a> &amp;v1, <span class="keyword">const</span> <a class="code" href="structvector__distance.html" title="Vector-distance structure. References a feature vector by its index and its squared...">vector_distance</a> &amp;v2)<span class="keyword"> const </span>{
+<a name="l00092"></a>00092     <span class="keywordflow">return</span> v1.<a class="code" href="structvector__distance.html#a8158283790076bab6add2b63c831b336" title="Squared distance of the referenced element to an implicit point.">squared_distance</a> &lt; v2.<a class="code" href="structvector__distance.html#a8158283790076bab6add2b63c831b336" title="Squared distance of the referenced element to an implicit point.">squared_distance</a>;
+<a name="l00093"></a>00093   }
+<a name="l00094"></a>00094 };
+<a name="l00095"></a>00095 
+<a name="l00096"></a>00096 <span class="comment">// Template implementation.</span>
+<a name="l00097"></a>00097 <span class="preprocessor">#include &quot;<a class="code" href="feature__vector_8cpp.html" title="Template implementations for generic D-dimensional feature vectors.">feature_vector.cpp</a>&quot;</span>
+<a name="l00098"></a>00098 
+<a name="l00099"></a>00099 <span class="preprocessor">#endif</span>
 </pre></div></div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed Jun 23 17:55:50 2010 for Kche-tree by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed May 25 01:08:25 2011 for Kche-tree by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

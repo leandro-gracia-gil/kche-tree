@@ -53,12 +53,11 @@
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Default destructor.  <a href="#a8b57370b33e690fe843111fdcb0f5075"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#a377902de21fd685725c460582cfcc1a4">build</a> (const <a class="el" href="structfeature__vector.html">kd_point</a> *points, unsigned int num_points, unsigned int bucket_size=32)</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Build a kd-tree from a set of input points. Cost: O(n log² n).  <a href="#a377902de21fd685725c460582cfcc1a4"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#aa288d7c126fbd325c81dc0605879d40b">knn</a> (const <a class="el" href="structfeature__vector.html">kd_point</a> &amp;p, unsigned int K, std::vector&lt; <a class="el" href="structvector__distance.html">kd_neighbour</a> &gt; &amp;output, T epsilon=(T) 0) const </td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).  <a href="#aa288d7c126fbd325c81dc0605879d40b"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#a9f4a85df883367be13593b29b4a33040">all_in_range</a> (const <a class="el" href="structfeature__vector.html">kd_point</a> &amp;p, T distance, std::vector&lt; <a class="el" href="structvector__distance.html">kd_neighbour</a> &gt; &amp;output) const </td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.  <a href="#a9f4a85df883367be13593b29b4a33040"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">const T &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#ab888b0010858415db49991bcd111e204">operator[]</a> (unsigned int index) const </td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Subscript operator for accesing stored data.  <a href="#ab888b0010858415db49991bcd111e204"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#a83fafa613b129b2a96da25ddf0d703fe">knn</a> (const <a class="el" href="structfeature__vector.html">kd_point</a> &amp;p, unsigned int K, std::vector&lt; <a class="el" href="structvector__distance.html">kd_neighbour</a> &gt; &amp;output, T epsilon=(T) 0, bool ignore_p_in_tree=false) const </td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).  <a href="#a83fafa613b129b2a96da25ddf0d703fe"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#a2de78a50fc88f711ec5fce25475587f7">all_in_range</a> (const <a class="el" href="structfeature__vector.html">kd_point</a> &amp;p, T distance, std::vector&lt; <a class="el" href="structvector__distance.html">kd_neighbour</a> &gt; &amp;output, bool ignore_p_in_tree=false) const </td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.  <a href="#a2de78a50fc88f711ec5fce25475587f7"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structfeature__vector.html">kd_point</a> &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#aaf1656b41eb5cb0c9c800eb4accb488c">operator[]</a> (unsigned int index) const </td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#ad71a29c2baafd30cc867c69a2799ddfc">get_D</a> () const </td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get the number of dimensions of the input data.  <a href="#ad71a29c2baafd30cc867c69a2799ddfc"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#a144f5d7f75bc8beaeced675cadc64fc7">get_N</a> () const </td></tr>
@@ -73,6 +72,8 @@
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Data of the kd-tree. Copied with element permutations during the tree building.  <a href="#a13bb048566fd405d8dbfab17b8d9d7f6"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">unsigned int *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#a56787f008f66b21739862e0f66259a2b">permutation</a></td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Permutation indices applied to kd-tree data to enhance cache behaviour.  <a href="#a56787f008f66b21739862e0f66259a2b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#a3b382105b448ba893020ed7802f4e296">inverse_perm</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Inverse of the permutation applied to indices in the permutation array.  <a href="#a3b382105b448ba893020ed7802f4e296"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">unsigned int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkd__tree.html#a11a342b531f7ac54924c14c88e38e8fe">num_elements</a></td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Number of elements currently in the tree.  <a href="#a11a342b531f7ac54924c14c88e38e8fe"></a><br/></td></tr>
 <tr><td colspan="2"><h2>Static Protected Attributes</h2></td></tr>
@@ -188,7 +189,7 @@ template&lt;typename T , const unsigned int D, typename S &gt; </div>
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a9f4a85df883367be13593b29b4a33040"></a><!-- doxytag: member="kd_tree::all_in_range" ref="a9f4a85df883367be13593b29b4a33040" args="(const kd_point &amp;p, T distance, std::vector&lt; kd_neighbour &gt; &amp;output) const " -->
+<a class="anchor" id="a2de78a50fc88f711ec5fce25475587f7"></a><!-- doxytag: member="kd_tree::all_in_range" ref="a2de78a50fc88f711ec5fce25475587f7" args="(const kd_point &amp;p, T distance, std::vector&lt; kd_neighbour &gt; &amp;output, bool ignore_p_in_tree=false) const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
@@ -210,7 +211,13 @@ template&lt;typename T , const unsigned int D, typename S &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">std::vector&lt; <a class="el" href="structvector__distance.html">kd_neighbour</a> &gt; &amp;&nbsp;</td>
-          <td class="paramname"> <em>output</em></td><td>&nbsp;</td>
+          <td class="paramname"> <em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&nbsp;</td>
+          <td class="paramname"> <em>ignore_p_in_tree</em> = <code>false</code></td><td>&nbsp;</td>
         </tr>
         <tr>
           <td></td>
@@ -228,6 +235,7 @@ template&lt;typename T , const unsigned int D, typename S &gt; </div>
     <tr><td valign="top"></td><td valign="top"><em>p</em>&nbsp;</td><td>Point whose <em>K</em> neighbours should be retrieved. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>distance</em>&nbsp;</td><td>Euclidean distance margin used to retrieve all points within. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>output</em>&nbsp;</td><td>STL vector where the neighbours within the specified range will be appended. Elements are not sorted by distance. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>ignore_p_in_tree</em>&nbsp;</td><td>Assume that <em>p</em> is contained in the tree any number of times and ignore them all. </td></tr>
   </table>
   </dd>
 </dl>
@@ -323,7 +331,7 @@ template&lt;typename T, const unsigned int D, typename S = k_vector&lt;vector_di
 
 </div>
 </div>
-<a class="anchor" id="aa288d7c126fbd325c81dc0605879d40b"></a><!-- doxytag: member="kd_tree::knn" ref="aa288d7c126fbd325c81dc0605879d40b" args="(const kd_point &amp;p, unsigned int K, std::vector&lt; kd_neighbour &gt; &amp;output, T epsilon=(T) 0) const " -->
+<a class="anchor" id="a83fafa613b129b2a96da25ddf0d703fe"></a><!-- doxytag: member="kd_tree::knn" ref="a83fafa613b129b2a96da25ddf0d703fe" args="(const kd_point &amp;p, unsigned int K, std::vector&lt; kd_neighbour &gt; &amp;output, T epsilon=(T) 0, bool ignore_p_in_tree=false) const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
@@ -351,7 +359,13 @@ template&lt;typename T , const unsigned int D, typename S &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">T&nbsp;</td>
-          <td class="paramname"> <em>epsilon</em> = <code>(T)&nbsp;0</code></td><td>&nbsp;</td>
+          <td class="paramname"> <em>epsilon</em> = <code>(T)&nbsp;0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&nbsp;</td>
+          <td class="paramname"> <em>ignore_p_in_tree</em> = <code>false</code></td><td>&nbsp;</td>
         </tr>
         <tr>
           <td></td>
@@ -370,20 +384,21 @@ template&lt;typename T , const unsigned int D, typename S &gt; </div>
     <tr><td valign="top"></td><td valign="top"><em>K</em>&nbsp;</td><td>Number of nearest neighbours to retrieve. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>output</em>&nbsp;</td><td>STL vector where the nearest neighbours will be appended. Sorted result depends on the template parameter S, enabled by default. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>epsilon</em>&nbsp;</td><td>Acceptable distance margin to ignore regions during kd-tree exploration. Defaults to zero (deterministic). </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>ignore_p_in_tree</em>&nbsp;</td><td>Assume that <em>p</em> is contained in the tree any number of times and ignore them all. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="ab888b0010858415db49991bcd111e204"></a><!-- doxytag: member="kd_tree::operator[]" ref="ab888b0010858415db49991bcd111e204" args="(unsigned int index) const " -->
+<a class="anchor" id="aaf1656b41eb5cb0c9c800eb4accb488c"></a><!-- doxytag: member="kd_tree::operator[]" ref="aaf1656b41eb5cb0c9c800eb4accb488c" args="(unsigned int index) const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T, const unsigned int D, typename S = k_vector&lt;vector_distance&lt;T&gt;, vector_distance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D, typename S &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const T&amp; <a class="el" href="classkd__tree.html">kd_tree</a>&lt; T, <a class="el" href="test__kdtree_8cpp.html#aab36b7f3966dcaeea1db0699a6054709">D</a>, S &gt;::operator[] </td>
+          <td class="memname">const <a class="el" href="classkd__tree.html">kd_tree</a>&lt; T, <a class="el" href="test__kdtree_8cpp.html#aab36b7f3966dcaeea1db0699a6054709">D</a>, S &gt;::<a class="el" href="structfeature__vector.html">kd_point</a> &amp; <a class="el" href="classkd__tree.html">kd_tree</a>&lt; T, <a class="el" href="test__kdtree_8cpp.html#aab36b7f3966dcaeea1db0699a6054709">D</a>, S &gt;::operator[] </td>
           <td>(</td>
           <td class="paramtype">unsigned int&nbsp;</td>
           <td class="paramname"> <em>index</em></td>
@@ -393,8 +408,14 @@ template&lt;typename T, const unsigned int D, typename S = k_vector&lt;vector_di
       </table>
 </div>
 <div class="memdoc">
-
-<p>Subscript operator for accesing stored data. </p>
+<p>Subscripting operator to access kd-tree data.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>index</em>&nbsp;</td><td>Index of the data being accessed. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd>Reference to the index-th element provided when building the tree (internal copy). </dd></dl>
 
 </div>
 </div>
@@ -416,6 +437,7 @@ template&lt;typename T , const unsigned int D, typename S &gt; </div>
 <div class="memdoc">
 
 <p>Release memory allocated by the kd-tree including tree nodes. </p>
+<p>Release any existing contents in the kd-tree. </p>
 
 </div>
 </div>
@@ -555,6 +577,23 @@ template&lt;typename T, const unsigned int D, typename S = k_vector&lt;vector_di
 
 </div>
 </div>
+<a class="anchor" id="a3b382105b448ba893020ed7802f4e296"></a><!-- doxytag: member="kd_tree::inverse_perm" ref="a3b382105b448ba893020ed7802f4e296" args="" -->
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T, const unsigned int D, typename S = k_vector&lt;vector_distance&lt;T&gt;, vector_distance&lt;T&gt; &gt;&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned int* <a class="el" href="classkd__tree.html">kd_tree</a>&lt; T, <a class="el" href="test__kdtree_8cpp.html#aab36b7f3966dcaeea1db0699a6054709">D</a>, S &gt;::<a class="el" href="classkd__tree.html#a3b382105b448ba893020ed7802f4e296">inverse_perm</a><code> [protected]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Inverse of the permutation applied to indices in the permutation array. </p>
+
+</div>
+</div>
 <a class="anchor" id="a11a342b531f7ac54924c14c88e38e8fe"></a><!-- doxytag: member="kd_tree::num_elements" ref="a11a342b531f7ac54924c14c88e38e8fe" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -629,7 +668,7 @@ template&lt;typename T, const unsigned int D, typename S = k_vector&lt;vector_di
 <li><a class="el" href="kd-tree__io_8cpp.html">kd-tree_io.cpp</a></li>
 </ul>
 </div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed Jun 23 17:55:50 2010 for Kche-tree by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed May 25 01:08:26 2011 for Kche-tree by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>
