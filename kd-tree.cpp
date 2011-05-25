@@ -312,7 +312,6 @@ void kd_tree<T, D, S>::all_in_range(const kd_point &p, T distance, std::vector<k
  * \param p Reference point being used in the search.
  * \param data Array of permutated data points.
  * \param K Number of neighbours to retrieve.
- * \param ignore_null_distances_arg Indicate that points with null distance should be ignored.
  */
 template <typename T, const unsigned int D, typename S>
 kd_tree<T, D, S>::kd_search_data::kd_search_data(const kd_point &p, const kd_point *data, unsigned int K, bool ignore_null_distances_arg)
