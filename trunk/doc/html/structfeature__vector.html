@@ -41,6 +41,10 @@
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Const subscript operator.  <a href="#ae38d8e2adbbe48fe2e185754d1d6b8ed"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">T &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfeature__vector.html#a3f63ce201e99ed3094d8e60679895ecb">operator[]</a> (unsigned int index)</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Subscript operator.  <a href="#a3f63ce201e99ed3094d8e60679895ecb"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfeature__vector.html#ab284335e8d7cf3570060adc0df2327fb">operator==</a> (const <a class="el" href="structfeature__vector.html">feature_vector</a> &amp;p) const </td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Equality comparison operator.  <a href="#ab284335e8d7cf3570060adc0df2327fb"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfeature__vector.html#ad58c365abf786d4152e96b440ca316d0">operator!=</a> (const <a class="el" href="structfeature__vector.html">feature_vector</a> &amp;p) const </td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Non-equality comparison operator.  <a href="#ad58c365abf786d4152e96b440ca316d0"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">T&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfeature__vector.html#a176faa4f6c9fc6013c9d744b621f22b9">distance_to</a> (const <a class="el" href="structfeature__vector.html">feature_vector</a> &amp;p) const </td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Squared distance to a point.  <a href="#a176faa4f6c9fc6013c9d744b621f22b9"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">T&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="structfeature__vector.html#a79e53d80d55856eb84694d401c3f457e">distance_to</a> (const <a class="el" href="structfeature__vector.html">feature_vector</a> &amp;p, T upper_bound) const </td></tr>
@@ -342,6 +346,66 @@ template&lt;typename T , const unsigned int D&gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="ad58c365abf786d4152e96b440ca316d0"></a><!-- doxytag: member="feature_vector::operator!=" ref="ad58c365abf786d4152e96b440ca316d0" args="(const feature_vector &amp;p) const " -->
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , const unsigned int D&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="structfeature__vector.html">feature_vector</a>&lt; T, <a class="el" href="test__kdtree_8cpp.html#aab36b7f3966dcaeea1db0699a6054709">D</a> &gt;::operator!= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structfeature__vector.html">feature_vector</a>&lt; T, <a class="el" href="test__kdtree_8cpp.html#aab36b7f3966dcaeea1db0699a6054709">D</a> &gt; &amp;&nbsp;</td>
+          <td class="paramname"> <em>p</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td> const<code> [inline]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Non-equality comparison operator. </p>
+<p>Check if two feature vectors are different equal.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>p</em>&nbsp;</td><td>Feature vector being compared to. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd><code>true</code> if different, <code>false</code> otherwise. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ab284335e8d7cf3570060adc0df2327fb"></a><!-- doxytag: member="feature_vector::operator==" ref="ab284335e8d7cf3570060adc0df2327fb" args="(const feature_vector &amp;p) const " -->
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , const unsigned int D&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="structfeature__vector.html">feature_vector</a>&lt; T, <a class="el" href="test__kdtree_8cpp.html#aab36b7f3966dcaeea1db0699a6054709">D</a> &gt;::operator== </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structfeature__vector.html">feature_vector</a>&lt; T, <a class="el" href="test__kdtree_8cpp.html#aab36b7f3966dcaeea1db0699a6054709">D</a> &gt; &amp;&nbsp;</td>
+          <td class="paramname"> <em>p</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td> const<code> [inline]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Equality comparison operator. </p>
+<p>Check if two feature vectors are exactly equal.</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>p</em>&nbsp;</td><td>Feature vector being compared to. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="return"><dt><b>Returns:</b></dt><dd><code>true</code> if equal, <code>false</code> otherwise. </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a3f63ce201e99ed3094d8e60679895ecb"></a><!-- doxytag: member="feature_vector::operator[]" ref="a3f63ce201e99ed3094d8e60679895ecb" args="(unsigned int index)" -->
 <div class="memitem">
 <div class="memproto">
@@ -409,7 +473,7 @@ template&lt;typename T, const unsigned int D&gt; </div>
 <li><a class="el" href="feature__vector_8cpp.html">feature_vector.cpp</a></li>
 </ul>
 </div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed Jun 23 17:55:50 2010 for Kche-tree by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed May 25 01:08:26 2011 for Kche-tree by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>

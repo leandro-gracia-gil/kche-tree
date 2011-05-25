@@ -24,8 +24,8 @@ Introduction</a></h2>
 <p>It provides the following basic operations:</p>
 <ul>
 <li><a class="el" href="classkd__tree.html#a377902de21fd685725c460582cfcc1a4">Build</a>: create a kd-tree from a training set of feature vectors. Median splitting is used to keep the tree balanced. Cost: O(n log² n).</li>
-<li><a class="el" href="classkd__tree.html#aa288d7c126fbd325c81dc0605879d40b">K nearest neighbours</a>: retrieve the K nearest neighbours of a given feature vector. Estimated average cost: O(log K log n).</li>
-<li><a class="el" href="classkd__tree.html#a9f4a85df883367be13593b29b4a33040">All neighbours within a range</a>: retrieve all the neighbours inside a maximum distance radius from a given feature vector. Estimated average cost: O(log m log n) with <em>m</em> the number of neighbours in the range.</li>
+<li><a class="el" href="classkd__tree.html#a83fafa613b129b2a96da25ddf0d703fe">K nearest neighbours</a>: retrieve the K nearest neighbours of a given feature vector. Estimated average cost: O(log K log n).</li>
+<li><a class="el" href="classkd__tree.html#a2de78a50fc88f711ec5fce25475587f7">All neighbours within a range</a>: retrieve all the neighbours inside a maximum distance radius from a given feature vector. Estimated average cost: O(log m log n) with <em>m</em> the number of neighbours in the range.</li>
 </ul>
 <p>The template has been designed to minimize the number of cache misses combined with many algorithmic techniques and ideas.<br/>
  Here are some of its features:</p>
@@ -58,7 +58,7 @@ Usage</a></h2>
 </ul>
 <p>In case of using the floating point/24 dimension SSE specialization, the file <a class="el" href="kd-tree__sse__24d_8h.html" title="Distance function specializations for single-precision floating point vectors of...">kd-tree_sse_24d.h</a> and the compilation flag <code>-msse</code> will be required. </p>
 </div>
-<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed Jun 23 17:55:50 2010 for Kche-tree by&nbsp;
+<hr class="footer"/><address style="text-align: right;"><small>Generated on Wed May 25 01:08:25 2011 for Kche-tree by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.3 </small></address>
 </body>
