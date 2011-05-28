@@ -28,6 +28,8 @@
 #include <cstdlib>
 #include <new>
 
+//#include "feature_vector.h"
+
 /**
  * Generic memory allocator operator for feature vector arrays.
  * Defined so that memory-aligned specializations can be defined if required.
@@ -106,12 +108,7 @@ bool feature_vector<T, D, M>::operator != (const feature_vector &p) const {
  */
 template <typename T, const unsigned int D, typename M>
 T feature_vector<T, D, M>::distance_to(const feature_vector &p) const {
-
-  // Standard squared distance between two D-dimensional vectors.
-  T acc = (T) 0;
-  for (unsigned int i=0; i<D; ++i)
-    acc += (data[i] - p[i]) * (data[i] - p[i]);
-  return acc;
+  metric->distance_to(p);
 }
 
 /**

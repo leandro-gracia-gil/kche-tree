@@ -44,20 +44,12 @@
 template <typename T, const unsigned int D, typename M>
   class feature_vector;
 
-class IMetric
-{
-  IMetric() {};
-  template <typename Tv, const unsigned int Dv, typename Mv>
-  Tv distance_to(const feature_vector<Tv,Dv,Mv>&, const feature_vector<Tv,Dv,Mv>&) const;
-};
-
-
-class SquaredMetric : public IMetric
+class SquaredMetric
 {
  public:
+  SquaredMetric() {};
   template <typename Tv, const unsigned int Dv, typename Mv>
-  Tv distance_to(const feature_vector<Tv,Dv,Mv>& a, const feature_vector<Tv,Dv,Mv>& b) const
-  {
+    Tv distance_to(const feature_vector<Tv,Dv,Mv>& a, const feature_vector<Tv,Dv,Mv>& b) const {
     Tv acc = (Tv) 0;
     for (unsigned int i=0; i<Dv; ++i)
       acc += (a[i] - b[i]) * (a[i] - b[i]);
@@ -67,13 +59,13 @@ class SquaredMetric : public IMetric
 
 template <typename T, const unsigned int D, typename M>
   class feature_vector {
-
+ public:  
   /// Data array.
   T data[D];
   M *metric;
-
+  
   // Constructors.
-  feature_vector() { metric = new SquaredMetric; } ///< Default constructor.
+  feature_vector() { metric = new SquaredMetric(); } ///< Default constructor.
   feature_vector(T value) {
     for (unsigned int d=0; d<D; ++d)
       data[d] = value;
