@@ -35,8 +35,8 @@
  * \param size Total size in bytes of the objects to allocate.
  * \return Address to the new allocated memory.
  */
-template <typename T, const unsigned int D>
-void *feature_vector<T, D>::operator new [] (size_t size) {
+template <typename T, const unsigned int D, typename M>
+void *feature_vector<T, D, M>::operator new [] (size_t size) {
 
   // Allocate plain memory for the requested vectors.
   void *p = malloc(size);
@@ -56,8 +56,8 @@ void *feature_vector<T, D>::operator new [] (size_t size) {
  *
  * \param p Pointer to the address to release.
  */
-template <typename T, const unsigned int D>
-void feature_vector<T, D>::operator delete [] (void *p) {
+template <typename T, const unsigned int D, typename M>
+void feature_vector<T, D, M>::operator delete [] (void *p) {
 
   // Just release memory.
   free(p);
@@ -69,8 +69,8 @@ void feature_vector<T, D>::operator delete [] (void *p) {
  * \param p Feature vector being compared to.
  * \return \c true if equal, \c false otherwise.
  */
-template <typename T, const unsigned int D>
-bool feature_vector<T, D>::operator == (const feature_vector &p) const {
+template <typename T, const unsigned int D, typename M>
+bool feature_vector<T, D, M>::operator == (const feature_vector &p) const {
 
   // Check that all dimensions have the same value.
   for (unsigned int d=0; d<D; ++d) {
@@ -86,8 +86,8 @@ bool feature_vector<T, D>::operator == (const feature_vector &p) const {
  * \param p Feature vector being compared to.
  * \return \c true if different, \c false otherwise.
  */
-template <typename T, const unsigned int D>
-bool feature_vector<T, D>::operator != (const feature_vector &p) const {
+template <typename T, const unsigned int D, typename M>
+bool feature_vector<T, D, M>::operator != (const feature_vector &p) const {
 
   // Check if any dimension has a different value.
   for (unsigned int d=0; d<D; ++d) {
@@ -104,8 +104,8 @@ bool feature_vector<T, D>::operator != (const feature_vector &p) const {
  * \param p Point being compared to.
  * \return Euclidean squared distance between the two kd_points.
  */
-template <typename T, const unsigned int D>
-T feature_vector<T, D>::distance_to(const feature_vector &p) const {
+template <typename T, const unsigned int D, typename M>
+T feature_vector<T, D, M>::distance_to(const feature_vector &p) const {
 
   // Standard squared distance between two D-dimensional vectors.
   T acc = (T) 0;
@@ -122,8 +122,8 @@ T feature_vector<T, D>::distance_to(const feature_vector &p) const {
  * \param upper_bound Upper bound for the distance. Will return immediatly if reached.
  * \return Euclidean squared distance between the two kd_points or a partial result greater or equal than \a upper.
  */
-template <typename T, const unsigned int D>
-T feature_vector<T, D>::distance_to(const feature_vector &p, T upper_bound) const {
+template <typename T, const unsigned int D, typename M>
+T feature_vector<T, D, M>::distance_to(const feature_vector &p, T upper_bound) const {
 
   // Constant calculated empirically.
   const unsigned int D_acc = (unsigned int) (0.25f * D);

@@ -110,11 +110,11 @@
  * \tparam S (Optional) K-best elements container. Responds to empty, size, back, push_back and pop_front.
  *  Defaults to k_vector<vector_distance<T>, vector_distance<T> >, but k_heap<vector_distance<T>, vector_distance<T> > is also valid.
  */
-template <typename T, const unsigned int D, typename S = k_vector<vector_distance<T>, vector_distance<T> > >
+template <typename T, const unsigned int D, typename S = k_vector<vector_distance<T>, vector_distance<T> >, typename M = SquaredMetric >
 class kd_tree {
 public:
   /// Consider compatible feature vectors as D-dimensional points in the space.
-  typedef feature_vector<T, D> kd_point;
+typedef feature_vector<T, D, M> kd_point;
 
   /// Define the type used for kd-tree neighbours.
   typedef vector_distance<T> kd_neighbour;

@@ -21,7 +21,8 @@
 /**
  * \file feature_vector.h
  * \brief Template for generic D-dimensional feature vectors.
- * \author Leandro Graciá Gil
+ * \author Leandro Graciá Gil, Puertos Ahuir Juan V.
+ * \email juanvi.puertos@gmail.com
 */
 
 #ifndef _FEATURE_VECTOR_H_
@@ -29,7 +30,7 @@
 
 // Include STL binary predicates.
 #include <functional>
-
+#include <new>
 /**
  * \brief Template for D-dimensional feature vectors.
  *
@@ -39,14 +40,40 @@
  * \tparam T Data type of the elements in the vector.
  * \tparam D Number of dimensions of the vector.
  */
-template <typename T, const unsigned int D>
-struct feature_vector {
+
+template <typename T, const unsigned int D, typename M>
+  class feature_vector;
+
+class IMetric
+{
+  IMetric() {};
+  template <typename Tv, const unsigned int Dv, typename Mv>
+  Tv distance_to(const feature_vector<Tv,Dv,Mv>&, const feature_vector<Tv,Dv,Mv>&) const;
+};
+
+
+class SquaredMetric : public IMetric
+{
+ public:
+  template <typename Tv, const unsigned int Dv, typename Mv>
+  Tv distance_to(const feature_vector<Tv,Dv,Mv>& a, const feature_vector<Tv,Dv,Mv>& b) const
+  {
+    Tv acc = (Tv) 0;
+    for (unsigned int i=0; i<Dv; ++i)
+      acc += (a[i] - b[i]) * (a[i] - b[i]);
+    return acc;
+  }
+};
+
+template <typename T, const unsigned int D, typename M>
+  class feature_vector {
 
   /// Data array.
   T data[D];
+  M *metric;
 
   // Constructors.
-  feature_vector() {} ///< Default constructor.
+  feature_vector() { metric = new SquaredMetric; } ///< Default constructor.
   feature_vector(T value) {
     for (unsigned int d=0; d<D; ++d)
       data[d] = value;
@@ -78,7 +105,7 @@ struct feature_vector {
  * \tparam T  Type used to encode the distance between two feature vectors. Should be the same than the data from the vectors.
  */
 template <typename T>
-struct vector_distance : public std::binary_function <vector_distance<T>, vector_distance<T>, bool> {
+class vector_distance : public std::binary_function <vector_distance<T>, vector_distance<T>, bool> {
 
   unsigned int index; ///< Index of the feature vector in the data set.
   T squared_distance; ///< Squared distance of the referenced element to an implicit point.
