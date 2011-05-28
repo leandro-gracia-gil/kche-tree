@@ -109,7 +109,7 @@ bool feature_vector<T, D>::operator != (const feature_vector &p) const {
  * \return Euclidean squared distance between the two kd_points.
  */
 
-
+/*
 template <typename T, const unsigned int D>
 T feature_vector<T, D>::distance_to(const feature_vector &p) const {
 
@@ -119,7 +119,7 @@ T feature_vector<T, D>::distance_to(const feature_vector &p) const {
     acc += (data[i] - p[i]) * (data[i] - p[i]);
   return acc;
 }
-
+*/
 
 /**
  * Generic squared euclidean distance operator for two D-dimensional numeric kd_points.
