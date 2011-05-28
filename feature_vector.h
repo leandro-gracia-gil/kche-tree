@@ -29,6 +29,34 @@
 
 // Include STL binary predicates.
 #include <functional>
+#include <new>
+
+template <typename T, const unsigned int D>
+  struct feature_vector;
+
+class IMetric
+{
+ public:
+  IMetric() {};
+  template <typename T, const unsigned int D>
+    T distance_to(const feature_vector<T,D> &,
+		  const feature_vector<T,D> &);
+};
+
+class EuclideanMetric : public IMetric
+{
+ public:
+  EuclideanMetric() {};
+  template <typename T, const unsigned int D>
+    T distance_to(const feature_vector<T,D> &a,
+		  const feature_vector<T,D> &b)
+  {
+    T acc = (T) 0;
+    for (unsigned int i=0; i<D; ++i)
+      acc += (a[i] - b[i]) * (a[i] - b[i]);
+    return acc;
+  };
+};
 
 /**
  * \brief Template for D-dimensional feature vectors.
@@ -44,10 +72,13 @@ struct feature_vector {
 
   /// Data array.
   T data[D];
+  IMetric *metric;
 
   // Constructors.
-  feature_vector() {} ///< Default constructor.
-  feature_vector(T value) {
+  feature_vector() { metric = new EuclideanMetric(); } ///< Default constructor.
+  feature_vector(IMetric& m) { metric = m;} ///< Default constructor.
+  feature_vector(IMetric& m, T value) {
+    metric = m;
     for (unsigned int d=0; d<D; ++d)
       data[d] = value;
   } ///< Value initialization constructor.
@@ -56,18 +87,21 @@ struct feature_vector {
   const T & operator [] (unsigned int index) const { return data[index]; } ///< Const subscript operator.
   T & operator [] (unsigned int index) { return data[index]; } ///< Subscript operator.
 
+  // Memory operators: used to allow memory-aligned specializations. For example, for SSE optimizations.
+  void *operator new [] (size_t size); ///< Standard allocation for arrays of feature vectors.
+  void  operator delete [] (void *p); ///< Standard deallocation for arrays of feature vectors.
+
   // Comparison operators.
   bool operator == (const feature_vector &p) const; ///< Equality comparison operator.
   bool operator != (const feature_vector &p) const; ///< Non-equality comparison operator.
 
   // Squared distance operators for two D-dimensional points of type T.
+  
   inline T distance_to(const feature_vector &p) const; ///< Squared distance to a point.
   inline T distance_to(const feature_vector &p, T upper_bound) const; ///< Squared distance to a point with an upper bound.
+  
 
-  // Memory operators: used to allow memory-aligned specializations. For example, for SSE optimizations.
-  void *operator new [] (size_t size); ///< Standard allocation for arrays of feature vectors.
-  void  operator delete [] (void *p); ///< Standard deallocation for arrays of feature vectors.
-
+ 
 } __attribute__((packed));
 
 /**

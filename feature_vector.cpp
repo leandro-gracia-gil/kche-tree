@@ -69,6 +69,7 @@ void feature_vector<T, D>::operator delete [] (void *p) {
  * \param p Feature vector being compared to.
  * \return \c true if equal, \c false otherwise.
  */
+
 template <typename T, const unsigned int D>
 bool feature_vector<T, D>::operator == (const feature_vector &p) const {
 
@@ -86,6 +87,8 @@ bool feature_vector<T, D>::operator == (const feature_vector &p) const {
  * \param p Feature vector being compared to.
  * \return \c true if different, \c false otherwise.
  */
+
+
 template <typename T, const unsigned int D>
 bool feature_vector<T, D>::operator != (const feature_vector &p) const {
 
@@ -97,6 +100,7 @@ bool feature_vector<T, D>::operator != (const feature_vector &p) const {
   return false;
 }
 
+
 /**
  * Generic squared euclidean distance operator for two D-dimensional numeric kd_points.
  * Redefinitions and specializations of this operator are welcome.
@@ -104,6 +108,8 @@ bool feature_vector<T, D>::operator != (const feature_vector &p) const {
  * \param p Point being compared to.
  * \return Euclidean squared distance between the two kd_points.
  */
+
+
 template <typename T, const unsigned int D>
 T feature_vector<T, D>::distance_to(const feature_vector &p) const {
 
@@ -114,6 +120,7 @@ T feature_vector<T, D>::distance_to(const feature_vector &p) const {
   return acc;
 }
 
+
 /**
  * Generic squared euclidean distance operator for two D-dimensional numeric kd_points.
  * Special version with early leaving in case an upper bound value is reached.
@@ -122,6 +129,7 @@ T feature_vector<T, D>::distance_to(const feature_vector &p) const {
  * \param upper_bound Upper bound for the distance. Will return immediatly if reached.
  * \return Euclidean squared distance between the two kd_points or a partial result greater or equal than \a upper.
  */
+
 template <typename T, const unsigned int D>
 T feature_vector<T, D>::distance_to(const feature_vector &p, T upper_bound) const {
 
@@ -142,3 +150,4 @@ T feature_vector<T, D>::distance_to(const feature_vector &p, T upper_bound) cons
 
   return acc;
 }
+
