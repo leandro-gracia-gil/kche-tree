@@ -21,7 +21,7 @@
 /**
  * \file feature_vector.h
  * \brief Template for generic D-dimensional feature vectors.
- * \author Leandro Graciá Gil
+ * \author Leandro Graciá Gil, Juan V. Puertos
 */
 
 #ifndef _FEATURE_VECTOR_H_
