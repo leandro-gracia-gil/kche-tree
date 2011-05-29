@@ -21,7 +21,7 @@
 /**
  * \file feature_vector.cpp
  * \brief Template implementations for generic D-dimensional feature vectors.
- * \author Leandro Graciá Gil
+ * \author Leandro Graciá Gil, Juan V. Puertos
  */
 
 // Includes from STL and the C standard library.
