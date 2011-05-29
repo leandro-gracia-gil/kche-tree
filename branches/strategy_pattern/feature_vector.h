@@ -41,6 +41,10 @@ class IMetric
   IMetric() {};
   virtual T distance_to(const feature_vector<T, D> &,
 			const feature_vector<T, D> &) = 0;
+  
+  virtual T distance_to(const feature_vector<T, D> &,
+			const feature_vector<T, D> &, T) const = 0;
+
 };
 
 template <typename T, const unsigned int D>
@@ -48,15 +52,40 @@ template <typename T, const unsigned int D>
 {
  public:
   EuclideanMetric() { };
-  T distance_to(const feature_vector<T, D> &a,
-		  const feature_vector<T, D> &b)
+  inline T distance_to(const feature_vector<T, D> &a,
+		       const feature_vector<T, D> &b)
   {
     T acc = (T) 0;
     for (unsigned int i=0; i<D; ++i)
       acc += (a[i] - b[i]) * (a[i] - b[i]);
     return acc;
   };
+
+  inline T distance_to(const feature_vector<T, D> &a,
+		       const feature_vector<T, D> &b,
+		       T upper_bound) const
+  {
+    const unsigned int D_acc = (unsigned int) (0.25f * D);
+
+    // Squared distance in two steps: first accumulate without comparisons.
+    T acc = (T) 0;
+    for (unsigned int i=0; i<D_acc; ++i)
+      acc += (a[i] - b[i]) * (a[i] - b[i]);
+
+    // Second step: accumulate comparing with upper bound.
+    for (unsigned int i=D_acc; i<D; ++i) {
+      acc += (a[i] - b[i]) * (a[i] - b[i]);
+      if (acc > upper_bound)
+	break;
+    }
+
+    return acc;
+  }
+
 };
+
+// Chebyshev distance
+// Manhatan distance
 
 /**
  * \brief Template for D-dimensional feature vectors.
@@ -70,6 +99,7 @@ template <typename T, const unsigned int D>
 template <typename T, const unsigned int D>
 struct feature_vector {
 public:
+
   /// Data array.
   T data[D];
   IMetric<T, D>* metric;
@@ -101,7 +131,7 @@ public:
 
   inline T distance_to(const feature_vector &p, T upper_bound) const; ///< Squared distance to a point with an upper bound.
   
-
+  void set_metric();
  
 } __attribute__((packed));
 
