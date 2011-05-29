@@ -40,7 +40,7 @@ class IMetric
  public:
   IMetric() {};
   virtual T distance_to(const feature_vector<T, D> &,
-			const feature_vector<T, D> &);
+			const feature_vector<T, D> &) = 0;
 };
 
 template <typename T, const unsigned int D>
@@ -75,7 +75,6 @@ public:
   IMetric<T, D>* metric;
 
   // Constructors.
-  //feature_vector() { metric = new EuclideanMetric<T, D>(); } ///< Default constructor.
   feature_vector() { metric = new EuclideanMetric<T,D>(); } ///< Default constructor.
   //feature_vector(IMetric<T,D>& m) { metric = m;} ///< Default constructor.
   feature_vector(IMetric<T,D>& m, T value) {
