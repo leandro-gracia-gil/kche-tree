@@ -40,7 +40,7 @@
 #include "kd-tree.h"
 
 /// Number of dimensions to use in this test.
-const unsigned int D = 32;
+const unsigned int D = 24;
 
 /// Alias for the specific kd_tree type being used.
 typedef kd_tree<float, D> kdtree_test;
