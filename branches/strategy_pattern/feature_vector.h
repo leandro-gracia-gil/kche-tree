@@ -106,7 +106,7 @@ public:
 
   // Constructors.
   feature_vector() { metric = new EuclideanMetric<T,D>(); } ///< Default constructor.
-  //feature_vector(IMetric<T,D>& m) { metric = m;} ///< Default constructor.
+  feature_vector(IMetric<T,D>& m) { metric = m;} ///< Default constructor.
   feature_vector(IMetric<T,D>& m, T value) {
     metric = m;
     for (unsigned int d=0; d<D; ++d)
@@ -128,10 +128,13 @@ public:
   // Squared distance operators for two D-dimensional points of type T.
   
   inline T distance_to(const feature_vector &p) const;
-
   inline T distance_to(const feature_vector &p, T upper_bound) const; ///< Squared distance to a point with an upper bound.
   
-  void set_metric();
+  void set_metric(IMetric<T, D>& m)
+  {
+    delete metric;
+    metric = m;
+  }
  
 } __attribute__((packed));
 
