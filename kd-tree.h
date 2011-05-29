@@ -112,7 +112,7 @@
  */
 template <typename T, const unsigned int D, typename S = k_vector<vector_distance<T>, vector_distance<T> > >
 class kd_tree {
-public:
+ public:
   /// Consider compatible feature vectors as D-dimensional points in the space.
   typedef feature_vector<T, D> kd_point;
 
@@ -121,6 +121,7 @@ public:
 
   // Constructors and destructors.
   kd_tree(); ///< Default constructor. Creates an empty and uninitialized kd-tree.
+  kd_tree(IMetric<T,D>& m); ///< Default constructor, overloaded having a metric functor.
   ~kd_tree(); ///< Default destructor.
 
   // Basic kd-tree operations.
@@ -141,6 +142,8 @@ public:
   // Kd-tree properties.
   unsigned int get_D() const { return D; } ///< Get the number of dimensions of the input data.
   unsigned int get_N() const { return num_elements; } ///< Get the number of elements stored in the tree.
+  
+  void set_metric(IMetric<T, D>& m) { }; ///< Sets the metric functor used for calculating distances.
 
 #ifdef DEBUG_KDTREE
   bool verify() const;
