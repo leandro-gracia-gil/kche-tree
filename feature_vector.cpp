@@ -126,7 +126,7 @@ template <typename T, const unsigned int D>
 T feature_vector<T, D>::distance_to(const feature_vector &p, T upper_bound) const {
 
   // Constant calculated empirically.
-  const unsigned int D_acc = (unsigned int) (0.25f * D);
+  const unsigned int D_acc = (unsigned int) (0.4f * D);
 
   // Squared distance in two steps: first accumulate without comparisons.
   T acc = (T) 0;
@@ -136,7 +136,7 @@ T feature_vector<T, D>::distance_to(const feature_vector &p, T upper_bound) cons
   // Second step: accumulate comparing with upper bound.
   for (unsigned int i=D_acc; i<D; ++i) {
     acc += (data[i] - p[i]) * (data[i] - p[i]);
-    if (acc > upper_bound)
+    if (!(i & 3) && acc > upper_bound)
       break;
   }
 
