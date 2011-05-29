@@ -65,7 +65,7 @@ template <typename T, const unsigned int D>
 		       const feature_vector<T, D> &b,
 		       T upper_bound) const
   {
-    const unsigned int D_acc = (unsigned int) (0.25f * D);
+    const unsigned int D_acc = (unsigned int) (0.4f * D);
 
     // Squared distance in two steps: first accumulate without comparisons.
     T acc = (T) 0;
@@ -75,7 +75,8 @@ template <typename T, const unsigned int D>
     // Second step: accumulate comparing with upper bound.
     for (unsigned int i=D_acc; i<D; ++i) {
       acc += (a[i] - b[i]) * (a[i] - b[i]);
-      if (acc > upper_bound)
+      if (!(i & 3) && acc > upper_bound)
+	//      if (acc > upper_bound)
 	break;
     }
 
