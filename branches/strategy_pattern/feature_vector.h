@@ -76,7 +76,6 @@ template <typename T, const unsigned int D>
     for (unsigned int i=D_acc; i<D; ++i) {
       acc += (a[i] - b[i]) * (a[i] - b[i]);
       if (!(i & 3) && acc > upper_bound)
-	//      if (acc > upper_bound)
 	break;
     }
 
