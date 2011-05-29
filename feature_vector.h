@@ -34,21 +34,21 @@
 template <typename T, const unsigned int D>
   struct feature_vector;
 
+template <typename T, const unsigned int D>
 class IMetric
 {
  public:
   IMetric() {};
-  template <typename T, const unsigned int D>
-    T distance_to(const feature_vector<T,D> &,
-		  const feature_vector<T,D> &);
+  virtual T distance_to(const feature_vector<T, D> &,
+			const feature_vector<T, D> &);
 };
 
-class EuclideanMetric : public IMetric
+template <typename T, const unsigned int D>
+  class EuclideanMetric : public IMetric<T, D>
 {
  public:
-  EuclideanMetric() {};
-  template <typename T, const unsigned int D>
-    T distance_to(const feature_vector<T, D> &a,
+  EuclideanMetric() { };
+  T distance_to(const feature_vector<T, D> &a,
 		  const feature_vector<T, D> &b)
   {
     T acc = (T) 0;
@@ -72,12 +72,13 @@ struct feature_vector {
 public:
   /// Data array.
   T data[D];
-  IMetric *metric;
+  IMetric<T, D>* metric;
 
   // Constructors.
-  feature_vector() { metric = new EuclideanMetric(); } ///< Default constructor.
-  feature_vector(IMetric& m) { metric = m;} ///< Default constructor.
-  feature_vector(IMetric& m, T value) {
+  //feature_vector() { metric = new EuclideanMetric<T, D>(); } ///< Default constructor.
+  feature_vector() { metric = new EuclideanMetric<T,D>(); } ///< Default constructor.
+  //feature_vector(IMetric<T,D>& m) { metric = m;} ///< Default constructor.
+  feature_vector(IMetric<T,D>& m, T value) {
     metric = m;
     for (unsigned int d=0; d<D; ++d)
       data[d] = value;
@@ -97,8 +98,7 @@ public:
 
   // Squared distance operators for two D-dimensional points of type T.
   
-  inline T distance_to(const feature_vector &p) const
-  { return metric->distance_to(this, p); }; ///< Squared distance to a point.
+  inline T distance_to(const feature_vector &p) const;
 
   inline T distance_to(const feature_vector &p, T upper_bound) const; ///< Squared distance to a point with an upper bound.
   
