@@ -30,14 +30,15 @@
 #include <cmath>
 #include <ctime>
 
-// Include the kd-tree template.
+// Include the kche-tree templates.
 //
 // Note: in the float and 24 dimensions case we can use an SSE-accelerated version of the
-//       kd-tree by just including the file "kd-tree_sse_24d.h" instead of "kd-tree.h".
+//       kd-tree by just including the file "kche-tree_sse_24d.h" instead of "kche-tree.h".
 //       Proper memory alignments are ensured by the specialization of the new operator.
 //       Also remember to set the -msse flag when compiling with g++ or face errors.
 //
-#include "kd-tree.h"
+#include "kche-tree.h"
+using namespace kche_tree;
 
 /// Number of dimensions to use in this test.
 const unsigned int D = 24;

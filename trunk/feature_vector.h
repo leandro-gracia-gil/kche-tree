@@ -27,8 +27,12 @@
 #ifndef _FEATURE_VECTOR_H_
 #define _FEATURE_VECTOR_H_
 
-// Include STL binary predicates.
+// Includes from STL and the C standard library.
+#include <cstdlib>
 #include <functional>
+#include <new>
+
+namespace kche_tree {
 
 /**
  * \brief Template for D-dimensional feature vectors.
@@ -95,5 +99,7 @@ struct vector_distance : public std::binary_function <vector_distance<T>, vector
 
 // Template implementation.
 #include "feature_vector.cpp"
+
+} // namespace kche_tree
 
 #endif

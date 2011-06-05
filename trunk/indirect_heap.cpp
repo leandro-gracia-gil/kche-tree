@@ -24,10 +24,6 @@
  * \author Leandro Graciá Gil
 */
 
-#include <algorithm>
-#include <cassert>
-#include <cstring>
-
 /**
  * Build a mutable reference heap over an existing array.
  *

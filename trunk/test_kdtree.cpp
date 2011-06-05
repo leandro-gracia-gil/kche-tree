@@ -25,36 +25,37 @@
  */
 
 // Includes from C Standard Library and C++ STL.
+#include <cassert>
+#include <cfloat>
 #include <cstdio>
 #include <cstdlib>
-#include <ctime>
 #include <cmath>
-#include <cfloat>
+#include <ctime>
 #include <fstream>
 
 // Enable kd-tree structure debugging.
 #define DEBUG_KDTREE
 
-// Include the generic kd-tree template or its SSE-enabled specialization for floats and 24 dimensions.
+// Include the generic kche-tree templates or the SSE-enabled specialization for floats and 24 dimensions.
 #ifdef SSE
-#include "kd-tree_sse_24d.h"
+#include "kche-tree_sse_24d.h"
 #else
-#include "kd-tree.h"
+#include "kche-tree.h"
 #endif
+
+// Bring some things to the global namespace.
+using namespace kche_tree;
+using std::ofstream;
+using std::ifstream;
+using std::vector;
+using std::min;
+using std::max;
 
 /// Number of dimensions to use in this test.
 const unsigned int D = 24;
 
 /// Alias for the specific kd_tree type being used.
 typedef kd_tree<float, D> test_kdtree;
-
-
-// Bring some things from STL namespace.
-using std::ofstream;
-using std::ifstream;
-using std::vector;
-using std::min;
-using std::max;
 
 
 #ifdef FROM_FILE

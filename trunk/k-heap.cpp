@@ -24,12 +24,6 @@
  * \author Leandro Graciá Gil
 */
 
-#include <algorithm>
-#include <cassert>
-#include <cstring>
-
-using std::swap;
-
 /**
  * Build a k-heap of the given \a K size.
  *
@@ -191,10 +185,10 @@ void k_heap<T, C, idx>::pop_best() {
 
   // Swap extracted element to the end in the data array and update heaps.
   if (bestIndex != lastIndex) {
-    swap(data[bestIndex], data[lastIndex]);
+    std::swap(data[bestIndex], data[lastIndex]);
     bestHeap.swap(bestIndex, lastIndex);
     worstHeap.swap(bestIndex, lastIndex);
-    swap(bestIndex, lastIndex);
+    std::swap(bestIndex, lastIndex);
   }
 
   // Remove the element from the worst elements heap.
@@ -221,10 +215,10 @@ void k_heap<T, C, idx>::pop_worst() {
 
   // Swap extracted element to the end in the data array and update heaps.
   if (worstIndex != lastIndex) {
-    swap(data[worstIndex], data[lastIndex]);
+    std::swap(data[worstIndex], data[lastIndex]);
     bestHeap.swap(worstIndex, lastIndex);
     worstHeap.swap(worstIndex, lastIndex);
-    swap(worstIndex, lastIndex);
+    std::swap(worstIndex, lastIndex);
   }
 
   // Remove the element from the best elements heap.

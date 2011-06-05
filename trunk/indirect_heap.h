@@ -27,8 +27,13 @@
 #ifndef _INDIRECT_HEAP_H_
 #define _INDIRECT_HEAP_H_
 
-// Include 'less' comparison template (used by default).
+// Include required C Standard Library STL files.
+#include <algorithm>
+#include <cassert>
+#include <cstring>
 #include <functional>
+
+namespace kche_tree {
 
 /**
  * \brief Define a reference-based heap over an array of existing data that
@@ -106,5 +111,7 @@ public:
 
 // Template implementation.
 #include "indirect_heap.cpp"
+
+} // namespace kche_tree
 
 #endif

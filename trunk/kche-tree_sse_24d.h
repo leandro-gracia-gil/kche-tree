@@ -19,20 +19,22 @@
  ***************************************************************************/
 
 /**
- * \file kd-tree_sse_24d.h
+ * \file kche-tree_sse_24d.h
  * \brief Distance function specializations for single-precision floating point vectors of 24 dimensions using the SSE instruction set.
  * \author Leandro Graciá Gil
 */
 
-#ifndef _KD_TREE_SSE_24D_H_
-#define _KD_TREE_SSE_24D_H_
+#ifndef _KCHE_TREE_SSE_24D_H_
+#define _KCHE_TREE_SSE_24D_H_
 
 // Includes for the SSE instruction set and aligned memory allocation.
 #include <xmmintrin.h>
 #include <malloc.h>
 
-// Include the kd-tree template.
-#include "kd-tree.h"
+// Include the kche-tree templates.
+#include "kche-tree.h"
+
+namespace kche_tree {
 
 /**
  * Memory-aligned version of the memory allocation operator for feature vectors.
@@ -162,5 +164,7 @@ float feature_vector<float, 24U>::distance_to(const feature_vector<float, 24U> &
   // Return the sum of the 4 acc1 elements.
   return f[0] + f[1] + f[2] + f[3];
 }
+
+} // namespace kche_tree
 
 #endif

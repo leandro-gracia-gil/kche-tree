@@ -24,11 +24,6 @@
  * \author Leandro Graciá Gil
  */
 
-// Includes from STL and C standard library.
-#include <cstdio>
-#include <stdexcept>
-#include <typeinfo>
-
 // File serialization settings.
 template <typename T, const unsigned int D, typename S> const char *kd_tree<T, D, S>::file_header = "kdtree";
 template <typename T, const unsigned int D, typename S> const unsigned short kd_tree<T, D, S>::file_header_length = 6;
