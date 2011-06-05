@@ -4,7 +4,8 @@ CFLAGS=-O3 -Wall
 SSE_FLAGS=-msse -DSSE
 FILE_FLAGS=-DFROM_FILE
 
-TEMPLATE_FILES= kd-tree.h kd-tree.cpp kd-tree_io.cpp kd-tree_sse_24d.h
+TEMPLATE_FILES= kche-tree.h kche-tree_sse_24d.h
+TEMPLATE_FILES+= kd-tree.h kd-tree.cpp kd-tree_io.cpp
 TEMPLATE_FILES+= k-heap.h k-heap.cpp indirect_heap.h indirect_heap.cpp
 TEMPLATE_FILES+= k-vector.h k-vector.cpp
 TEMPLATE_FILES+= feature_vector.h feature_vector.cpp
@@ -39,4 +40,3 @@ clean:
 	@rm -f $(SPEED) $(SPEED)_file $(SPEED)_sse $(SPEED)_file_sse
 	@rm -f $(TEST) $(TEST)_file $(TEST)_sse $(TEST)_file_sse
 	@rm -f $(EXAMPLE)
-

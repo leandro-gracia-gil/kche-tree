@@ -29,12 +29,14 @@
 #include <cstdlib>
 #include <ctime>
 
-// Include the generic kd-tree template or its SSE-enabled specialization for floats and 24 dimensions.
+// Include the generic kche-tree templates or the SSE-enabled specialization for floats and 24 dimensions.
 #ifdef SSE
-#include "kd-tree_sse_24d.h"
+#include "kche-tree_sse_24d.h"
 #else
-#include "kd-tree.h"
+#include "kche-tree.h"
 #endif
+
+using namespace kche_tree;
 
 /// Number of dimensions to use in this test.
 const unsigned int D = 24;

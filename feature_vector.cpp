@@ -24,10 +24,6 @@
  * \author Leandro Graciá Gil
  */
 
-// Includes from STL and the C standard library.
-#include <cstdlib>
-#include <new>
-
 /**
  * Generic memory allocator operator for feature vector arrays.
  * Defined so that memory-aligned specializations can be defined if required.

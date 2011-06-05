@@ -30,6 +30,8 @@
 // Include STL less comparison template (used by default).
 #include <functional>
 
+namespace kche_tree {
+
 /**
  * \brief Define an insertion-based vector to hold the K best elements pushed.
  *
@@ -71,5 +73,7 @@ protected:
 
 // Template implementation.
 #include "k-vector.cpp"
+
+} // namespace kche_tree
 
 #endif

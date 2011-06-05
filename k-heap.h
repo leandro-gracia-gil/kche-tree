@@ -30,8 +30,13 @@
 // Include indirect heaps.
 #include "indirect_heap.h"
 
-// Include STL less comparison template (used by default).
+// Include required C Standard Library STL files.
+#include <algorithm>
 #include <functional>
+#include <cassert>
+#include <cstring>
+
+namespace kche_tree {
 
 /**
  * \brief Define a reference-based heap that holds the K best elements on it allowing to push them in logarithmic time.
@@ -98,5 +103,7 @@ protected:
 
 // Template implementation.
 #include "k-heap.cpp"
+
+} // namespace kche_tree
 
 #endif
