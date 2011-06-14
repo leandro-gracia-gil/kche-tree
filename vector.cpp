@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2010, 2011 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,10 +19,12 @@
  ***************************************************************************/
 
 /**
- * \file feature_vector.cpp
+ * \file vector.cpp
  * \brief Template implementations for generic D-dimensional feature vectors.
  * \author Leandro Graciá Gil
  */
+
+namespace kche_tree {
 
 /**
  * Generic memory allocator operator for feature vector arrays.
@@ -32,7 +34,7 @@
  * \return Address to the new allocated memory.
  */
 template <typename T, const unsigned int D>
-void *feature_vector<T, D>::operator new [] (size_t size) {
+void *Vector<T, D>::operator new [] (size_t size) {
 
   // Allocate plain memory for the requested vectors.
   void *p = malloc(size);
@@ -53,7 +55,7 @@ void *feature_vector<T, D>::operator new [] (size_t size) {
  * \param p Pointer to the address to release.
  */
 template <typename T, const unsigned int D>
-void feature_vector<T, D>::operator delete [] (void *p) {
+void Vector<T, D>::operator delete [] (void *p) {
 
   // Just release memory.
   free(p);
@@ -66,14 +68,8 @@ void feature_vector<T, D>::operator delete [] (void *p) {
  * \return \c true if equal, \c false otherwise.
  */
 template <typename T, const unsigned int D>
-bool feature_vector<T, D>::operator == (const feature_vector &p) const {
-
-  // Check that all dimensions have the same value.
-  for (unsigned int d=0; d<D; ++d) {
-    if (data[d] != p.data[d])
-      return false;
-  }
-  return true;
+bool Vector<T, D>::operator == (const Vector &p) const {
+  return equal_arrays(data, p.data, D);
 }
 
 /**
@@ -83,14 +79,8 @@ bool feature_vector<T, D>::operator == (const feature_vector &p) const {
  * \return \c true if different, \c false otherwise.
  */
 template <typename T, const unsigned int D>
-bool feature_vector<T, D>::operator != (const feature_vector &p) const {
-
-  // Check if any dimension has a different value.
-  for (unsigned int d=0; d<D; ++d) {
-    if (data[d] != p.data[d])
-      return true;
-  }
-  return false;
+bool Vector<T, D>::operator != (const Vector &p) const {
+  return !equal_arrays(data, p.data, D);
 }
 
 /**
@@ -101,7 +91,7 @@ bool feature_vector<T, D>::operator != (const feature_vector &p) const {
  * \return Euclidean squared distance between the two kd_points.
  */
 template <typename T, const unsigned int D>
-T feature_vector<T, D>::distance_to(const feature_vector &p) const {
+T Vector<T, D>::distance_to(const Vector &p) const {
 
   // Standard squared distance between two D-dimensional vectors.
   T acc = (T) 0;
@@ -119,7 +109,7 @@ T feature_vector<T, D>::distance_to(const feature_vector &p) const {
  * \return Euclidean squared distance between the two kd_points or a partial result greater or equal than \a upper.
  */
 template <typename T, const unsigned int D>
-T feature_vector<T, D>::distance_to(const feature_vector &p, T upper_bound) const {
+T Vector<T, D>::distance_to(const Vector &p, T upper_bound) const {
 
   // Constant calculated empirically.
   const unsigned int D_acc = (unsigned int) (0.4f * D);
@@ -138,3 +128,5 @@ T feature_vector<T, D>::distance_to(const feature_vector &p, T upper_bound) cons
 
   return acc;
 }
+
+} // namespace kche_tree

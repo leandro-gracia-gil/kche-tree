@@ -41,13 +41,13 @@ namespace kche_tree {
  * \tparam Compare Type of the comparison object. Defaults to std::less<T>.
  */
 template <typename T, typename Compare = std::less<T> >
-class k_vector {
+class KVector {
 public:
   /// K-vector constructor.
-  k_vector(unsigned int K, const Compare &c = Compare());
+  KVector(unsigned int K, const Compare &c = Compare());
 
   /// Default destructor.
-  ~k_vector();
+  ~KVector();
 
   // K-vector properties.
   bool empty() const; ///< Check if the k-vector is empty. Cost: O(1).
@@ -71,9 +71,9 @@ protected:
   void push_full(const T &elem); ///< Push a new element into the k-vector when the vector is already full. Cost: O(K).
 };
 
+} // namespace kche_tree
+
 // Template implementation.
 #include "k-vector.cpp"
-
-} // namespace kche_tree
 
 #endif

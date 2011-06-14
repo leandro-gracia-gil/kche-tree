@@ -24,11 +24,20 @@
  * \author Leandro Graciá Gil
  */
 
+// C Standard Library includes.
+#include <cstdio>
+
+// STL exceptions and runtime type information.
+#include <stdexcept>
+#include <typeinfo>
+
+namespace kche_tree {
+
 // File serialization settings.
-template <typename T, const unsigned int D, typename S> const char *kd_tree<T, D, S>::file_header = "kdtree";
-template <typename T, const unsigned int D, typename S> const unsigned short kd_tree<T, D, S>::file_header_length = 6;
-template <typename T, const unsigned int D, typename S> const unsigned short kd_tree<T, D, S>::file_version[2] = { 1, 0 };
-template <typename T, const unsigned int D, typename S> const unsigned short kd_tree<T, D, S>::signature = 0xCAFE;
+template <typename T, const unsigned int D, typename S> const char *KDTree<T, D, S>::file_header = "kdtree";
+template <typename T, const unsigned int D, typename S> const unsigned short KDTree<T, D, S>::file_header_length = 6;
+template <typename T, const unsigned int D, typename S> const unsigned short KDTree<T, D, S>::file_version[2] = { 1, 0 };
+template <typename T, const unsigned int D, typename S> const unsigned short KDTree<T, D, S>::signature = 0xCAFE;
 
 /**
  * Standard input stream operator.
@@ -41,7 +50,7 @@ template <typename T, const unsigned int D, typename S> const unsigned short kd_
  * \return Input stream after reading the data.
  */
 template <typename T, const unsigned int D, typename S>
-std::istream & operator >> (std::istream &in, kd_tree<T, D, S> &kdtree) {
+std::istream & operator >> (std::istream &in, KDTree<T, D, S> &kdtree) {
 
   // Read header.
   char header[kdtree.file_header_length + 1];
@@ -68,16 +77,18 @@ std::istream & operator >> (std::istream &in, kd_tree<T, D, S> &kdtree) {
   unsigned short name_length;
   in.read(reinterpret_cast<char *>(&name_length), sizeof(unsigned short));
   if (!in.good())
-    throw std::runtime_error("error reading type length data");
+    throw std::runtime_error("error reading type name length data");
 
   // Read type name.
   char type_name[name_length + 1];
   in.read(type_name, name_length);
   if (!in.good())
-    throw std::runtime_error("error reading type data");
+    throw std::runtime_error("error reading type name");
   type_name[name_length] = '\0';
 
   // Check type name.
+  // WARNING: The value returned by typeid::name() is implementation-dependent.
+  //          There is a possibility of problems when porting data between different platforms.
   if (strcmp(typeid(T).name(), type_name)) {
     char error_msg[name_length + strlen(typeid(T).name()) + 50];
     sprintf(error_msg, "kd-tree type doesn't match: found %s, expected %s", type_name, typeid(T).name());
@@ -101,9 +112,9 @@ std::istream & operator >> (std::istream &in, kd_tree<T, D, S> &kdtree) {
   kdtree.release();
 
   // Define aliases for local kd-tree types.
-  typedef typename kd_tree<T, D, S>::kd_point point_type;
-  typedef typename kd_tree<T, D, S>::kd_node node_type;
-  typedef typename kd_tree<T, D, S>::kd_leaf leaf_type;
+  typedef typename KDTree<T, D, S>::Point point_type;
+  typedef typename KDTree<T, D, S>::Node node_type;
+  typedef typename KDTree<T, D, S>::Leaf leaf_type;
 
   // Read and check number of elements.
   in.read(reinterpret_cast<char *>(&kdtree.num_elements), sizeof(unsigned int));
@@ -151,11 +162,11 @@ std::istream & operator >> (std::istream &in, kd_tree<T, D, S> &kdtree) {
  * \return Output stream after writting the data.
  */
 template <typename T, const unsigned int D, typename S>
-std::ostream & operator << (std::ostream &out, const kd_tree<T, D, S> &kdtree) {
+std::ostream & operator << (std::ostream &out, const KDTree<T, D, S> &kdtree) {
 
   // Define aliases for local kd-tree types.
-  typedef typename kd_tree<T, D, S>::kd_point point_type;
-  typedef typename kd_tree<T, D, S>::kd_node node_type;
+  typedef typename KDTree<T, D, S>::Point point_type;
+  typedef typename KDTree<T, D, S>::Node node_type;
 
   // Write header.
   out.write(kdtree.file_header, kdtree.file_header_length);
@@ -200,11 +211,11 @@ std::ostream & operator << (std::ostream &out, const kd_tree<T, D, S> &kdtree) {
  * \param in Input stream.
  */
 template <typename T, const unsigned int D, typename S>
-kd_tree<T, D, S>::kd_node::kd_node(std::istream &in) {
+KDTree<T, D, S>::Node::Node(std::istream &in) {
 
   // Allocate node.
-  typedef typename kd_tree<T, D, S>::kd_node node_type;
-  typedef typename kd_tree<T, D, S>::kd_leaf leaf_type;
+  typedef typename KDTree<T, D, S>::Node node_type;
+  typedef typename KDTree<T, D, S>::Leaf leaf_type;
 
   // Read node data.
   in.read(reinterpret_cast<char *>(&split_value), sizeof(T));
@@ -232,7 +243,7 @@ kd_tree<T, D, S>::kd_node::kd_node(std::istream &in) {
  * \param in Input stream.
  */
 template <typename T, const unsigned int D, typename S>
-kd_tree<T, D, S>::kd_leaf::kd_leaf(std::istream &in) {
+KDTree<T, D, S>::Leaf::Leaf(std::istream &in) {
 
   // Read leaf node data.
   in.read(reinterpret_cast<char *>(&first_index),  sizeof(unsigned int));
@@ -248,7 +259,7 @@ kd_tree<T, D, S>::kd_leaf::kd_leaf(std::istream &in) {
  * \return \c true if successful, \c false in case of write error.
  */
 template <typename T, const unsigned int D, typename S>
-bool kd_tree<T, D, S>::kd_node::write_to_binary_stream(std::ostream &out) {
+bool KDTree<T, D, S>::Node::write_to_binary_stream(std::ostream &out) {
 
   // Write split value and node axis/leaf information.
   out.write(reinterpret_cast<const char *>(&split_value), sizeof(T));
@@ -283,7 +294,7 @@ bool kd_tree<T, D, S>::kd_node::write_to_binary_stream(std::ostream &out) {
  * \return \c true if successful, \c false in case of write error.
  */
 template <typename T, const unsigned int D, typename S>
-bool kd_tree<T, D, S>::kd_leaf::write_to_binary_stream(std::ostream &out) {
+bool KDTree<T, D, S>::Leaf::write_to_binary_stream(std::ostream &out) {
 
   // Write left leaf node information.
   out.write(reinterpret_cast<const char *>(&first_index), sizeof(unsigned int));
@@ -294,3 +305,5 @@ bool kd_tree<T, D, S>::kd_leaf::write_to_binary_stream(std::ostream &out) {
     return false;
   return true;
 }
+
+} // namespace kche_tree

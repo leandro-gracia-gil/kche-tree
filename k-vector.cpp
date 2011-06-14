@@ -24,6 +24,8 @@
  * \author Leandro Graciá Gil
 */
 
+namespace kche_tree {
+
 /**
  * Build a k-vector of size K.
  *
@@ -31,7 +33,7 @@
  * \param c Comparison object used for internal element sorting.
  */
 template <typename T, typename Compare>
-k_vector<T, Compare>::k_vector(unsigned int K, const Compare &c)
+KVector<T, Compare>::KVector(unsigned int K, const Compare &c)
   : data(new T[K]),
     K(K),
     stored(0),
@@ -39,7 +41,7 @@ k_vector<T, Compare>::k_vector(unsigned int K, const Compare &c)
 
 /** Default destructor */
 template <typename T, typename Compare>
-k_vector<T, Compare>::~k_vector() {
+KVector<T, Compare>::~KVector() {
   delete []data;
 }
 
@@ -49,7 +51,7 @@ k_vector<T, Compare>::~k_vector() {
  * \return \c true if the k-vector is empty, \c false otherwise.
  */
 template <typename T, typename Compare>
-bool k_vector<T, Compare>::empty() const {
+bool KVector<T, Compare>::empty() const {
   return stored == 0;
 }
 
@@ -59,7 +61,7 @@ bool k_vector<T, Compare>::empty() const {
  * \return \c true if the k-vector is full, \c false otherwise.
  */
 template <typename T, typename Compare>
-bool k_vector<T, Compare>::full() const {
+bool KVector<T, Compare>::full() const {
   return stored == K;
 }
 
@@ -69,7 +71,7 @@ bool k_vector<T, Compare>::full() const {
  * \return Number of elements currently in the k-vector.
  */
 template <typename T, typename Compare>
-unsigned int k_vector<T, Compare>::size() const {
+unsigned int KVector<T, Compare>::size() const {
   return stored;
 }
 
@@ -79,7 +81,7 @@ unsigned int k_vector<T, Compare>::size() const {
  * \return Reference to the worst element stored.
  */
 template <typename T, typename Compare>
-const T & k_vector<T, Compare>::front() const {
+const T & KVector<T, Compare>::front() const {
   return data[0];
 }
 
@@ -89,7 +91,7 @@ const T & k_vector<T, Compare>::front() const {
  * \return Reference to the best element stored.
  */
 template <typename T, typename Compare>
-const T & k_vector<T, Compare>::back() const {
+const T & KVector<T, Compare>::back() const {
   return data[stored - 1];
 }
 
@@ -97,7 +99,7 @@ const T & k_vector<T, Compare>::back() const {
  * Pop the best element stored in the k-vector.
  */
 template <typename T, typename Compare>
-void k_vector<T, Compare>::pop_back() {
+void KVector<T, Compare>::pop_back() {
   if (stored > 0)
     --stored;
 }
@@ -108,7 +110,7 @@ void k_vector<T, Compare>::pop_back() {
  * \param elem Element being pushed.
  */
 template <typename T, typename Compare>
-void k_vector<T, Compare>::push_back(const T &elem) {
+void KVector<T, Compare>::push_back(const T &elem) {
   if (stored < K)
     push_not_full(elem);
   else
@@ -118,14 +120,14 @@ void k_vector<T, Compare>::push_back(const T &elem) {
 /**
  * Push a new element into the k-vector with the precondition that it's still not full.
  * Ensuring the precondition before calling is responsability of the caller.
- * For a generic pushing method use \link k_vector::push_back push_back\endlink.
+ * For a generic pushing method use \link KVector::push_back push_back\endlink.
  *
  * \pre The k-vector object must not be full.
  *
  * \param elem Element being pushed.
  */
 template <typename T, typename Compare>
-void k_vector<T, Compare>::push_not_full(const T &elem) {
+void KVector<T, Compare>::push_not_full(const T &elem) {
 
   // Look where the new candidate should be placed.
   unsigned int index;
@@ -141,14 +143,14 @@ void k_vector<T, Compare>::push_not_full(const T &elem) {
 /**
  * Push a new element into the k-vector with the precondition that it's already full.
  * Ensuring the precondition before calling is responsability of the caller.
- * For a generic pushing method use \link k_vector::push_back push_back\endlink.
+ * For a generic pushing method use \link KVector::push_back push_back\endlink.
  *
  * \pre The k-vector object must be already full.
  *
  * \param elem Element being pushed.
  */
 template <typename T, typename Compare>
-void k_vector<T, Compare>::push_full(const T &elem) {
+void KVector<T, Compare>::push_full(const T &elem) {
 
   // Avoid further calculations if candidate is worst than the current worst one.
   if (!compare(elem, data[0]))
@@ -164,3 +166,5 @@ void k_vector<T, Compare>::push_full(const T &elem) {
     data[i] = data[i+1];
   data[index] = elem;
 }
+
+} // namespace kche_tree
