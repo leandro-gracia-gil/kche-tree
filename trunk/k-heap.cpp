@@ -24,13 +24,20 @@
  * \author Leandro Graciá Gil
 */
 
+// Include required C Standard Library STL files.
+#include <algorithm>
+#include <cassert>
+#include <cstring>
+
+namespace kche_tree {
+
 /**
  * Build a k-heap of the given \a K size.
  *
  * \param K Maximum number of best elements to store in the heap.
 */
 template <typename T, typename C, typename idx>
-k_heap<T, C, idx>::k_heap(unsigned int K)
+KHeap<T, C, idx>::KHeap(unsigned int K)
   : K(K),
     data(new T[K]),
     compare(C()),
@@ -40,12 +47,12 @@ k_heap<T, C, idx>::k_heap(unsigned int K)
 /**
  * \brief Copy constructor.
  *
- * Initialize a k_heap copying another one.
+ * Initialize a KHeap copying another one.
  *
  * \param heap Element being copied.
  */
 template <typename T, typename C, typename idx>
-k_heap<T, C, idx>::k_heap(const k_heap &heap)
+KHeap<T, C, idx>::KHeap(const KHeap &heap)
   : data(NULL),
     compare(heap.compare),
     bestHeap(NULL, 0),
@@ -57,7 +64,7 @@ k_heap<T, C, idx>::k_heap(const k_heap &heap)
 
 /// Default destructor.
 template <typename T, typename C, typename idx>
-k_heap<T, C, idx>::~k_heap() {
+KHeap<T, C, idx>::~KHeap() {
 
   // Release data.
   delete []data;
@@ -71,7 +78,7 @@ k_heap<T, C, idx>::~k_heap() {
  * \param heap Element being copied.
  */
 template <typename T, typename C, typename idx>
-k_heap<T, C, idx> &k_heap<T, C, idx>::operator = (const k_heap &heap) {
+KHeap<T, C, idx> &KHeap<T, C, idx>::operator = (const KHeap &heap) {
 
   // Check self assignment.
   if (this == &heap)
@@ -86,7 +93,8 @@ k_heap<T, C, idx> &k_heap<T, C, idx>::operator = (const k_heap &heap) {
   assert(data = new T[K]);
 
   // Copy data.
-  memcpy(data, heap.data, K * sizeof(T));
+  copy_array(data, heap.data, K);
+
   bestHeap.setData(data);
   worstHeap.setData(data);
 
@@ -106,7 +114,7 @@ k_heap<T, C, idx> &k_heap<T, C, idx>::operator = (const k_heap &heap) {
  * \return \c true if equal, \c false otherwise.
  */
 template <typename T, typename C, typename idx>
-bool k_heap<T, C, idx>::operator == (const k_heap &heap) const {
+bool KHeap<T, C, idx>::operator == (const KHeap &heap) const {
 
   // Compare K value.
   if (K != heap.K)
@@ -133,7 +141,7 @@ bool k_heap<T, C, idx>::operator == (const k_heap &heap) const {
  * \return \c true if \a elem is kept in the heap, \c false if discarded.
 */
 template <typename T, typename C, typename idx>
-bool k_heap<T, C, idx>::push(const T &elem) {
+bool KHeap<T, C, idx>::push(const T &elem) {
 
   // Check if heaps are not yet full.
   if (bestHeap.count() < K) {
@@ -173,7 +181,7 @@ bool k_heap<T, C, idx>::push(const T &elem) {
  * No value is returned to avoid unnecessary object copies.
 */
 template <typename T, typename C, typename idx>
-void k_heap<T, C, idx>::pop_best() {
+void KHeap<T, C, idx>::pop_best() {
 
   // Check size.
   if (bestHeap.empty())
@@ -203,7 +211,7 @@ void k_heap<T, C, idx>::pop_best() {
  * No value is returned to avoid unnecessary object copies.
 */
 template <typename T, typename C, typename idx>
-void k_heap<T, C, idx>::pop_worst() {
+void KHeap<T, C, idx>::pop_worst() {
 
   // Check size.
   if (worstHeap.empty())
@@ -234,7 +242,7 @@ void k_heap<T, C, idx>::pop_worst() {
  * \return \c true if full, \c false if not.
 */
 template <typename T, typename C, typename idx>
-bool k_heap<T, C, idx>::full() const {
+bool KHeap<T, C, idx>::full() const {
   return bestHeap.count() == K;
 }
 
@@ -244,7 +252,7 @@ bool k_heap<T, C, idx>::full() const {
  * \return \c true if empty, \c false if not.
 */
 template <typename T, typename C, typename idx>
-bool k_heap<T, C, idx>::empty() const {
+bool KHeap<T, C, idx>::empty() const {
   return bestHeap.empty();
 }
 
@@ -254,17 +262,17 @@ bool k_heap<T, C, idx>::empty() const {
  * \return Number of elements in the heap.
 */
 template <typename T, typename C, typename idx>
-unsigned int k_heap<T, C, idx>::size() const {
+unsigned int KHeap<T, C, idx>::size() const {
   return bestHeap.count();
 }
 
 /**
  * Get the current best element in the heap.
  *
- * \return Best element in the heap, or last 'first' element if heap is already \link k_heap::empty empty\endlink.
+ * \return Best element in the heap, or last 'first' element if heap is already \link KHeap::empty empty\endlink.
 */
 template <typename T, typename C, typename idx>
-const T &k_heap<T, C, idx>::best() const {
+const T &KHeap<T, C, idx>::best() const {
   if (empty())
     return data[0];
   return bestHeap.top();
@@ -273,10 +281,10 @@ const T &k_heap<T, C, idx>::best() const {
 /**
  * Get the current worst element in the heap.
  *
- * \return Worst element in the heap, or last 'first' element if heap is already \link k_heap::empty empty\endlink.
+ * \return Worst element in the heap, or last 'first' element if heap is already \link KHeap::empty empty\endlink.
 */
 template <typename T, typename C, typename idx>
-const T &k_heap<T, C, idx>::worst() const {
+const T &KHeap<T, C, idx>::worst() const {
   if (empty())
     return data[0];
   return worstHeap.top();
@@ -288,7 +296,7 @@ const T &k_heap<T, C, idx>::worst() const {
  * \return The K value used to build the heap.
 */
 template <typename T, typename C, typename idx>
-unsigned int k_heap<T, C, idx>::get_K() const {
+unsigned int KHeap<T, C, idx>::get_K() const {
   return K;
 }
 
@@ -298,6 +306,8 @@ unsigned int k_heap<T, C, idx>::get_K() const {
  * \return Current number of elements in the heap.
 */
 template <typename T, typename C, typename idx>
-unsigned int k_heap<T, C, idx>::count() const {
+unsigned int KHeap<T, C, idx>::count() const {
   return bestHeap.count();
 }
+
+} // namespace kche_tree

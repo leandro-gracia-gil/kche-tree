@@ -28,13 +28,18 @@
 #define _KCHE_TREE_SSE_24D_H_
 
 // Includes for the SSE instruction set and aligned memory allocation.
-#include <xmmintrin.h>
+#if !defined(__APPLE__)
 #include <malloc.h>
+#endif
+#include <xmmintrin.h>
 
 // Include the kche-tree templates.
 #include "kche-tree.h"
 
 namespace kche_tree {
+
+// Note: Mac OS X has already 16 byte memory alignment, so no specialization of new is required.
+#if !defined(__APPLE__)
 
 /**
  * Memory-aligned version of the memory allocation operator for feature vectors.
@@ -44,7 +49,7 @@ namespace kche_tree {
  * \return Address to the new allocated memory.
 */
 template <>
-void *feature_vector<float, 24U>::operator new [] (size_t size) {
+void *Vector<float, 24U>::operator new [] (size_t size) {
 
   // Allocate memory aligned to 16 bytes.
   void *p = memalign(16, size);
@@ -58,6 +63,8 @@ void *feature_vector<float, 24U>::operator new [] (size_t size) {
   return p;
 }
 
+#endif // !defined(__APPLE__)
+
 /**
  * SSE-accelerated squared euclidean distance operator for two 24-dimensional single precision kd_points.
  *
@@ -67,7 +74,7 @@ void *feature_vector<float, 24U>::operator new [] (size_t size) {
  * \return Euclidean squared distance between the two kd_points.
 */
 template <>
-float feature_vector<float, 24U>::distance_to(const feature_vector<float, 24U> &p) const {
+float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p) const {
 
   // Set data pointers as SSE vectors. Let's say each is composed of 6 4-float vectors: A B C D E F.
   __m128 *this_data = (__m128 *) data;
@@ -119,7 +126,7 @@ float feature_vector<float, 24U>::distance_to(const feature_vector<float, 24U> &
  * \return Euclidean squared distance between the two kd_points or a partial result greater or equal than \a upper.
 */
 template <>
-float feature_vector<float, 24U>::distance_to(const feature_vector<float, 24U> &p, float upper) const {
+float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p, float upper) const {
 
   // Set data pointers as SSE vectors. Let's say each is composed of 6 4-float vectors: A B C D E F.
   __m128 *this_data = (__m128 *) data;

@@ -27,10 +27,7 @@
 #ifndef _INDIRECT_HEAP_H_
 #define _INDIRECT_HEAP_H_
 
-// Include required C Standard Library STL files.
-#include <algorithm>
-#include <cassert>
-#include <cstring>
+// Include the std::less predicate (used by default).
 #include <functional>
 
 namespace kche_tree {
@@ -46,7 +43,7 @@ namespace kche_tree {
  * \tparam idx Type used for encoding data vector indices. Defaults to unsigned int, but can be reduced to short or char for small K values.
 */
 template <typename T, typename Compare = std::less<T>, typename idx = unsigned int>
-class indirect_heap {
+class IndirectHeap {
 protected:
 
   mutable const T *data; ///< Array of stored elements. Shifted to be 1-indexed.
@@ -72,15 +69,15 @@ protected:
 public:
 
   // Constructors and destructors.
-  indirect_heap(const T *data, unsigned int size, unsigned int maxSize = 0, const Compare &c = Compare());
-  indirect_heap(const indirect_heap &heap);
-  ~indirect_heap();
+  IndirectHeap(const T *data, unsigned int size, unsigned int maxSize = 0, const Compare &c = Compare());
+  IndirectHeap(const IndirectHeap &heap);
+  ~IndirectHeap();
 
   // Assignment operator (only the heap structure is copied, not the data pointer).
-  indirect_heap &operator = (const indirect_heap &heap);
+  IndirectHeap &operator = (const IndirectHeap &heap);
 
   // Comparison operator (only heap structure is compared, not data pointers or data itself).
-  bool operator == (const indirect_heap &heap) const;
+  bool operator == (const IndirectHeap &heap) const;
 
   // Data pointer adjustment.
   void setData(const T *data); ///< Update the pointer to data. Same size and structure is assumed. May require to rebuild the heap.
@@ -109,9 +106,9 @@ public:
   T &top() const;
 };
 
+} // namespace kche_tree
+
 // Template implementation.
 #include "indirect_heap.cpp"
-
-} // namespace kche_tree
 
 #endif

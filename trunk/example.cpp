@@ -20,7 +20,7 @@
 
 /**
  * \file example.cpp
- * \brief Example program to illustrate the use of the kd_tree template.
+ * \brief Example program to illustrate the use of the KDTree template.
  * \author Leandro Graciá Gil
  */
 
@@ -40,31 +40,25 @@
 #include "kche-tree.h"
 using namespace kche_tree;
 
-/// Number of dimensions to use in this test.
+/// Number of dimensions to use in this example.
 const unsigned int D = 24;
 
-/// Alias for the specific kd_tree type being used.
-typedef kd_tree<float, D> kdtree_test;
+/// Alias for the specific KDTree and data set types being used.
+typedef KDTree<float, D> KDTreeTest;
+typedef DataSet<float, D> DataSetTest;
 
 /**
  * Generate and initialize randomly a set of feature vectors.
  *
- * \param size Size of the set to generate.
- * \return A new set of \a size feature vectors initialized with random values in [-100, 100].
+ * \param dataset Data set to fill with random values.
  */
-kdtree_test::kd_point *generate_random_set(unsigned int size) {
-
-  // Allocate the set.
-  kdtree_test::kd_point *set = new kdtree_test::kd_point[size];
+void generate_random_set(DataSetTest &dataset) {
 
   // Initialize it randomly with values between -100 and 100.
-  for (unsigned int i=0; i<size; ++i) {
+  for (unsigned int i=0; i<dataset.size(); ++i) {
     for (unsigned int d=0; d<D; ++d)
-      set[i][d] = 100.0f * (rand() / (2.0f * RAND_MAX) - 1.0f);
+      dataset[i][d] = 100.0f * (rand() / (2.0f * RAND_MAX) - 1.0f);
   }
-
-  // Return the new set.
-  return set;
 }
 
 /**
@@ -80,38 +74,33 @@ int main(int argc, char *argv[]) {
   srand(time(NULL));
 
   // Generate 500000 random feature vectors for training.
-  const unsigned int N_train = 500000;
-  kdtree_test::kd_point *train = generate_random_set(N_train);
+  DataSetTest train_set(500000);
+  generate_random_set(train_set);
 
   // Create and build a new kd-tree with the training set.
-  kdtree_test kdtree;
-  kdtree.build(train, N_train);
+  KDTreeTest kdtree;
+  kdtree.build(train_set);
 
   // Generate 5 random feature vectors for testing.
-  const unsigned int N_test = 5;
-  kdtree_test::kd_point *test = generate_random_set(N_test);
+  DataSetTest test_set(5);
+  generate_random_set(test_set);
 
-  // Set the number of neighbours to retrieve and the epsilon used.
+  // Set the number of neighbours to retrieve.
   const unsigned int K = 3;
-  const float epsilon = 0.0f;
 
   // For each test case...
-  for (unsigned int i=0; i<N_test; ++i) {
+  for (unsigned int i=0; i<test_set.size(); ++i) {
 
     // Retrieve the K nearest neighbours.
-    std::vector<kdtree_test::kd_neighbour> neighbours;
-    kdtree.knn(test[i], K, neighbours, epsilon);
+    std::vector<KDTreeTest::Neighbour> neighbours;
+    kdtree.knn(test_set[i], K, neighbours);
 
     // Print distances to the K nearest neighbours.
-    printf("Distance to nearest neighbours in test case %d: ", i + 1);
+    printf("Distance to the %d nearest neighbours in test case %d: ", K, i + 1);
     for (unsigned int k=0; k<K; ++k)
       printf("%.4f ", sqrtf(neighbours[k].squared_distance));
     printf("\n");
   }
-
-  // Release feature vector sets.
-  delete []train;
-  delete []test;
 
   return 0;
 }

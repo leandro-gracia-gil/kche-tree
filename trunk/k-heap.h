@@ -27,14 +27,12 @@
 #ifndef _K_HEAP_H_
 #define _K_HEAP_H_
 
-// Include indirect heaps.
-#include "indirect_heap.h"
-
-// Include required C Standard Library STL files.
-#include <algorithm>
+// Include the std::less predicate (used by default).
 #include <functional>
-#include <cassert>
-#include <cstring>
+
+// Include indirect heaps and raw type options.
+#include "indirect_heap.h"
+#include "raw-types.h"
 
 namespace kche_tree {
 
@@ -48,19 +46,19 @@ namespace kche_tree {
  * \tparam idx Type used for encoding data vector indices. Defaults to unsigned int, but can be reduced to short or char for small K values.
 */
 template <typename T, typename Compare = std::less<T>, typename idx = unsigned int>
-class k_heap {
+class KHeap {
 public:
 
   // Constructors and destructors.
-  k_heap(unsigned int k); ///< K-heap constructor.
-  k_heap(const k_heap &heap); ///< Copy constructor.
-  ~k_heap(); ///< Default destructor.
+  KHeap(unsigned int k); ///< K-heap constructor.
+  KHeap(const KHeap &heap); ///< Copy constructor.
+  ~KHeap(); ///< Default destructor.
 
   // Assignment operator.
-  k_heap &operator =(const k_heap &heap); ///< Assignment operator.
+  KHeap &operator =(const KHeap &heap); ///< Assignment operator.
 
   // Comparison operator.
-  bool operator ==(const k_heap &heap) const; ///< Comparison operator.
+  bool operator ==(const KHeap &heap) const; ///< Comparison operator.
 
   // Heap operations.
   bool push(const T &elem); ///< Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).
@@ -80,14 +78,14 @@ public:
 
 
   // STL-based names for heap operations and properties.
-  bool push_front(const T &elem) { return push(elem); } ///< Same as \link k_heap::push push\endlink.
-  bool push_back (const T &elem) { return push(elem); } ///< Same as \link k_heap::push push\endlink.
+  bool push_front(const T &elem) { return push(elem); } ///< Same as \link KHeap::push push\endlink.
+  bool push_back (const T &elem) { return push(elem); } ///< Same as \link KHeap::push push\endlink.
 
-  void pop_front() { pop_worst(); } ///< Same as \link k_heap::pop_worst\endlink.
-  void pop_back()  { pop_best(); } ///< Same as \link k_heap::pop_best\endlink.
+  void pop_front() { pop_worst(); } ///< Same as \link KHeap::pop_worst\endlink.
+  void pop_back()  { pop_best(); } ///< Same as \link KHeap::pop_best\endlink.
 
-  const T &front() const { return worst();  } ///< Same as \link k_heap::worst\endlink.
-  const T &back()  const { return best(); } ///< Same as \link k_heap::best\endlink.
+  const T &front() const { return worst();  } ///< Same as \link KHeap::worst\endlink.
+  const T &back()  const { return best(); } ///< Same as \link KHeap::best\endlink.
 
 
 protected:
@@ -97,13 +95,13 @@ protected:
   const Compare &compare; ///< Comparison object used by internal heaps.
   static const idx root = 1; ///< Root index of the heap.
 
-  indirect_heap<T, Compare, idx> bestHeap; ///< Heap storing best data indices.
-  indirect_heap<T, std::binary_negate<Compare>, idx> worstHeap; ///< Heap storing worst data indices.
+  IndirectHeap<T, Compare, idx> bestHeap; ///< Heap storing best data indices.
+  IndirectHeap<T, std::binary_negate<Compare>, idx> worstHeap; ///< Heap storing worst data indices.
 };
+
+} // namespace kche_tree
 
 // Template implementation.
 #include "k-heap.cpp"
-
-} // namespace kche_tree
 
 #endif

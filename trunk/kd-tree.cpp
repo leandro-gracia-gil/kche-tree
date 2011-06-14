@@ -30,12 +30,19 @@
 #include <algorithm>
 #include <new>
 
+#ifdef DEBUG_KDTREE
+#include <iomanip>
+#include <iostream>
+#endif
+
+namespace kche_tree {
+
 /**
  * Default kd-tree constructor.
  * Creates an empty and uninitialized kd-tree.
  */
 template <typename T, const unsigned int D, typename S>
-kd_tree<T, D, S>::kd_tree()
+KDTree<T, D, S>::KDTree()
   : root(NULL),
     data(NULL),
     permutation(NULL),
@@ -46,7 +53,7 @@ kd_tree<T, D, S>::kd_tree()
  * Default kd-tree desstructor.
  */
 template <typename T, const unsigned int D, typename S>
-kd_tree<T, D, S>::~kd_tree() {
+KDTree<T, D, S>::~KDTree() {
 
   // Delete allocated contents.
   release();
@@ -56,7 +63,7 @@ kd_tree<T, D, S>::~kd_tree() {
  * Release any existing contents in the kd-tree.
  */
 template <typename T, const unsigned int D, typename S>
-void kd_tree<T, D, S>::release() {
+void KDTree<T, D, S>::release() {
 
   // Release tree nodes and data arrays.
   delete root;
@@ -81,23 +88,23 @@ void kd_tree<T, D, S>::release() {
  * \return Reference to the index-th element provided when building the tree (internal copy).
  */
 template <typename T, const unsigned int D, typename S>
-const typename kd_tree<T, D, S>::kd_point & kd_tree<T, D, S>::operator [] (unsigned int index) const {
+const typename KDTree<T, D, S>::Point & KDTree<T, D, S>::operator [] (unsigned int index) const {
   return data[inverse_perm[index]];
 }
 
 /**
  * Build a kd-tree from a set of \a n D-dimensional samples.
  *
- * \param points Array of contiguous D-dimensional kd_points.
- * \param num_points Number of elements in \a p.
+ * \param train_set Train set used to build the kd-tree.
  * \param bucket_size Number of elements that should be grouped in leaf nodes.
  * \return \c true if successful, \c false otherwise.
  */
 template <typename T, const unsigned int D, typename S>
-bool kd_tree<T, D, S>::build(const kd_point *points, unsigned int num_points, unsigned int bucket_size) {
+bool KDTree<T, D, S>::build(const DataSet<T, D>& train_set, unsigned int bucket_size) {
 
   // Check params.
-  if (points == NULL || num_points == 0 || bucket_size == 0)
+  unsigned int num_points = train_set.size();
+  if (num_points == 0 || bucket_size == 0)
     return false;
 
   // Delete any previous kd-tree.
@@ -110,13 +117,13 @@ bool kd_tree<T, D, S>::build(const kd_point *points, unsigned int num_points, un
 
   // Build the kd-tree recursively (num_elements will contain a recursively-calculated num_points after the call).
   num_elements = 0;
-  root = kd_node::build(points, permutation, num_points, NULL, bucket_size, num_elements);
+  root = Node::build(&train_set[0], permutation, train_set.size(), NULL, bucket_size, num_elements);
 
   // Make a permutated copy of the input data and calculate the inverse permutation.
-  data = new kd_point[num_points];
+  data = new Point[num_points];
   inverse_perm = new unsigned int[num_points];
   for (unsigned int i=0; i<num_points; ++i) {
-    data[i] = points[permutation[i]];
+    data[i] = train_set[permutation[i]];
     inverse_perm[permutation[i]] = i;
   }
 
@@ -135,21 +142,21 @@ bool kd_tree<T, D, S>::build(const kd_point *points, unsigned int num_points, un
  * \return Node of the tree completely initialized.
  */
 template <typename T, const unsigned int D, typename S>
-typename kd_tree<T, D, S>::kd_node *kd_tree<T, D, S>::kd_node::build(const kd_point *data, unsigned int *indices, unsigned int n,
-    kd_node *parent, unsigned int bucket_size, unsigned int &processed) {
+typename KDTree<T, D, S>::Node *KDTree<T, D, S>::Node::build(const Point *data, unsigned int *indices, unsigned int n,
+    Node *parent, unsigned int bucket_size, unsigned int &processed) {
 
   // Handle empty nodes (only for degenerate bucket sizes).
   if (n == 0)
     return NULL;
 
   // Allocate a new node.
-  kd_node *node = new kd_node();
+  Node *node = new Node();
 
   // Split the data with a basic cycle over the dimension indices.
   node->axis = parent ? (parent->axis + 1) % D : 0;
 
   // Create a sorter for the current axis.
-  kd_axis_comparer comparer = { data, node->axis };
+  AxisComparer comparer = { data, node->axis };
 
   // Find a pivot to split data appropiately (may involve index sorting or partitioning).
   unsigned int pivot = node->split(indices, n, comparer);
@@ -166,7 +173,7 @@ typename kd_tree<T, D, S>::kd_node *kd_tree<T, D, S>::kd_node::build(const kd_po
   if (left_elements > bucket_size)
     node->left_branch = build(data, indices, left_elements, node, bucket_size, processed);
   else {
-    node->left_leaf = new kd_leaf(processed, left_elements);
+    node->left_leaf = new Leaf(processed, left_elements);
     node->is_leaf |= left_bit;
     processed += left_elements;
   }
@@ -175,7 +182,7 @@ typename kd_tree<T, D, S>::kd_node *kd_tree<T, D, S>::kd_node::build(const kd_po
   if (right_elements > bucket_size)
     node->right_branch = build(data, right_indices, right_elements, node, bucket_size, processed);
   else {
-    node->right_leaf = new kd_leaf(processed, right_elements);
+    node->right_leaf = new Leaf(processed, right_elements);
     node->is_leaf |= right_bit;
     processed += right_elements;
   }
@@ -197,7 +204,7 @@ typename kd_tree<T, D, S>::kd_node *kd_tree<T, D, S>::kd_node::build(const kd_po
  * All data in the left half must be less than the value associated to this index.
  */
 template <typename T, const unsigned int D, typename S>
-unsigned int kd_tree<T, D, S>::kd_node::split(unsigned int *indices, unsigned int n, const kd_axis_comparer &comparer) {
+unsigned int KDTree<T, D, S>::Node::split(unsigned int *indices, unsigned int n, const AxisComparer &comparer) {
 
   // Avoid sorting when less than 2 elements (base case).
   if (n < 2)
@@ -216,7 +223,7 @@ unsigned int kd_tree<T, D, S>::kd_node::split(unsigned int *indices, unsigned in
  * Delete the tree recursively handling branches and leaf nodes appropiately.
  */
 template <typename T, const unsigned int D, typename S>
-kd_tree<T, D, S>::kd_node::~kd_node() {
+KDTree<T, D, S>::Node::~Node() {
 
   // Delete left branch / leaf.
   if (is_leaf & left_bit)
@@ -232,8 +239,8 @@ kd_tree<T, D, S>::kd_node::~kd_node() {
 }
 
 /**
- * Find the K nearest neighbours of a given kd_point and push their indices sorted into a given STL vector.
- * In case that there are not enough kd_points in the tree, all the available ones will be provided.
+ * Find the K nearest neighbours of a given Point and push their indices sorted into a given STL vector.
+ * In case that there are not enough Points in the tree, all the available ones will be provided.
  *
  * \param p Point whose \a K neighbours should be retrieved.
  * \param K Number of nearest neighbours to retrieve.
@@ -242,14 +249,14 @@ kd_tree<T, D, S>::kd_node::~kd_node() {
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
 template <typename T, const unsigned int D, typename S>
-void kd_tree<T, D, S>::knn(const kd_point &p, unsigned int K, std::vector<kd_neighbour> &output, T epsilon, bool ignore_p_in_tree) const {
+void KDTree<T, D, S>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, T epsilon, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || num_elements == 0 || K == 0)
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle-hypersphere intersection calculation.
-  kd_search_data search_data(p, data, K, ignore_p_in_tree);
+  SearchData search_data(p, data, K, ignore_p_in_tree);
 
   // Convert epsilon to a squared distance and set it as initial hyperrectangle distance.
   search_data.hyperrect_distance = epsilon * epsilon;
@@ -262,7 +269,7 @@ void kd_tree<T, D, S>::knn(const kd_point &p, unsigned int K, std::vector<kd_nei
 
   // Append the nearest neighbours to the output vector in increasing distance correcting index permutations.
   while (!best_k.empty()) {
-    kd_neighbour neighbour = best_k.back();
+    Neighbour neighbour = best_k.back();
     neighbour.index = permutation[neighbour.index];
     output.push_back(neighbour);
     best_k.pop_back();
@@ -270,8 +277,8 @@ void kd_tree<T, D, S>::knn(const kd_point &p, unsigned int K, std::vector<kd_nei
 }
 
 /**
- * Find the K nearest neighbours of a given kd_point and push their indices sorted into a given STL vector.
- * In case that there are not enough kd_points in the tree, all the available ones will be provided.
+ * Find the K nearest neighbours of a given Point and push their indices sorted into a given STL vector.
+ * In case that there are not enough Points in the tree, all the available ones will be provided.
  *
  * \param p Point whose \a K neighbours should be retrieved.
  * \param distance Euclidean distance margin used to retrieve all points within.
@@ -279,28 +286,28 @@ void kd_tree<T, D, S>::knn(const kd_point &p, unsigned int K, std::vector<kd_nei
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
 template <typename T, const unsigned int D, typename S>
-void kd_tree<T, D, S>::all_in_range(const kd_point &p, T distance, std::vector<kd_neighbour> &output, bool ignore_p_in_tree) const {
+void KDTree<T, D, S>::all_in_range(const Point &p, T distance, std::vector<Neighbour> &output, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || num_elements == 0 || distance <= (T) 0)
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle-hypersphere intersection calculation.
-  kd_search_data search_data(p, data, 0, ignore_p_in_tree);
+  SearchData search_data(p, data, 0, ignore_p_in_tree);
   search_data.farthest_distance = distance * distance;
 
   // Build a STL vector to hold all the points in range.
-  std::vector<kd_neighbour> points_in_range;
+  std::vector<Neighbour> points_in_range;
 
   // Store a dummy element in the vector with the distance range (will act as the farthest nearest neighbour during calculations).
-  points_in_range.push_back(kd_neighbour(-1, search_data.farthest_distance));
+  points_in_range.push_back(Neighbour(-1, search_data.farthest_distance));
 
   // Start an exploration traversal from the root.
   root->explore(NULL, search_data, points_in_range);
 
   // Append the nearest neighbours to the output vector correcting index permutations.
   for (unsigned int i=1; i<points_in_range.size(); ++i) {
-    kd_neighbour neighbour = points_in_range[i];
+    Neighbour neighbour = points_in_range[i];
     neighbour.index = permutation[neighbour.index];
     output.push_back(neighbour);
   }
@@ -315,7 +322,7 @@ void kd_tree<T, D, S>::all_in_range(const kd_point &p, T distance, std::vector<k
  * \param ignore_null_distances_arg Indicate that points with null distance should be ignored.
  */
 template <typename T, const unsigned int D, typename S>
-kd_tree<T, D, S>::kd_search_data::kd_search_data(const kd_point &p, const kd_point *data, unsigned int K, bool ignore_null_distances_arg)
+KDTree<T, D, S>::SearchData::SearchData(const Point &p, const Point *data, unsigned int K, bool ignore_null_distances_arg)
   : p(p),
     data(data),
     K(K),
@@ -338,7 +345,7 @@ kd_tree<T, D, S>::kd_search_data::kd_search_data(const kd_point &p, const kd_poi
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  */
 template <typename T, const unsigned int D, typename S>
-kd_tree<T, D, S>::kd_incremental::kd_incremental(const kd_node *node, const kd_node *parent, kd_search_data &search_data)
+KDTree<T, D, S>::Incremental::Incremental(const Node *node, const Node *parent, SearchData &search_data)
   : search_data(search_data),
     parent_axis(0),
     modified(false),
@@ -350,8 +357,8 @@ kd_tree<T, D, S>::kd_incremental::kd_incremental(const kd_node *node, const kd_n
     return;
 
   // Get splitting axis data.
-  parent_axis = parent->axis & kd_node::axis_mask;
-  typename kd_search_data::axis_data *axis = &search_data.axis[parent_axis];
+  parent_axis = parent->axis & Node::axis_mask;
+  typename SearchData::AxisData *axis = &search_data.axis[parent_axis];
 
   // Check if current branch modifies the bounding hyperrectangle.
   if ((parent->left_branch  == node && parent->split_value > axis->nearest) ||
@@ -372,7 +379,7 @@ kd_tree<T, D, S>::kd_incremental::kd_incremental(const kd_node *node, const kd_n
  * Restore the updated values to their previous ones, if modified.
  */
 template <typename T, const unsigned int D, typename S>
-kd_tree<T, D, S>::kd_incremental::~kd_incremental() {
+KDTree<T, D, S>::Incremental::~Incremental() {
 
   // Restore previous values if modified.
   if (modified) {
@@ -389,14 +396,14 @@ kd_tree<T, D, S>::kd_incremental::~kd_incremental() {
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
 template <typename T, const unsigned int D, typename S> template <typename C>
-void kd_tree<T, D, S>::kd_node::explore(const kd_node *parent, kd_search_data &search_data, C &candidates) const {
+void KDTree<T, D, S>::Node::explore(const Node *parent, SearchData &search_data, C &candidates) const {
 
   // Intersection data is updated incrementally when the object is created, and restored when destroyed.
-  kd_incremental incremental_update(this, parent, search_data);
+  Incremental incremental_update(this, parent, search_data);
 
   // Check which branch should be explored first.
-  kd_node *first_branch = NULL, *second_branch = NULL;
-  kd_leaf *first_leaf = NULL, *second_leaf = NULL;
+  Node *first_branch = NULL, *second_branch = NULL;
+  Leaf *first_leaf = NULL, *second_leaf = NULL;
 
   // Left branch first or same point.
   if (search_data.p[axis & axis_mask] <= split_value) {
@@ -462,10 +469,10 @@ void kd_tree<T, D, S>::kd_node::explore(const kd_node *parent, kd_search_data &s
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
 template <typename T, const unsigned int D, typename S> template <typename C>
-void kd_tree<T, D, S>::kd_node::intersect(const kd_node *parent, kd_search_data &search_data, C &candidates) const {
+void KDTree<T, D, S>::Node::intersect(const Node *parent, SearchData &search_data, C &candidates) const {
 
   // Intersection data is updated incrementally when the object is created, and restored when destroyed.
-  kd_incremental incremental_update(this, parent, search_data);
+  Incremental incremental_update(this, parent, search_data);
 
   // Check if the hypersphere from current worst neighbour candidate intersects the region hyperrectangle.
   if (!(search_data.hyperrect_distance < search_data.farthest_distance))
@@ -499,7 +506,7 @@ void kd_tree<T, D, S>::kd_node::intersect(const kd_node *parent, kd_search_data 
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
 template <typename T, const unsigned int D, typename S> template <typename C>
-void kd_tree<T, D, S>::kd_leaf::explore(kd_search_data &search_data, C &candidates) const {
+void KDTree<T, D, S>::Leaf::explore(SearchData &search_data, C &candidates) const {
 
   if (search_data.ignore_null_distances) {
 
@@ -507,14 +514,14 @@ void kd_tree<T, D, S>::kd_leaf::explore(kd_search_data &search_data, C &candidat
     for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
       T distance = search_data.p.distance_to(search_data.data[i]);
       if (distance > (T) 0)
-        candidates.push_back(kd_neighbour(i, search_data.p.distance_to(search_data.data[i])));
+        candidates.push_back(Neighbour(i, search_data.p.distance_to(search_data.data[i])));
     }
 
   } else {
     // Process all the buckets in the node.
     for (unsigned int i=first_index; i < first_index + num_elements; ++i)
       // Create a new neighbour candidate with the point referenced by this node and push it into the K best ones.
-      candidates.push_back(kd_neighbour(i, search_data.p.distance_to(search_data.data[i])));
+      candidates.push_back(Neighbour(i, search_data.p.distance_to(search_data.data[i])));
   }
 
   // Update current farthest nearest neighbour distance.
@@ -529,7 +536,7 @@ void kd_tree<T, D, S>::kd_leaf::explore(kd_search_data &search_data, C &candidat
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
 template <typename T, const unsigned int D, typename S> template <typename C>
-void kd_tree<T, D, S>::kd_leaf::intersect(kd_search_data &search_data, C &candidates) const {
+void KDTree<T, D, S>::Leaf::intersect(SearchData &search_data, C &candidates) const {
 
   // Process all the buckets in the node.
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
@@ -541,7 +548,7 @@ void kd_tree<T, D, S>::kd_leaf::intersect(kd_search_data &search_data, C &candid
     if (new_distance <= search_data.farthest_distance) {
 
       // Push it in the nearest neighbour container (will reject the previous farthest one).
-      candidates.push_back(kd_neighbour(i, new_distance));
+      candidates.push_back(Neighbour(i, new_distance));
 
       // Update the distance to the new farthest nearest neighbour.
       search_data.farthest_distance = candidates.front().squared_distance;
@@ -557,7 +564,7 @@ void kd_tree<T, D, S>::kd_leaf::intersect(kd_search_data &search_data, C &candid
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
 template <typename T, const unsigned int D, typename S> template <typename C>
-void kd_tree<T, D, S>::kd_leaf::intersect_ignoring_same(kd_search_data &search_data, C &candidates) const {
+void KDTree<T, D, S>::Leaf::intersect_ignoring_same(SearchData &search_data, C &candidates) const {
 
   // Process all the buckets in the node.
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
@@ -571,7 +578,7 @@ void kd_tree<T, D, S>::kd_leaf::intersect_ignoring_same(kd_search_data &search_d
     if (new_distance <= search_data.farthest_distance) {
 
       // Push it in the nearest neighbour container (will reject the previous farthest one).
-      candidates.push_back(kd_neighbour(i, new_distance));
+      candidates.push_back(Neighbour(i, new_distance));
 
       // Update the distance to the new farthest nearest neighbour.
       search_data.farthest_distance = candidates.front().squared_distance;
@@ -579,29 +586,28 @@ void kd_tree<T, D, S>::kd_leaf::intersect_ignoring_same(kd_search_data &search_d
   }
 }
 
-
 #ifdef DEBUG_KDTREE
 template <typename T, const unsigned int D, typename S>
-bool kd_tree<T, D, S>::verify() const {
+bool KDTree<T, D, S>::verify() const {
   return root->verify(data, 0);
 }
 
 template <typename T, const unsigned int D, typename S>
-bool kd_tree<T, D, S>::kd_node::verify(const kd_point* data, int axis) const {
+bool KDTree<T, D, S>::Node::verify(const Point *data, int axis) const {
 
   bool result;
   if (is_leaf & left_bit)
-    result = left_leaf->verify_less_than(data, split_value, axis);
+    result = left_leaf->verify_op(data, split_value, axis, std::less_equal<T>());
   else
-    result = left_branch->verify_less_than(data, split_value, axis);
+    result = left_branch->verify_op(data, split_value, axis, std::less_equal<T>());
 
   if (!result)
     return false;
 
   if (is_leaf & right_bit)
-    result = right_leaf->verify_more_than(data, split_value, axis);
+    result = right_leaf->verify_op(data, split_value, axis, std::greater_equal<T>());
   else
-    result = right_branch->verify_more_than(data, split_value, axis);
+    result = right_branch->verify_op(data, split_value, axis, std::greater_equal<T>());
 
   if (!result)
     return false;
@@ -618,52 +624,33 @@ bool kd_tree<T, D, S>::kd_node::verify(const kd_point* data, int axis) const {
   return result;
 }
 
-template <typename T, const unsigned int D, typename S>
-bool kd_tree<T, D, S>::kd_node::verify_less_than(const kd_point* data, float value, int axis) const {
+template <typename T, const unsigned int D, typename S> template <typename Op>
+bool KDTree<T, D, S>::Node::verify_op(const Point *data, float value, int axis, const Op &op) const {
 
   bool result;
   if (is_leaf & left_bit)
-    result = left_leaf->verify_less_than(data, value, axis);
+    result = left_leaf->verify_op(data, value, axis, op);
   else
-    result = left_branch->verify_less_than(data, value, axis);
+    result = left_branch->verify_op(data, value, axis, op);
 
   if (!result)
     return false;
 
   if (is_leaf & right_bit)
-    result = right_leaf->verify_less_than(data, value, axis);
+    result = right_leaf->verify_op(data, value, axis, op);
   else
-    result = right_branch->verify_less_than(data, value, axis);
+    result = right_branch->verify_op(data, value, axis, op);
 
   return result;
 }
 
-template <typename T, const unsigned int D, typename S>
-bool kd_tree<T, D, S>::kd_node::verify_more_than(const kd_point* data, float value, int axis) const {
-
-  bool result;
-  if (is_leaf & left_bit)
-    result = left_leaf->verify_more_than(data, value, axis);
-  else
-    result = left_branch->verify_more_than(data, value, axis);
-
-  if (!result)
-    return false;
-
-  if (is_leaf & right_bit)
-    result = right_leaf->verify_more_than(data, value, axis);
-  else
-    result = right_branch->verify_more_than(data, value, axis);
-
-  return result;
-}
-
-template <typename T, const unsigned int D, typename S>
-bool kd_tree<T, D, S>::kd_leaf::verify_less_than(const kd_point*data, float value, int axis) const {
+template <typename T, const unsigned int D, typename S> template <typename Op>
+bool KDTree<T, D, S>::Leaf::verify_op(const Point *data, float value, int axis, const Op &op) const {
 
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
-    if (!(data[i][axis] <= value)) {
-      fprintf(stderr, "Error: %.3f should be <= %.3f for axis %d\n", data[i][axis], value, axis);
+    if (!op(data[i][axis], value)) {
+      std::cerr << "Error: " << std::fixed << std::setprecision(3) << data[i][axis] <<
+          " should be '" << typeid(Op).name() << "' than " << value << " for axis " << axis << std::endl;
       return false;
     }
   }
@@ -671,16 +658,6 @@ bool kd_tree<T, D, S>::kd_leaf::verify_less_than(const kd_point*data, float valu
   return true;
 }
 
-template <typename T, const unsigned int D, typename S>
-bool kd_tree<T, D, S>::kd_leaf::verify_more_than(const kd_point* data, float value, int axis) const {
-
-  for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
-    if (!(data[i][axis] >= value)) {
-      fprintf(stderr, "Error: %.3f should be >= %.3f for axis %d\n", data[i][axis], value, axis);
-      return false;
-    }
-  }
-
-  return true;
-}
 #endif // DEBUG_KDTREE
+
+} // namespace kche_tree
