@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 /**
- * \file dataset.cpp
+ * \file dataset.tpp
  * \brief Template implementation for data sets containing an array of feature vectors.
  * \author Leandro Graciá Gil
 */

@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 /**
- * \file vector.cpp
+ * \file vector.tpp
  * \brief Template implementations for generic D-dimensional feature vectors.
  * \author Leandro Graciá Gil
  */

@@ -101,6 +101,6 @@ private:
 } // namespace kche_tree
 
 // Template implementation.
-#include "dataset.cpp"
+#include "dataset.tpp"
 
 #endif

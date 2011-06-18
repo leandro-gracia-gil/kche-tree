@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 /**
- * \file k-vector.cpp
+ * \file k-vector.tpp
  * \brief Template implementations for k-vectors holding the best k elements (linear, but simpler).
  * \author Leandro Graciá Gil
 */

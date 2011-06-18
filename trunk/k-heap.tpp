@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 /**
- * \file k-heap.cpp
+ * \file k-heap.tpp
  * \brief Template implementations for k-heaps holding the best k elements.
  * \author Leandro Graciá Gil
 */
