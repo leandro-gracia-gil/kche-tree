@@ -109,6 +109,6 @@ public:
 } // namespace kche_tree
 
 // Template implementation.
-#include "indirect_heap.cpp"
+#include "indirect_heap.tpp"
 
 #endif

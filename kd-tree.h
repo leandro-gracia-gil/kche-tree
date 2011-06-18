@@ -260,7 +260,7 @@ protected:
 } // namespace kche_tree
 
 // Template implementation.
-#include "kd-tree.cpp"
-#include "kd-tree_io.cpp"
+#include "kd-tree.tpp"
+#include "kd-tree_io.tpp"
 
 #endif

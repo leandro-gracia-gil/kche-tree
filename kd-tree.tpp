@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 /**
- * \file kd-tree.cpp
+ * \file kd-tree.tpp
  * \brief Template implementations for generic kd-trees.
  * \author Leandro Graciá Gil
  */

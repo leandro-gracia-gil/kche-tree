@@ -103,6 +103,6 @@ struct VectorDistance : public std::binary_function <VectorDistance<T>, VectorDi
 } // namespace kche_tree
 
 // Template implementation.
-#include "vector.cpp"
+#include "vector.tpp"
 
 #endif

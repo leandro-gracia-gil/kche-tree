@@ -102,6 +102,6 @@ protected:
 } // namespace kche_tree
 
 // Template implementation.
-#include "k-heap.cpp"
+#include "k-heap.tpp"
 
 #endif

@@ -4,10 +4,10 @@ CFLAGS=-O3 -Wall
 SSE_FLAGS=-msse -DSSE
 
 TEMPLATE_FILES= kche-tree.h kche-tree_sse_24d.h
-TEMPLATE_FILES+= kd-tree.h kd-tree.cpp kd-tree_io.cpp
-TEMPLATE_FILES+= k-heap.h k-heap.cpp indirect_heap.h indirect_heap.cpp
-TEMPLATE_FILES+= k-vector.h k-vector.cpp
-TEMPLATE_FILES+= vector.h vector.cpp dataset.h dataset.cpp
+TEMPLATE_FILES+= kd-tree.h kd-tree.tpp kd-tree_io.tpp
+TEMPLATE_FILES+= k-heap.h k-heap.tpp indirect_heap.h indirect_heap.tpp
+TEMPLATE_FILES+= k-vector.h k-vector.tpp
+TEMPLATE_FILES+= vector.h vector.tpp dataset.h dataset.tpp
 TEMPLATE_FILES+= raw-types.h mapreduce.h
 
 MAKEFILE=Makefile
@@ -37,6 +37,6 @@ $(EXAMPLE): $(TEMPLATE_FILES) $(EXAMPLE).cpp $(MAKEFILE)
 	@$(CPP) $(CFLAGS) $(EXAMPLE).cpp -o $@
 
 clean:
-	@rm -f $(SPEED) $(SPEED)_args.* $(SPEED)_sse
-	@rm -f $(TEST) $(TEST)_args.* $(TEST)_sse
-	@rm -f $(EXAMPLE)
+	@rm -Rf $(SPEED) $(SPEED).dSYM $(SPEED)_args.* $(SPEED)_sse
+	@rm -Rf $(TEST) $(TEST).dSYM $(TEST)_args.* $(TEST)_sse
+	@rm -Rf $(EXAMPLE) $(EXAMPLE).dSYM

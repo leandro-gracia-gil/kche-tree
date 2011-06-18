@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 /**
- * \file kd-tree_io.cpp
+ * \file kd-tree_io.tpp
  * \brief Template implementations for stream operations in kd-trees.
  * \author Leandro Graciá Gil
  */

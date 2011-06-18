@@ -74,6 +74,6 @@ protected:
 } // namespace kche_tree
 
 // Template implementation.
-#include "k-vector.cpp"
+#include "k-vector.tpp"
 
 #endif

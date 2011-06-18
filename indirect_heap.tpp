@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 /**
- * \file indirect_heap.cpp
+ * \file indirect_heap.tpp
  * \brief Template implementations for index-based indirect heaps.
  * \author Leandro Graciá Gil
 */
