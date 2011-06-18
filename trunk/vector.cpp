@@ -24,7 +24,26 @@
  * \author Leandro Graciá Gil
  */
 
+// Include the map-reduce metaprograming templates.
+#include "mapreduce.h"
+
 namespace kche_tree {
+
+/**
+ * Functor to calculate the squared difference between elements in 2 arrays.
+ *
+ * \param a First array.
+ * \param b Second array.
+ * \param i Index of the dimension being calculated.
+ * \return The squared difference between the elements in the \a i-th dimension.
+ */
+template <typename T>
+struct DotFunctor {
+  T operator () (const T *a, const T *b, unsigned int i) const {
+    return (a[i] - b[i]) * (a[i] - b[i]);
+  }
+};
+
 
 /**
  * Generic memory allocator operator for feature vector arrays.
@@ -94,9 +113,9 @@ template <typename T, const unsigned int D>
 T Vector<T, D>::distance_to(const Vector &p) const {
 
   // Standard squared distance between two D-dimensional vectors.
-  T acc = (T) 0;
+  T acc = 0;
   for (unsigned int i=0; i<D; ++i)
-    acc += (data[i] - p[i]) * (data[i] - p[i]);
+    acc += (data[i] - p.data[i]) * (data[i] - p.data[i]);
   return acc;
 }
 
@@ -114,19 +133,16 @@ T Vector<T, D>::distance_to(const Vector &p, T upper_bound) const {
   // Constant calculated empirically.
   const unsigned int D_acc = (unsigned int) (0.4f * D);
 
-  // Squared distance in two steps: first accumulate without comparisons.
-  T acc = (T) 0;
+  // This has been empirically compared with the MapReduce template metaprogramming class,
+  // but the loop seemed to be always faster because of the code locality.
+  T acc = 0;
   for (unsigned int i=0; i<D_acc; ++i)
-    acc += (data[i] - p[i]) * (data[i] - p[i]);
+    acc += (data[i] - p.data[i]) * (data[i] - p.data[i]);
 
-  // Second step: accumulate comparing with upper bound.
-  for (unsigned int i=D_acc; i<D; ++i) {
-    acc += (data[i] - p[i]) * (data[i] - p[i]);
-    if (!(i & 3) && acc > upper_bound)
-      break;
-  }
-
-  return acc;
+  // Calculate the remaining dimensions using an upper bound, and checking it every 4 dimensions.
+  // The template metaprogramming makes sure this interval is performed without actually checking any index or iterator at runtime.
+  // Has been tested to be faster than a loop with the difference being more acute with greater D values.
+  return BoundedMapReduce<T, D, 4, D_acc>::run(DotFunctor<T>(), std::plus<T>(), std::greater<T>(), data, p.data, upper_bound, acc);
 }
 
 } // namespace kche_tree
