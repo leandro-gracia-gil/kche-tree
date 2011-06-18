@@ -24,6 +24,10 @@
  * \author Leandro Graciá Gil
 */
 
+// Include STL strings and auto_ptr.
+#include <memory>
+#include <string>
+
 namespace kche_tree {
 
 /**
@@ -216,18 +220,21 @@ std::istream& operator >> (std::istream& in, DataSet<T, D> &dataset) {
     throw std::runtime_error("error reading type name length data");
 
   // Read type name.
-  char type_name[name_length + 1];
-  in.read(type_name, name_length);
+  std::auto_ptr<char> type_name(new char[name_length + 1]);
+  assert(type_name.get());
+  in.read(type_name.get(), name_length);
   if (!in.good())
     throw std::runtime_error("error reading type name");
-  type_name[name_length] = '\0';
+  type_name.get()[name_length] = '\0';
 
   // Check type name.
   // WARNING: The value returned by typeid::name() is implementation-dependent.
   //          There is a possibility of problems when porting data between different platforms.
-  if (strcmp(typeid(T).name(), type_name)) {
-    char error_msg[name_length + strlen(typeid(T).name()) + 50];
-    sprintf(error_msg, "kd-tree type doesn't match: found %s, expected %s", type_name, typeid(T).name());
+  if (strcmp(typeid(T).name(), type_name.get())) {
+    std::string error_msg = "kd-tree type doesn't match: found ";
+    error_msg += type_name.get();
+    error_msg += ", expected ";
+    error_msg += typeid(T).name();
     throw std::runtime_error(error_msg);
   }
 

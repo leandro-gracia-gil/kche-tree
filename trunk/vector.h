@@ -71,7 +71,11 @@ struct Vector {
   void *operator new [] (size_t size); ///< Standard allocation for arrays of feature vectors.
   void  operator delete [] (void *p); ///< Standard deallocation for arrays of feature vectors.
 
-} __attribute__((packed));
+}
+#ifdef __GNUC__
+__attribute__((packed))
+#endif
+;
 
 /**
  * \brief Vector-distance structure. References a feature vector by its index and its squared distance to another implicit vector.
