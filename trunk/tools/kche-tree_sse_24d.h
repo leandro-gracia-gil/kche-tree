@@ -111,7 +111,7 @@ float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p) const {
   acc1 = _mm_add_ps(acc1, acc2);
 
   // Return the sum of the 4 acc1 elements.
-  const float *f = (const float *) &acc1;
+  const float *f = reinterpret_cast<const float *>(&acc1);
   return f[0] + f[1] + f[2] + f[3];
 }
 
@@ -153,8 +153,8 @@ float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p, float upper) 
   acc1 = _mm_add_ps(acc1, acc2);
 
   // Check upper bound.
-  const float *f = (const float *) &acc1;
-  float partial_acc = f[0] + f[1] + f[2];
+  const float *f1 = reinterpret_cast<const float *>(&acc1);
+  float partial_acc = f1[0] + f1[1] + f1[2] + f1[3];
   if (partial_acc > upper)
     return partial_acc;
 
@@ -165,11 +165,9 @@ float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p, float upper) 
   sqr2 = _mm_mul_ps(sqr2, sqr2);
   acc2 = _mm_add_ps(sqr1, sqr2);
 
-  // Accumulate acc1 += acc2 (acc1 contains A + B + C + D + E + F).
-  acc1 = _mm_add_ps(acc1, acc2);
-
-  // Return the sum of the 4 acc1 elements.
-  return f[0] + f[1] + f[2] + f[3];
+  // Return the sum of the 4 acc2 elements plus the previous accumulation of acc1.
+  const float *f2 = reinterpret_cast<const float *>(&acc2);
+  return partial_acc + f2[0] + f2[1] + f2[2] + f2[3];
 }
 
 } // namespace kche_tree
