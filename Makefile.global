@@ -1,10 +1,12 @@
 CPP=g++
 GOPT=gengetopt
 MAKE=make
+INSTALL=install
 
-INCLUDES=kche-tree
+PREFIX=/usr/include
+INSTALL_FOLDER=kche-tree
 
-CFLAGS=-O3 -Wall -I../kche-tree
+CFLAGS=-O3 -Wall
 SSE_FLAGS=-msse -DSSE
 
 COMPILE_NOTIFY="  [CC]\t$@"

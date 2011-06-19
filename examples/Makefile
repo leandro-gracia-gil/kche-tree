@@ -3,7 +3,7 @@ include ../Makefile.global
 PARENT='../'
 MAKEFILE_DEPS=$(addprefix, $PARENT, $MAKEFILE_DEPS) Makefile
 KCHE_TREE=$(addprefix, $PARENT, $KCHE_TREE)
-INCLUDES=-I$(addprefix, $PARENT, $INCLUDES)
+INCLUDES=-I$(PARENT)
 
 .PHONY: clean
 
@@ -18,4 +18,5 @@ $(EXAMPLES): %: $(MAKEFILE_DEPS) $(KCHE_TREE) %.cpp
 
 clean:
 	@for example in $(EXAMPLES); do \
-	rm -Rf $${example} $${example}.dSYM; done
+		rm -Rf $${example} $${example}.dSYM; \
+	done

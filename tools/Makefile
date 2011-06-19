@@ -3,7 +3,7 @@ include ../Makefile.global
 PARENT='../'
 MAKEFILE_DEPS=$(addprefix, $PARENT, $MAKEFILE_DEPS) Makefile
 KCHE_TREE=$(addprefix, $PARENT, $KCHE_TREE)
-INCLUDES=-I$(addprefix, $PARENT, $INCLUDES)
+INCLUDES=-I$(PARENT)
 
 GENGETOPT_DEPS=gengetopt_found
 .PHONY: clean
@@ -34,4 +34,5 @@ $(TOOLS): %: $(GENGETOPT_DEPS) $(MAKEFILE_DEPS) $(KCHE_TREE) $(TOOLS_COMMON) %.c
 
 clean:
 	@for tool in $(TOOLS); do \
-	rm -Rf $$tool $${tool}.dSYM $${tool}_args.* $${tool}_sse; done
+		rm -Rf $$tool $${tool}.dSYM $${tool}_args.* $${tool}_sse; \
+	done
