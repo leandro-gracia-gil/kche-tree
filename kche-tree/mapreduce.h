@@ -24,8 +24,8 @@
  * \author Leandro Graciá Gil
  */
 
-#ifndef _MAPREDUCE_H_
-#define _MAPREDUCE_H_
+#ifndef _KCHE_TREE_MAPREDUCE_H_
+#define _KCHE_TREE_MAPREDUCE_H_
 
 namespace kche_tree {
 

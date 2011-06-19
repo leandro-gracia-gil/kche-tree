@@ -24,8 +24,8 @@
  * \author Leandro Graciá Gil
 */
 
-#ifndef _RAW_TYPES_H_
-#define _RAW_TYPES_H_
+#ifndef _KCHE_TREE_RAW_TYPES_H_
+#define _KCHE_TREE_RAW_TYPES_H_
 
 // C Standard Library and C++ STL includes.
 #include <algorithm>

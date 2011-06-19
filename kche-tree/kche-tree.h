@@ -82,8 +82,8 @@
  * \author Leandro Graciá Gil
 */
 
-#ifndef _KCHE_TREE_H_
-#define _KCHE_TREE_H_
+#ifndef _KCHE_TREE_KCHE_TREE_H_
+#define _KCHE_TREE_KCHE_TREE_H_
 
 // Required library includes.
 #include "kd-tree.h"

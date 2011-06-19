@@ -24,8 +24,8 @@
  * \author Leandro Graciá Gil
 */
 
-#ifndef _KD_TREE_H_
-#define _KD_TREE_H_
+#ifndef _KCHE_TREE_KD_TREE_H_
+#define _KCHE_TREE_KD_TREE_H_
 
 // Include STL vectors for K neighbours output.
 #include <vector>

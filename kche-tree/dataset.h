@@ -24,8 +24,8 @@
  * \author Leandro Graciá Gil
 */
 
-#ifndef _DATASET_H_
-#define _DATASET_H_
+#ifndef _KCHE_TREE_DATASET_H_
+#define _KCHE_TREE_DATASET_H_
 
 // STL streams, exceptions and runtime type information.
 #include <iostream>
