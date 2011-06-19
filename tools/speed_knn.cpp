@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2010, 2011 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,8 +19,8 @@
  ***************************************************************************/
 
 /**
- * \file speed_kdtree.cpp
- * \brief Benchmark tool for kd-trees.
+ * \file speed_knn.cpp
+ * \brief Speed benchmark tool for the K-Nearest Neighbour search.
  * \author Leandro Graciá Gil
  */
 
@@ -37,8 +37,8 @@
 #endif
 
 // Argument parsing results from gengetopt.
-#include "speed_kdtree_args.h"
-static struct speed_kdtree_args cmdline_args;
+#include "speed_knn_args.h"
+static struct speed_knn_args cmdline_args;
 
 // Auxiliary functions for the tools.
 #include "tool_utils.h"
@@ -61,7 +61,7 @@ typedef DataSet<float, D> DataSetTest;
  * \param argv Params of command line.
  * \param args_info Structure to be filled with parsed input params.
 */
-void parse_cmdline(int argc, char *argv[], speed_kdtree_args *args_info) {
+void parse_cmdline(int argc, char *argv[], speed_knn_args *args_info) {
 
   if (argc == 1) {
     cmdline_parser_print_help();
