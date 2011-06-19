@@ -24,8 +24,8 @@
  * \author Leandro Graciá Gil
 */
 
-#ifndef _INDIRECT_HEAP_H_
-#define _INDIRECT_HEAP_H_
+#ifndef _KCHE_TREE_INDIRECT_HEAP_H_
+#define _KCHE_TREE_INDIRECT_HEAP_H_
 
 // Include the std::less predicate (used by default).
 #include <functional>

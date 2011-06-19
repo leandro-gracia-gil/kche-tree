@@ -24,8 +24,8 @@
  * \author Leandro Graciá Gil
 */
 
-#ifndef _K_VECTOR_H_
-#define _K_VECTOR_H_
+#ifndef _KCHE_TREE_K_VECTOR_H_
+#define _KCHE_TREE_K_VECTOR_H_
 
 // Include STL less comparison template (used by default).
 #include <functional>

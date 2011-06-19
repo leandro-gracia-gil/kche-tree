@@ -24,8 +24,8 @@
  * \author Leandro Graciá Gil
 */
 
-#ifndef _KCHE_TREE_SSE_24D_H_
-#define _KCHE_TREE_SSE_24D_H_
+#ifndef _KCHE_TREE_KCHE_TREE_SSE_24D_H_
+#define _KCHE_TREE_KCHE_TREE_SSE_24D_H_
 
 // Includes for the SSE instruction set and aligned memory allocation.
 #if !defined(__APPLE__)

@@ -24,8 +24,8 @@
  * \author Leandro Graciá Gil
 */
 
-#ifndef _VECTOR_H_
-#define _VECTOR_H_
+#ifndef _KCHE_TREE_VECTOR_H_
+#define _KCHE_TREE_VECTOR_H_
 
 // Includes from STL and the C standard library.
 #include <cstdlib>
