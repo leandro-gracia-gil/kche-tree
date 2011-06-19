@@ -24,6 +24,11 @@
  * \author Leandro Graciá Gil
  */
 
+// Includes from STL and the C standard library.
+#include <cstdlib>
+#include <functional>
+#include <new>
+
 // Include the map-reduce metaprograming templates.
 #include "mapreduce.h"
 
