@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2010, 2011 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *

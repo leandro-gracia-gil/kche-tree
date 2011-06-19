@@ -1,0 +1,19 @@
+CPP=g++
+GOPT=gengetopt
+MAKE=make
+
+INCLUDES=kche-tree
+
+CFLAGS=-O3 -Wall -I../kche-tree
+SSE_FLAGS=-msse -DSSE
+
+COMPILE_NOTIFY="  [CC]\t$@"
+MAKEFILE_DEPS=Makefile.global Makefile
+
+# Add any new kche-tree template files here.
+KCHE_TREE= kche-tree.h kche-tree_sse_24d.h
+KCHE_TREE+= kd-tree.h kd-tree.tpp kd-tree_io.tpp
+KCHE_TREE+= k-heap.h k-heap.tpp indirect_heap.h indirect_heap.tpp
+KCHE_TREE+= k-vector.h k-vector.tpp
+KCHE_TREE+= vector.h vector.tpp dataset.h dataset.tpp
+KCHE_TREE+= raw-types.h mapreduce.h

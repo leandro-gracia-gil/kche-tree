@@ -19,8 +19,8 @@
  ***************************************************************************/
 
 /**
- * \file test_kdtree.cpp
- * \brief Testing tool for kd-trees.
+ * \file verify.cpp
+ * \brief Result verification tool for the kche-tree library.
  * \author Leandro Graciá Gil
  */
 
@@ -41,8 +41,8 @@
 #endif
 
 // Argument parsing results from gengetopt.
-#include "test_kdtree_args.h"
-static struct test_kdtree_args cmdline_args;
+#include "verify_args.h"
+static struct verify_args cmdline_args;
 
 // Auxiliary functions for the tools.
 #include "tool_utils.h"
@@ -65,7 +65,7 @@ typedef DataSet<float, D> DataSetTest;
  * \param argv Params of command line.
  * \param args_info Structure to be filled with parsed input params.
 */
-void parse_cmdline(int argc, char *argv[], test_kdtree_args *args_info) {
+void parse_cmdline(int argc, char *argv[], verify_args *args_info) {
 
   if (argc == 1) {
     cmdline_parser_print_help();

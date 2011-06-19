@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2010, 2011 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,8 +19,8 @@
  ***************************************************************************/
 
 /**
- * \file example.cpp
- * \brief Example program to illustrate the use of the KDTree template.
+ * \file knn_simple.cpp
+ * \brief Example program to show how to perform a simple K-Nearest Neighbour search using kche-tree.
  * \author Leandro Graciá Gil
  */
 
@@ -33,7 +33,7 @@
 // Include the kche-tree templates.
 //
 // Note: in the float and 24 dimensions case we can use an SSE-accelerated version of the
-//       kd-tree by just including the file "kche-tree_sse_24d.h" instead of "kche-tree.h".
+//       kd-tree by just including the file "../tools/kche-tree_sse_24d.h" instead of "kche-tree.h".
 //       Proper memory alignments are ensured by the specialization of the new operator.
 //       Also remember to set the -msse flag when compiling with g++ or face errors.
 //
