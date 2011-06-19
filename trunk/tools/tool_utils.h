@@ -29,8 +29,8 @@
 #include <fstream>
 
 // Library includes.
-#include "dataset.h"
-#include "raw-types.h"
+#include "kche-tree/dataset.h"
+#include "kche-tree/raw-types.h"
 
 /**
  * \brief Generate a random data set.

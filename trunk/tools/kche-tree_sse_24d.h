@@ -34,7 +34,7 @@
 #include <xmmintrin.h>
 
 // Include the kche-tree templates.
-#include "kche-tree.h"
+#include "kche-tree/kche-tree.h"
 
 namespace kche_tree {
 

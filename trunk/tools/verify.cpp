@@ -37,7 +37,7 @@
 #ifdef SSE
 #include "kche-tree_sse_24d.h"
 #else
-#include "kche-tree.h"
+#include "kche-tree/kche-tree.h"
 #endif
 
 // Argument parsing results from gengetopt.

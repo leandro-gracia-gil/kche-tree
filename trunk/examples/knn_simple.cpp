@@ -37,7 +37,7 @@
 //       Proper memory alignments are ensured by the specialization of the new operator.
 //       Also remember to set the -msse flag when compiling with g++ or face errors.
 //
-#include "kche-tree.h"
+#include "kche-tree/kche-tree.h"
 using namespace kche_tree;
 
 /// Number of dimensions to use in this example.
