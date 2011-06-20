@@ -1,10 +1,9 @@
 include ../Makefile.global
 
-PARENT='../'
-MAKEFILE_DEPS=$(addprefix, $PARENT, $MAKEFILE_DEPS) Makefile
-KCHE_TREE=$(addprefix, $PARENT, $KCHE_TREE)
+PARENT=../
+MAKEFILE_DEPS:=$(addprefix $(PARENT), $(MAKEFILE_DEPS)) Makefile
+KCHE_TREE:=$(addprefix $(PARENT)$(INSTALL_FOLDER)/, $(KCHE_TREE))
 INCLUDES=-I$(PARENT)
-
 .PHONY: clean
 
 # Add any new examples here.
