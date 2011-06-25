@@ -1,5 +1,7 @@
 include Makefile.global
 
+KCHE_TREE:=$(addprefix $(INSTALL_FOLDER)/, $(KCHE_TREE))
+
 # Add any new subdirs here.
 SUBDIRS=examples tools
 
@@ -13,6 +15,11 @@ subdirs: $(SUBDIRS)
 $(SUBDIRS):
 	@echo "Building $@..."
 	@$(MAKE) -sC $@
+
+doc: $(KCHE_TREE)
+	@echo "Generating documentation with $(DOXYGEN)..."
+	@mkdir -p doc
+	@$(DOXYGEN) doxygen.conf
 
 install:
 	@mkdir -p $(PREFIX)/$(INSTALL_FOLDER)

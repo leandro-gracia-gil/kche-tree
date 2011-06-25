@@ -1,5 +1,6 @@
 CPP=g++
 GOPT=gengetopt
+DOXYGEN=doxygen
 MAKE=make
 INSTALL=install
 
@@ -17,4 +18,4 @@ KCHE_TREE= kche-tree.h kd-tree.h kd-tree.tpp kd-tree_io.tpp
 KCHE_TREE+= k-heap.h k-heap.tpp indirect_heap.h indirect_heap.tpp
 KCHE_TREE+= k-vector.h k-vector.tpp
 KCHE_TREE+= vector.h vector.tpp dataset.h dataset.tpp
-KCHE_TREE+= raw-types.h mapreduce.h
+KCHE_TREE+= traits.h map_reduce.h compile_assert.h

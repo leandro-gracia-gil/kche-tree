@@ -35,7 +35,7 @@ namespace kche_tree {
 /**
  * \brief Define an insertion-based vector to hold the K best elements pushed.
  *
- * \note Element insertions are asyntotically linear. However they may be faster than \link k_heap k-heaps\endlink for small K values.
+ * \note Element insertions are asyntotically linear. However they may be faster than \link KHeap k-heaps\endlink for small K values.
  *
  * \tparam T Type of the data stored in the k-vector.
  * \tparam Compare Type of the comparison object. Defaults to std::less<T>.

@@ -93,7 +93,7 @@ KHeap<T, C, idx> &KHeap<T, C, idx>::operator = (const KHeap &heap) {
   assert(data = new T[K]);
 
   // Copy data.
-  copy_array(data, heap.data, K);
+  Traits<T>::copy_array(data, heap.data, K);
 
   bestHeap.setData(data);
   worstHeap.setData(data);

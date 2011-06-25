@@ -7,7 +7,7 @@ INCLUDES=-I$(PARENT)
 .PHONY: clean
 
 # Add any new examples here.
-EXAMPLES=knn_simple
+EXAMPLES=knn_simple custom_type
 
 all: $(EXAMPLES)
 

@@ -28,6 +28,9 @@
 #include <memory>
 #include <string>
 
+// Include type traits.
+#include "traits.h"
+
 namespace kche_tree {
 
 /**
@@ -90,7 +93,7 @@ DataSet<T, D>::DataSet(const DataSet &dataset)
     ptr_owner_(true) {
 
   if (dataset.size_)
-    copy_array(vectors_, dataset.vectors_, dataset.size_);
+    Traits<T>::copy_array(vectors_, dataset.vectors_, dataset.size_);
 }
 
 /**
@@ -143,7 +146,7 @@ template <typename T, const unsigned int D>
 bool DataSet<T, D>::operator == (const DataSet& dataset) const {
   if (size_ != dataset.size_)
     return false;
-  return equal_arrays(vectors_, dataset.vectors_, size_);
+  return Traits<T>::equal_arrays(vectors_, dataset.vectors_, size_);
 }
 
 /**
@@ -153,7 +156,7 @@ template <typename T, const unsigned int D>
 bool DataSet<T, D>::operator != (const DataSet& dataset) const {
   if (size_ != dataset.size_)
     return false;
-  return !equal_arrays(vectors_, dataset.vectors_, size_);
+  return !Traits<T>::equal_arrays(vectors_, dataset.vectors_, size_);
 }
 
 /**

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2010, 2011 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -249,7 +249,7 @@ KDTree<T, D, S>::Node::~Node() {
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
 template <typename T, const unsigned int D, typename S>
-void KDTree<T, D, S>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, T epsilon, bool ignore_p_in_tree) const {
+void KDTree<T, D, S>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const T &epsilon, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || num_elements == 0 || K == 0)
@@ -286,10 +286,10 @@ void KDTree<T, D, S>::knn(const Point &p, unsigned int K, std::vector<Neighbour>
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
 template <typename T, const unsigned int D, typename S>
-void KDTree<T, D, S>::all_in_range(const Point &p, T distance, std::vector<Neighbour> &output, bool ignore_p_in_tree) const {
+void KDTree<T, D, S>::all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
-  if (root == NULL || num_elements == 0 || distance <= (T) 0)
+  if (root == NULL || num_elements == 0 || distance <= Traits<T>::zero())
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle-hypersphere intersection calculation.
@@ -326,8 +326,8 @@ KDTree<T, D, S>::SearchData::SearchData(const Point &p, const Point *data, unsig
   : p(p),
     data(data),
     K(K),
-    hyperrect_distance((T) 0),
-    farthest_distance((T) 0),
+    hyperrect_distance(Traits<T>::zero()),
+    farthest_distance(Traits<T>::zero()),
     ignore_null_distances(ignore_null_distances_arg) {
 
   // Fill per-axis data contents.
@@ -349,8 +349,8 @@ KDTree<T, D, S>::Incremental::Incremental(const Node *node, const Node *parent, 
   : search_data(search_data),
     parent_axis(0),
     modified(false),
-    previous_axis_nearest((T) 0),
-    previous_hyperrect_distance((T) 0) {
+    previous_axis_nearest(Traits<T>::zero()),
+    previous_hyperrect_distance(Traits<T>::zero()) {
 
   // Check parent.
   if (parent == NULL)
@@ -371,7 +371,7 @@ KDTree<T, D, S>::Incremental::Incremental(const Node *node, const Node *parent, 
   previous_hyperrect_distance = search_data.hyperrect_distance;
 
   // Perform incremental update (simplification of the equation local * (local + 2 * (p - nearest)) with local = nearest - split).
-  search_data.hyperrect_distance += (parent->split_value - axis->nearest) * (axis->nearest + parent->split_value - axis->p * 2);
+  search_data.hyperrect_distance += (parent->split_value - axis->nearest) * (axis->nearest + parent->split_value - axis->p - axis->p);
   axis->nearest = parent->split_value;
 }
 
@@ -512,8 +512,8 @@ void KDTree<T, D, S>::Leaf::explore(SearchData &search_data, C &candidates) cons
 
     // Process only the bucket elements different to p.
     for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
-      T distance = search_data.p.distance_to(search_data.data[i]);
-      if (distance > (T) 0)
+      const T &distance = search_data.p.distance_to(search_data.data[i]);
+      if (distance > Traits<T>::zero())
         candidates.push_back(Neighbour(i, search_data.p.distance_to(search_data.data[i])));
     }
 
@@ -542,7 +542,7 @@ void KDTree<T, D, S>::Leaf::intersect(SearchData &search_data, C &candidates) co
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
 
     // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
-    T new_distance = search_data.p.distance_to(search_data.data[i], search_data.farthest_distance);
+    const T &new_distance = search_data.p.distance_to(search_data.data[i], search_data.farthest_distance);
 
     // If less than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
     if (new_distance <= search_data.farthest_distance) {
@@ -570,8 +570,8 @@ void KDTree<T, D, S>::Leaf::intersect_ignoring_same(SearchData &search_data, C &
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
 
     // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
-    T new_distance = search_data.p.distance_to(search_data.data[i], search_data.farthest_distance);
-    if (new_distance == (T) 0)
+    const T &new_distance = search_data.p.distance_to(search_data.data[i], search_data.farthest_distance);
+    if (new_distance == Traits<T>::zero())
       continue;
 
     // If less than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).

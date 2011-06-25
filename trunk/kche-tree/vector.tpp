@@ -29,13 +29,14 @@
 #include <functional>
 #include <new>
 
-// Include the map-reduce metaprograming templates.
-#include "mapreduce.h"
+// Include the map-reduce metaprograming templates and traits.
+#include "map_reduce.h"
+#include "traits.h"
 
 namespace kche_tree {
 
 /**
- * Functor to calculate the squared difference between elements in 2 arrays.
+ * \brief Functor to calculate the squared difference between elements in 2 arrays.
  *
  * \param a First array.
  * \param b Second array.
@@ -93,7 +94,7 @@ void Vector<T, D>::operator delete [] (void *p) {
  */
 template <typename T, const unsigned int D>
 bool Vector<T, D>::operator == (const Vector &p) const {
-  return equal_arrays(data, p.data, D);
+  return Traits<T>::equal_arrays(data, p.data, D);
 }
 
 /**
@@ -104,7 +105,7 @@ bool Vector<T, D>::operator == (const Vector &p) const {
  */
 template <typename T, const unsigned int D>
 bool Vector<T, D>::operator != (const Vector &p) const {
-  return !equal_arrays(data, p.data, D);
+  return !Traits<T>::equal_arrays(data, p.data, D);
 }
 
 /**
@@ -118,7 +119,7 @@ template <typename T, const unsigned int D>
 T Vector<T, D>::distance_to(const Vector &p) const {
 
   // Standard squared distance between two D-dimensional vectors.
-  T acc = 0;
+  T acc = Traits<T>::zero();
   for (unsigned int i=0; i<D; ++i)
     acc += (data[i] - p.data[i]) * (data[i] - p.data[i]);
   return acc;
@@ -140,7 +141,7 @@ T Vector<T, D>::distance_to(const Vector &p, T upper_bound) const {
 
   // This has been empirically compared with the MapReduce template metaprogramming class,
   // but the loop seemed to be always faster because of the code locality.
-  T acc = 0;
+  T acc = Traits<T>::zero();
   for (unsigned int i=0; i<D_acc; ++i)
     acc += (data[i] - p.data[i]) * (data[i] - p.data[i]);
 
