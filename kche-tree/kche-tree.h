@@ -27,11 +27,11 @@
  * of the typical kd-tree structure functionality with very low latencies.
  *
  * It provides the following basic operations:
- * - \link kd_tree::build Build\endlink: create a kd-tree from a training set of
+ * - \link kche_tree::KDTree::build Build\endlink: create a kd-tree from a training set of
  *   feature vectors. Median splitting is used to keep the tree balanced. Cost: O(n log² n).
- * - \link kd_tree::knn K nearest neighbours\endlink: retrieve the K nearest
+ * - \link kche_tree::KDTree::knn K nearest neighbours\endlink: retrieve the K nearest
  *   neighbours of a given feature vector. Estimated average cost: O(log K log n).
- * - \link kd_tree::all_in_range All neighbours within a range\endlink: retrieve all the
+ * - \link kche_tree::KDTree::all_in_range All neighbours within a range\endlink: retrieve all the
  *   neighbours inside a maximum distance radius from a given feature vector.
  *   Estimated average cost: O(log m log n) with \e m the number of neighbours in the range.
  *
@@ -46,34 +46,29 @@
  * - Use of specific k-neighbours optimized containers: k-vectors and k-heaps.
  * - Distance calculations with upper bounds allowing early returns.
  * - Designed to easily enable SSE optimizations by template specialization. Example and benchmarks included.
- * - Binary file format and stream operators provide to easily save and load the kd-trees.
+ * - Binary file format and stream operators provide to easily save and load the kd-trees and data sets.
  *
  * The current version is not still thread-safe. This is expected to be solved in future releases
  * along with OpenMP optimizations.
  *
- * Additionally, the following tools are provided:
- * - Example tool: shows a quite simple use of the template. Can be found in file example.cpp.
- * - Testing tool: tests the correction of the results and the I/O functions of the kd-tree.
- *   Comes in various flavors: random feature vector generation or file input and SSE optimizations.
- *   Can be found in file test_kdtree.cpp.
- * - Benchmark tool: measures the time spent in building the kd-tree and finding the K nearest neighbours.
- *   Like the testing tool comes in various flavors allowing to test its speed with random or
- *   preprocessed data from a file. Can be found in file speed_kdtree.cpp.
+ * Additionally, the following tools and examples are provided:
+ * - <b>Verify tool</b>: verifies the correction of the results provided by Kche-tree compared with a raw exhaustive search.
+ *   Can be found in the file tools/verify.cpp. Comes with an extra SSE-optimized version.
+ * - <b>Benchmark tool</b>: measures the time spent in building the kd-tree and finding the K nearest neighbours.
+ *   Can be found in file speed_kdtree.cpp. Like the testing tool it also comes comes with an extra SSE-optimized version.
+ * - <b>knn simple example</b>: shows a quite simple use of the template. Can be found in the file examples/knn_simple.cpp.
+ * - <b>custom types example</b>: shows how to use a custom type with Kche-tree. Can be found in the file examples/custom_type.cpp.
  *
  *
  * \section installation Usage
- * Kche-trees are quite simple to use. Just include the \c kd-tree.h file
- * and proceed like in the usage example \c example.cpp. Since it's a template
- * no additional files required to be compiled or linked. However it requires
- * the following files to be present where the main header is:
- * - kd-tree template files: kd-tree.h, kd-tree.cpp, kd-tree_io.cpp
- * - feature vector files: feature_vector.h, feature_vector.cpp
- * - k-neighbour container files: k-vector.h, k-vector.cpp for k-vectors,
- *   k-heap.h, k-heap.cpp, indirect_heap.h, indirect_heap.cpp for k-heaps.
- * - <b>LICENSE</b>: don't forget this is GPL code. Yours must be also if you use this.
+ * Kche-trees are quite simple to use. Just include the \c kche-tree.h file, use its
+ * namespace like you would normally do with STL and proceed like in the usage example \c knn_simple.cpp.
+ * Since it's a template no additional files required to be compiled or linked. However it requires
+ * the \c kche-tree folder to be present in an include path. This can also be achieved by running \c make \c install,
+ * will copy the template files to your /usr/include folder by default. To undo this run \c make \c uninstall.
  *
  * In case of using the floating point/24 dimension SSE specialization,
- * the file kd-tree_sse_24d.h and the compilation flag \c -msse will be required.
+ * the file tools/kd-tree_sse_24d.h and the compilation flag \c -msse (in GCC) will be also required.
 */
 
 /**

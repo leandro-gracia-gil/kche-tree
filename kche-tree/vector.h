@@ -55,8 +55,8 @@ struct Vector {
   T & operator [] (unsigned int index) { return data[index]; } ///< Subscript operator.
 
   // Comparison operators.
-  bool operator == (const Vector &p) const; ///< Equality comparison operator.
-  bool operator != (const Vector &p) const; ///< Non-equality comparison operator.
+  bool operator == (const Vector &p) const; ///< Equality comparison operator. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
+  bool operator != (const Vector &p) const; ///< Non-equality comparison operator. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
 
   // Squared distance operators for two D-dimensional points of type T.
   inline T distance_to(const Vector &p) const; ///< Squared distance to a point.
@@ -67,9 +67,6 @@ struct Vector {
   void  operator delete [] (void *p); ///< Standard deallocation for arrays of feature vectors.
 
 }
-#ifdef __GNUC__
-__attribute__((packed))
-#endif
 ;
 
 /**

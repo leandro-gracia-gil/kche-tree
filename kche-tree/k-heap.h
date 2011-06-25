@@ -30,16 +30,16 @@
 // Include the std::less predicate (used by default).
 #include <functional>
 
-// Include indirect heaps and raw type options.
+// Include indirect heaps and traits information.
 #include "indirect_heap.h"
-#include "raw-types.h"
+#include "traits.h"
 
 namespace kche_tree {
 
 /**
  * \brief Define a reference-based heap that holds the K best elements on it allowing to push them in logarithmic time.
  *
- * \note Even if asyntotically optimal it could be slower than \link k_vector k-vectors\endlink for small values of K due to extra operations and cache misses.
+ * \note Even if asyntotically optimal it could be slower than \link KVector k-vectors\endlink for small values of K due to extra operations and cache misses.
  *
  * \tparam T Type of the data stored in the k-heap.
  * \tparam Compare Type of the comparison object. The class must inherit from \c std::binary_function an define its \c bool (\c const \c &T, \c const \c &T) \c const operator.

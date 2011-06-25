@@ -41,6 +41,9 @@
 #include "dataset.h"
 #include "vector.h"
 
+#include "traits.h"
+
+/// Namespace of the Kche-tree template library.
 namespace kche_tree {
 
 // Forward-declare the class.
@@ -83,10 +86,10 @@ public:
 
   // Basic kd-tree operations.
   bool build(const DataSet<T, D>& train_set, unsigned int bucket_size = 32); ///< Build a kd-tree from a set of training vectors. Cost: O(n log² n).
-  void knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, T epsilon = (T) 0, bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
-  void all_in_range(const Point &p, T distance, std::vector<Neighbour> &output, bool ignore_p_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
+  void knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const T &epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
+  void all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, bool ignore_p_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
 
-  // Subscript operator for accesing stored data (will fail on non-built kd-trees).
+  /// Subscript operator for accesing stored data (will fail on non-built kd-trees).
   const Point &operator [] (unsigned int index) const;
 
   // Stream operators.

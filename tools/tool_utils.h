@@ -30,7 +30,7 @@
 
 // Library includes.
 #include "kche-tree/dataset.h"
-#include "kche-tree/raw-types.h"
+#include "kche-tree/traits.h"
 
 /**
  * \brief Generate a random data set.
@@ -39,7 +39,7 @@
  *
  * \param size Number of vectors in the dataset.
  * \param range Numeric range of the elements in the vectors. Will go from 0 to \a range.
- * \param data Generated data set. Will discard any existing contents.
+ * \param random_set Generated data set. Will discard any existing contents.
  */
 template <typename T, const unsigned int D>
 void generate_random_dataset(unsigned int size, T range, kche_tree::DataSet<T, D>& random_set) {
@@ -58,7 +58,7 @@ void generate_random_dataset(unsigned int size, T range, kche_tree::DataSet<T, D
  * \param range Numeric range of the elements in the vectors. Will go from 0 to \a range.
  * \param reference_set Reference dataset from where some elements may be taken.
  * \param p Probability (from 0 to 1) of copying an element from the reference set instead of generating a random one.
- * \param data Generated data set. Will discard any existing contents.
+ * \param random_set Generated data set. Will discard any existing contents.
  */
 template <typename T, const unsigned int D>
 void generate_random_dataset_from_existing(unsigned int size, T range, const kche_tree::DataSet<T, D> &reference_set, float p, kche_tree::DataSet<T, D> &random_set) {
@@ -66,7 +66,7 @@ void generate_random_dataset_from_existing(unsigned int size, T range, const kch
   for (unsigned int i=0; i<size; ++i) {
     if (rand() / static_cast<float>(RAND_MAX) < p) {
       unsigned int reference_index = rand() % reference_set.size();
-      kche_tree::copy_array(&random_set[i][0], &reference_set[reference_index][0], D);
+      kche_tree::Traits<T>::copy_array(&random_set[i][0], &reference_set[reference_index][0], D);
     } else {
       for (unsigned int d=0; d<D; ++d)
         random_set[i][d] = static_cast<T>(rand() / static_cast<float>(RAND_MAX)) * range;

@@ -32,8 +32,7 @@
 #include <stdexcept>
 #include <typeinfo>
 
-// Include raw type template and feature vectors.
-#include "raw-types.h"
+// Include feature vectors.
 #include "vector.h"
 
 namespace kche_tree {
@@ -64,38 +63,38 @@ template <typename T, const unsigned int D>
 class DataSet {
 public:
   // Constructors and destructors;
-  DataSet();
-  DataSet(unsigned int size);
-  DataSet(Vector<T, D> *vectors, unsigned int size);
-  ~DataSet();
+  DataSet(); ///< Create an empty data set.
+  DataSet(unsigned int size); ///< Create a data set of the specified size.
+  DataSet(Vector<T, D> *vectors, unsigned int size); ///< Create a data set object over an existing vector array of the specified size.
+  ~DataSet(); ///< Destroy the data set. Will release the vectors array if owned by the object.
 
   // Copy constructor and assignment operator.
-  DataSet(const DataSet& dataset);
-  DataSet& operator = (const DataSet& dataset);
+  DataSet(const DataSet& dataset); ///< Copy-construct a data set. Will always make an owned copy of the vectors array.
+  DataSet& operator = (const DataSet& dataset); ///< Assign a data set. Will release the current array if owned and make an owned copy of the other dataset vectors.
 
   // Initialization methods.
-  void reset_to_size(unsigned int size);
+  void reset_to_size(unsigned int size); ///< Reset the data set to an uninitialized version of the specified size.
 
   // Attributes.
   unsigned int size() const { return size_; } ///< Returns the number of vectors in the data set.
   bool is_data_owner() const { return ptr_owner_; } ///< Tells if the vectors are owned by the object and hence will be released by it.
 
   // Subscript operators.
-  const Vector<T, D>& operator [] (unsigned int index) const { return vectors_[index]; }
-  Vector<T, D>& operator [] (unsigned int index) { return vectors_[index]; }
+  const Vector<T, D>& operator [] (unsigned int index) const { return vectors_[index]; } ///< Access vectors of the data set without modifying them.
+  Vector<T, D>& operator [] (unsigned int index) { return vectors_[index]; } ///< Access vectors of the data set.
 
   // Comparison operators.
-  bool operator == (const DataSet& dataset) const;
-  bool operator != (const DataSet& dataset) const;
+  bool operator == (const DataSet& dataset) const; ///< Check if the data set is equal to some other. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
+  bool operator != (const DataSet& dataset) const; ///< Check if the data set is different to some other. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
 
   // Stream operators.
   friend std::istream & operator >> <>(std::istream &in, DataSet &set);
   friend std::ostream & operator << <>(std::ostream &out, const DataSet &set);
 
 private:
-  Vector<T, D> *vectors_;
-  unsigned int size_;
-  bool ptr_owner_;
+  Vector<T, D> *vectors_; ///< Array of the vectors in the data set.
+  unsigned int size_; ///< Number of vectors in the data set.
+  bool ptr_owner_; ///< Flag indicating if the data set owns the vector array and should release it on destruction.
 };
 
 } // namespace kche_tree
