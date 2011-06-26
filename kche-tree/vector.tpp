@@ -94,7 +94,7 @@ void Vector<T, D>::operator delete [] (void *p) {
  */
 template <typename T, const unsigned int D>
 bool Vector<T, D>::operator == (const Vector &p) const {
-  return Traits<T>::equal_arrays(data, p.data, D);
+  return Traits<T>::equal_arrays(data_, p.data_, D);
 }
 
 /**
@@ -105,7 +105,7 @@ bool Vector<T, D>::operator == (const Vector &p) const {
  */
 template <typename T, const unsigned int D>
 bool Vector<T, D>::operator != (const Vector &p) const {
-  return !Traits<T>::equal_arrays(data, p.data, D);
+  return !Traits<T>::equal_arrays(data_, p.data_, D);
 }
 
 /**
@@ -121,7 +121,7 @@ T Vector<T, D>::distance_to(const Vector &p) const {
   // Standard squared distance between two D-dimensional vectors.
   T acc = Traits<T>::zero();
   for (unsigned int i=0; i<D; ++i)
-    acc += (data[i] - p.data[i]) * (data[i] - p.data[i]);
+    acc += (data_[i] - p.data_[i]) * (data_[i] - p.data_[i]);
   return acc;
 }
 
@@ -143,12 +143,12 @@ T Vector<T, D>::distance_to(const Vector &p, T upper_bound) const {
   // but the loop seemed to be always faster because of the code locality.
   T acc = Traits<T>::zero();
   for (unsigned int i=0; i<D_acc; ++i)
-    acc += (data[i] - p.data[i]) * (data[i] - p.data[i]);
+    acc += (data_[i] - p.data_[i]) * (data_[i] - p.data_[i]);
 
   // Calculate the remaining dimensions using an upper bound, and checking it every 4 dimensions.
   // The template metaprogramming makes sure this interval is performed without actually checking any index or iterator at runtime.
   // Has been tested to be faster than a loop with the difference being more acute with greater D values.
-  return BoundedMapReduce<T, D, 4, D_acc>::run(DotFunctor<T>(), std::plus<T>(), std::greater<T>(), data, p.data, upper_bound, acc);
+  return BoundedMapReduce<T, D, 4, D_acc>::run(DotFunctor<T>(), std::plus<T>(), std::greater<T>(), data_, p.data_, upper_bound, acc);
 }
 
 } // namespace kche_tree

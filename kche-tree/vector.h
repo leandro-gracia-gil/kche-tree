@@ -32,7 +32,7 @@ namespace kche_tree {
 /**
  * \brief Template for D-dimensional feature vectors.
  *
- * Encapsulates D-dimensional vectors containing feature values.
+ * Encapsulates D-dimensional contiguous vectors containing feature values.
  * Has been compared to the direct use of arrays with no change in efficiency.
  *
  * \note For cache reasons it is recommended not to extend this class adding any labels
@@ -42,17 +42,20 @@ namespace kche_tree {
  * \tparam D Number of dimensions of the vector.
  */
 template <typename T, const unsigned int D>
-struct Vector {
+class Vector {
+public:
+  /// Type of the elements in the vector.
+  typedef T ElementType;
 
-  /// Data array.
-  T data[D];
+  /// Number of dimensions (size) of the vector.
+  static const unsigned int Dimensions = D;
 
   // Constructors.
   Vector() {} ///< Default constructor.
 
   // Subscript operators.
-  const T & operator [] (unsigned int index) const { return data[index]; } ///< Const subscript operator.
-  T & operator [] (unsigned int index) { return data[index]; } ///< Subscript operator.
+  const T & operator [] (unsigned int index) const { return data_[index]; } ///< Const subscript operator.
+  T & operator [] (unsigned int index) { return data_[index]; } ///< Subscript operator.
 
   // Comparison operators.
   bool operator == (const Vector &p) const; ///< Equality comparison operator. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
@@ -66,15 +69,17 @@ struct Vector {
   void *operator new [] (size_t size); ///< Standard allocation for arrays of feature vectors.
   void  operator delete [] (void *p); ///< Standard deallocation for arrays of feature vectors.
 
-}
-;
+private:
+  /// Contiguous D-dimensional data array.
+  T data_[D];
+};
 
 /**
  * \brief Vector-distance structure. References a feature vector by its index and its squared distance to another implicit vector.
  *
  * Implements its own comparison function with the parenthesis operator for STL-based algorithm use.
  *
- * \tparam T  Type used to encode the distance between two feature vectors. Should be the same than the data from the vectors.
+ * \tparam T Type used to encode the distance between two feature vectors. Should be the same than the data from the vectors.
  */
 template <typename T>
 struct VectorDistance : public std::binary_function <VectorDistance<T>, VectorDistance<T>, bool> {

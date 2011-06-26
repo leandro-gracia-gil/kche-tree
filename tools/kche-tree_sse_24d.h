@@ -77,8 +77,8 @@ template <>
 float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p) const {
 
   // Set data pointers as SSE vectors. Let's say each is composed of 6 4-float vectors: A B C D E F.
-  __m128 *this_data = (__m128 *) data;
-  __m128 *p_data = (__m128 *) p.data;
+  __m128 *this_data = (__m128 *) data_;
+  __m128 *p_data = (__m128 *) p.data_;
 
   // Required SSE registers.
   __m128 sqr1, sqr2, acc1, acc2;
@@ -129,8 +129,8 @@ template <>
 float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p, float upper) const {
 
   // Set data pointers as SSE vectors. Let's say each is composed of 6 4-float vectors: A B C D E F.
-  __m128 *this_data = (__m128 *) data;
-  __m128 *p_data = (__m128 *) p.data;
+  __m128 *this_data = (__m128 *) data_;
+  __m128 *p_data = (__m128 *) p.data_;
 
   // Required SSE registers.
   __m128 sqr1, sqr2, acc1, acc2;
