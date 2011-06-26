@@ -24,12 +24,6 @@
  * \author Leandro Graciá Gil
  */
 
-// Includes from STL and C standard library.
-#include <cstdlib>
-#include <cstring>
-#include <algorithm>
-#include <new>
-
 namespace kche_tree {
 
 /**

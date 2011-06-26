@@ -24,12 +24,10 @@
  * \author Leandro Graciá Gil
  */
 
- // ******************************************* //
- // ******************************************* //
- //    MOVE THE APPROPRIATE INCLUDES HERE
- // ******************************************* //
- // ******************************************* //
+// Include STL sort.
+#include <algorithm>
 
+// Includes to ouput debug information about the kd-tree structure.
 #ifdef _KCHE_TREE_DEBUG_
 #include <iomanip>
 #include <iostream>

@@ -27,7 +27,6 @@
 // Includes from STL and the C standard library.
 #include <cstdlib>
 #include <functional>
-#include <new>
 
 // Include the map-reduce metaprograming templates and traits.
 #include "map_reduce.h"

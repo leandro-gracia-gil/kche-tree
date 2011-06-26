@@ -37,10 +37,9 @@
 #include "k-heap.h"
 #include "k-vector.h"
 
-// Include template for feature vectors and data sets.
+// Include data sets, vectors, type traits and kd-tree nodes.
 #include "dataset.h"
 #include "vector.h"
-
 #include "traits.h"
 #include "kd-node.h"
 
