@@ -31,7 +31,7 @@
 #include <ctime>
 
 // Enable kd-tree structure debugging.
-#define DEBUG_KDTREE
+#define _KCHE_TREE_DEBUG_
 
 // Include the generic kche-tree templates or the SSE-enabled specialization for floats and 24 dimensions.
 #ifdef SSE

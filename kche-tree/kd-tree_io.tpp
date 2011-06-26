@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2010, 2011 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -117,9 +117,9 @@ std::istream & operator >> (std::istream &in, KDTree<T, D, S> &kdtree) {
   kdtree.release();
 
   // Define aliases for local kd-tree types.
-  typedef typename KDTree<T, D, S>::Point point_type;
-  typedef typename KDTree<T, D, S>::Node node_type;
-  typedef typename KDTree<T, D, S>::Leaf leaf_type;
+  typedef Vector<T, D> PointType;
+  typedef KDNode<T, D> NodeType;
+  typedef KDLeaf<T, D> LeafType;
 
   // Read and check number of elements.
   in.read(reinterpret_cast<char *>(&kdtree.num_elements), sizeof(unsigned int));
@@ -140,13 +140,13 @@ std::istream & operator >> (std::istream &in, KDTree<T, D, S> &kdtree) {
     kdtree.inverse_perm[kdtree.permutation[i]] = i;
 
   // Allocate and read kd-tree data array.
-  kdtree.data = new point_type [kdtree.num_elements];
-  in.read(reinterpret_cast<char *>(kdtree.data), kdtree.num_elements * sizeof(point_type));
+  kdtree.data = new PointType [kdtree.num_elements];
+  in.read(reinterpret_cast<char *>(kdtree.data), kdtree.num_elements * sizeof(PointType));
   if (!in.good())
     throw std::runtime_error("error reading kd-tree data");
 
   // Read the tree structure from the stream.
-  kdtree.root = new node_type(in);
+  kdtree.root = new NodeType(in);
 
   // Read the signature value.
   unsigned short signature;
@@ -170,8 +170,8 @@ template <typename T, const unsigned int D, typename S>
 std::ostream & operator << (std::ostream &out, const KDTree<T, D, S> &kdtree) {
 
   // Define aliases for local kd-tree types.
-  typedef typename KDTree<T, D, S>::Point point_type;
-  typedef typename KDTree<T, D, S>::Node node_type;
+  typedef Vector<T, D> PointType;
+  typedef KDNode<T, D> NodeType;
 
   // Write header.
   out.write(kdtree.file_header, kdtree.file_header_length);
@@ -197,7 +197,7 @@ std::ostream & operator << (std::ostream &out, const KDTree<T, D, S> &kdtree) {
   out.write(reinterpret_cast<const char *>(kdtree.permutation), kdtree.num_elements * sizeof(unsigned int));
 
   // Write tree data permutation.
-  out.write(reinterpret_cast<const char *>(kdtree.data), kdtree.num_elements * sizeof(point_type));
+  out.write(reinterpret_cast<const char *>(kdtree.data), kdtree.num_elements * sizeof(PointType));
 
   // Write the kd-tree structure recursively.
   kdtree.root->write_to_binary_stream(out);
@@ -215,12 +215,12 @@ std::ostream & operator << (std::ostream &out, const KDTree<T, D, S> &kdtree) {
  *
  * \param in Input stream.
  */
-template <typename T, const unsigned int D, typename S>
-KDTree<T, D, S>::Node::Node(std::istream &in) {
+template <typename T, const unsigned int D>
+KDNode<T, D>::KDNode(std::istream &in) {
 
   // Allocate node.
-  typedef typename KDTree<T, D, S>::Node node_type;
-  typedef typename KDTree<T, D, S>::Leaf leaf_type;
+  typedef KDNode<T, D> NodeType;
+  typedef KDLeaf<T, D> LeafType;
 
   // Read node data.
   in.read(reinterpret_cast<char *>(&split_value), sizeof(T));
@@ -230,15 +230,15 @@ KDTree<T, D, S>::Node::Node(std::istream &in) {
 
   // Process the left branch or leaf.
   if (is_leaf & left_bit)
-    left_leaf = new leaf_type(in);
+    left_leaf = new LeafType(in);
   else
-    left_branch = new node_type(in);
+    left_branch = new NodeType(in);
 
   // Process the right branch or leaf.
   if (is_leaf & right_bit)
-    right_leaf = new leaf_type(in);
+    right_leaf = new LeafType(in);
   else
-    right_branch = new node_type(in);
+    right_branch = new NodeType(in);
 }
 
 /**
@@ -247,8 +247,8 @@ KDTree<T, D, S>::Node::Node(std::istream &in) {
  *
  * \param in Input stream.
  */
-template <typename T, const unsigned int D, typename S>
-KDTree<T, D, S>::Leaf::Leaf(std::istream &in) {
+template <typename T, const unsigned int D>
+KDLeaf<T, D>::KDLeaf(std::istream &in) {
 
   // Read leaf node data.
   in.read(reinterpret_cast<char *>(&first_index),  sizeof(unsigned int));
@@ -263,8 +263,8 @@ KDTree<T, D, S>::Leaf::Leaf(std::istream &in) {
  * \param out Output stream.
  * \return \c true if successful, \c false in case of write error.
  */
-template <typename T, const unsigned int D, typename S>
-bool KDTree<T, D, S>::Node::write_to_binary_stream(std::ostream &out) {
+template <typename T, const unsigned int D>
+bool KDNode<T, D>::write_to_binary_stream(std::ostream &out) {
 
   // Write split value and node axis/leaf information.
   out.write(reinterpret_cast<const char *>(&split_value), sizeof(T));
@@ -298,8 +298,8 @@ bool KDTree<T, D, S>::Node::write_to_binary_stream(std::ostream &out) {
  * \param out Output stream.
  * \return \c true if successful, \c false in case of write error.
  */
-template <typename T, const unsigned int D, typename S>
-bool KDTree<T, D, S>::Leaf::write_to_binary_stream(std::ostream &out) {
+template <typename T, const unsigned int D>
+bool KDLeaf<T, D>::write_to_binary_stream(std::ostream &out) {
 
   // Write left leaf node information.
   out.write(reinterpret_cast<const char *>(&first_index), sizeof(unsigned int));
