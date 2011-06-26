@@ -63,7 +63,7 @@ public:
 
   // Squared distance operators for two D-dimensional points of type T.
   inline T distance_to(const Vector &p) const; ///< Squared distance to a point.
-  inline T distance_to(const Vector &p, T upper_bound) const; ///< Squared distance to a point with an upper bound.
+  inline T distance_to(const Vector &p, const T &upper_bound) const; ///< Squared distance to a point with an upper bound.
 
   // Memory operators: used to allow memory-aligned specializations. For example, for SSE optimizations.
   void *operator new [] (size_t size); ///< Standard allocation for arrays of feature vectors.
@@ -75,21 +75,21 @@ private:
 };
 
 /**
- * \brief Vector-distance structure. References a feature vector by its index and its squared distance to another implicit vector.
+ * \brief References a feature vector by its index in the data set and provides the squared distance to it from an implicit vector.
  *
  * Implements its own comparison function with the parenthesis operator for STL-based algorithm use.
  *
  * \tparam T Type used to encode the distance between two feature vectors. Should be the same than the data from the vectors.
  */
 template <typename T>
-struct VectorDistance : public std::binary_function <VectorDistance<T>, VectorDistance<T>, bool> {
+struct VectorDistance : public std::binary_function<VectorDistance<T>, VectorDistance<T>, bool> {
 
   unsigned int index; ///< Index of the feature vector in the data set.
-  T squared_distance; ///< Squared distance of the referenced element to an implicit point.
+  T squared_distance; ///< Squared distance of the referenced element to an implicit vector.
 
   // Default and convenience constructors.
   VectorDistance() {}
-  VectorDistance(unsigned int index, T squared_distance) : index(index), squared_distance(squared_distance) {}
+  VectorDistance(unsigned int index, const T &squared_distance) : index(index), squared_distance(squared_distance) {}
 
   /// Distance comparison operator for VectorDistances. Allows VectorDistance objects to be used as STL comparison functors.
   bool operator () (const VectorDistance &v1, const VectorDistance &v2) const {

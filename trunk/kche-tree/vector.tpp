@@ -134,7 +134,7 @@ T Vector<T, D>::distance_to(const Vector &p) const {
  * \return Euclidean squared distance between the two kd_points or a partial result greater or equal than \a upper.
  */
 template <typename T, const unsigned int D>
-T Vector<T, D>::distance_to(const Vector &p, T upper_bound) const {
+T Vector<T, D>::distance_to(const Vector &p, const T &upper_bound) const {
 
   // Constant calculated empirically.
   const unsigned int D_acc = (unsigned int) (0.4f * D);

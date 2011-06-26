@@ -126,7 +126,7 @@ float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p) const {
  * \return Euclidean squared distance between the two kd_points or a partial result greater or equal than \a upper.
 */
 template <>
-float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p, float upper) const {
+float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p, const float &upper) const {
 
   // Set data pointers as SSE vectors. Let's say each is composed of 6 4-float vectors: A B C D E F.
   __m128 *this_data = (__m128 *) data_;
