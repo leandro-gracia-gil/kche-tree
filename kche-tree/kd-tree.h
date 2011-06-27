@@ -70,6 +70,9 @@ std::ostream & operator << (std::ostream &out, const KDTree<T, D> &kdtree); ///<
 template <typename T, const unsigned int D>
 class KDTree {
 public:
+  /// Type of the elements in the kd-tree.
+  typedef T ElementType;
+
   /// Define the number of dimensions of the kd-tree.
   static unsigned const int Dimensions = D;
 
