@@ -71,69 +71,69 @@
 <a name="l00036"></a>00036 
 <a name="l00037"></a>00037 <span class="keyword">namespace </span>kche_tree {
 <a name="l00038"></a>00038 
-<a name="l00048"></a>00048 <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Compare = std::less&lt;T&gt;, <span class="keyword">typename</span> <span class="keywordtype">id</span>x = <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>&gt;
-<a name="l00049"></a><a class="code" href="classkche__tree_1_1KHeap.html">00049</a> <span class="keyword">class </span><a class="code" href="classkche__tree_1_1KHeap.html" title="Define a reference-based heap that holds the K best elements on it allowing to push them in logarithm...">KHeap</a> {
-<a name="l00050"></a>00050 <span class="keyword">public</span>:
-<a name="l00051"></a>00051 
-<a name="l00052"></a>00052   <span class="comment">// Constructors and destructors.</span>
-<a name="l00053"></a>00053   <a class="code" href="classkche__tree_1_1KHeap.html#a560f5dfde390402eabc5bed6f81d8cd3" title="K-heap constructor.">KHeap</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> k); 
-<a name="l00054"></a>00054   <a class="code" href="classkche__tree_1_1KHeap.html#a560f5dfde390402eabc5bed6f81d8cd3" title="K-heap constructor.">KHeap</a>(<span class="keyword">const</span> <a class="code" href="classkche__tree_1_1KHeap.html" title="Define a reference-based heap that holds the K best elements on it allowing to push them in logarithm...">KHeap</a> &amp;heap); 
-<a name="l00055"></a>00055   <a class="code" href="classkche__tree_1_1KHeap.html#a1bd5fa591e3bfceed778cdeed099dd16" title="Default destructor.">~KHeap</a>(); 
-<a name="l00056"></a>00056 
-<a name="l00057"></a>00057   <span class="comment">// Assignment operator.</span>
-<a name="l00058"></a>00058   <a class="code" href="classkche__tree_1_1KHeap.html" title="Define a reference-based heap that holds the K best elements on it allowing to push them in logarithm...">KHeap</a> &amp;<a class="code" href="classkche__tree_1_1KHeap.html#a24ac96fdede7f353a122814807c12646" title="Assignment operator.">operator =</a>(<span class="keyword">const</span> <a class="code" href="classkche__tree_1_1KHeap.html" title="Define a reference-based heap that holds the K best elements on it allowing to push them in logarithm...">KHeap</a> &amp;heap); 
-<a name="l00059"></a>00059 
-<a name="l00060"></a>00060   <span class="comment">// Comparison operator.</span>
-<a name="l00061"></a>00061   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a5155ce3ca8c47beec2c603350748f783" title="Comparison operator.">operator ==</a>(<span class="keyword">const</span> <a class="code" href="classkche__tree_1_1KHeap.html" title="Define a reference-based heap that holds the K best elements on it allowing to push them in logarithm...">KHeap</a> &amp;heap) <span class="keyword">const</span>; 
-<a name="l00062"></a>00062 
-<a name="l00063"></a>00063   <span class="comment">// Heap operations.</span>
-<a name="l00064"></a>00064   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a119f99eddf6a0967b5d29ccb21e95886" title="Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).">push</a>(<span class="keyword">const</span> T &amp;elem); 
-<a name="l00065"></a>00065   <span class="keywordtype">void</span> <a class="code" href="classkche__tree_1_1KHeap.html#aea99fe579af6f2c21a259c54384db982" title="Pop the best element from the heap. Can be used for direct sorting. Cost: O(log K).">pop_best</a>(); 
-<a name="l00066"></a>00066   <span class="keywordtype">void</span> <a class="code" href="classkche__tree_1_1KHeap.html#a50dbfc5dd34c973c18a12aa424dfbc2e" title="Pop the worst element from the heap. Can be used for reverse sorting. Cost: O(log K)...">pop_worst</a>(); 
-<a name="l00067"></a>00067 
-<a name="l00068"></a>00068   <span class="comment">// Heap properties.</span>
-<a name="l00069"></a>00069   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a734008cb4f8386faacca547829aa5656" title="Check if the heap is full (it has already K elements). Cost: O(1).">full</a>() <span class="keyword">const</span>; 
-<a name="l00070"></a>00070   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a925d0bdc6ff7e355a320ebf8df9c3c1d" title="Check if the heap is empty. Cost: O(1).">empty</a>() <span class="keyword">const</span>; 
-<a name="l00071"></a>00071   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classkche__tree_1_1KHeap.html#a70fd5e633a441a2389b468292263ee24" title="Return the number of elements in the heap. Cost: O(1).">size</a>() <span class="keyword">const</span>; 
-<a name="l00072"></a>00072 
-<a name="l00073"></a>00073   <span class="keyword">const</span> T &amp;<a class="code" href="classkche__tree_1_1KHeap.html#a0c0422706ef9c8b4e6727a5f2c526877" title="Retrieve the best element from the heap, or the first data object if empty. Cost: O(1)...">best</a>() <span class="keyword">const</span>; 
-<a name="l00074"></a>00074   <span class="keyword">const</span> T &amp;<a class="code" href="classkche__tree_1_1KHeap.html#aca49f1f23fdd90da777d9fa28fa044f1" title="Retrieve the worst element from the heap, or the first data object if empty. Cost: O(1)...">worst</a>() <span class="keyword">const</span>; 
-<a name="l00075"></a>00075 
-<a name="l00076"></a>00076   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classkche__tree_1_1KHeap.html#ab141f2c5263f395c0eaa914367ade5ab" title="Get the maximum number of elements stored in the heap (also the maximum heap size). Cost: O(1).">get_K</a>() <span class="keyword">const</span>; 
-<a name="l00077"></a>00077   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classkche__tree_1_1KHeap.html#ade4bb28a6a1506095ea7b2f7565b8a5a" title="Get the number of elements currently in the heap. Cost: O(1).">count</a>() <span class="keyword">const</span>; 
+<a name="l00047"></a>00047 <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Compare = std::less&lt;T&gt; &gt;
+<a name="l00048"></a><a class="code" href="classkche__tree_1_1KHeap.html">00048</a> <span class="keyword">class </span><a class="code" href="classkche__tree_1_1KHeap.html" title="Define a reference-based heap that holds the K best elements on it allowing to push them in logarithm...">KHeap</a> {
+<a name="l00049"></a>00049 <span class="keyword">public</span>:
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051   <span class="comment">// Constructors and destructors.</span>
+<a name="l00052"></a>00052   <a class="code" href="classkche__tree_1_1KHeap.html#a7bdf4ecfc230f03bdc3240d4a6f6cbad" title="K-heap constructor.">KHeap</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> k); 
+<a name="l00053"></a>00053   <a class="code" href="classkche__tree_1_1KHeap.html#a7bdf4ecfc230f03bdc3240d4a6f6cbad" title="K-heap constructor.">KHeap</a>(<span class="keyword">const</span> <a class="code" href="classkche__tree_1_1KHeap.html" title="Define a reference-based heap that holds the K best elements on it allowing to push them in logarithm...">KHeap</a> &amp;heap); 
+<a name="l00054"></a>00054   <a class="code" href="classkche__tree_1_1KHeap.html#af32c92e7bd318aa180bd1460ba9c190a" title="Default destructor.">~KHeap</a>(); 
+<a name="l00055"></a>00055 
+<a name="l00056"></a>00056   <span class="comment">// Assignment operator.</span>
+<a name="l00057"></a>00057   <a class="code" href="classkche__tree_1_1KHeap.html" title="Define a reference-based heap that holds the K best elements on it allowing to push them in logarithm...">KHeap</a> &amp;<a class="code" href="classkche__tree_1_1KHeap.html#ae9849df65f563f365f884f780d73f4e9" title="Assignment operator.">operator =</a>(<span class="keyword">const</span> <a class="code" href="classkche__tree_1_1KHeap.html" title="Define a reference-based heap that holds the K best elements on it allowing to push them in logarithm...">KHeap</a> &amp;heap); 
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059   <span class="comment">// Comparison operator.</span>
+<a name="l00060"></a>00060   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a15edd9337c4a2d81620996287b3c0bba" title="Comparison operator.">operator ==</a>(<span class="keyword">const</span> <a class="code" href="classkche__tree_1_1KHeap.html" title="Define a reference-based heap that holds the K best elements on it allowing to push them in logarithm...">KHeap</a> &amp;heap) <span class="keyword">const</span>; 
+<a name="l00061"></a>00061 
+<a name="l00062"></a>00062   <span class="comment">// Heap operations.</span>
+<a name="l00063"></a>00063   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a702bf078950c1ad4db8aadd071e48463" title="Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).">push</a>(<span class="keyword">const</span> T &amp;elem); 
+<a name="l00064"></a>00064   <span class="keywordtype">void</span> <a class="code" href="classkche__tree_1_1KHeap.html#a5940262aa8cdaf45ded057fe492710e1" title="Pop the best element from the heap. Can be used for direct sorting. Cost: O(log K).">pop_best</a>(); 
+<a name="l00065"></a>00065   <span class="keywordtype">void</span> <a class="code" href="classkche__tree_1_1KHeap.html#a5ac7e6659527742967b72f3c01f4500d" title="Pop the worst element from the heap. Can be used for reverse sorting. Cost: O(log K)...">pop_worst</a>(); 
+<a name="l00066"></a>00066 
+<a name="l00067"></a>00067   <span class="comment">// Heap properties.</span>
+<a name="l00068"></a>00068   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a225be5b5e417f175019073f5bfdb0126" title="Check if the heap is full (it has already K elements). Cost: O(1).">full</a>() <span class="keyword">const</span>; 
+<a name="l00069"></a>00069   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a08c948ae412bce093fb5c45c17bb3af2" title="Check if the heap is empty. Cost: O(1).">empty</a>() <span class="keyword">const</span>; 
+<a name="l00070"></a>00070   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classkche__tree_1_1KHeap.html#aab8792d209f5c4e34d9476ac053e5b61" title="Return the number of elements in the heap. Cost: O(1).">size</a>() <span class="keyword">const</span>; 
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072   <span class="keyword">const</span> T &amp;<a class="code" href="classkche__tree_1_1KHeap.html#aaa5bad69a1c006f47d442baca1516114" title="Retrieve the best element from the heap, or the first data object if empty. Cost: O(1)...">best</a>() <span class="keyword">const</span>; 
+<a name="l00073"></a>00073   <span class="keyword">const</span> T &amp;<a class="code" href="classkche__tree_1_1KHeap.html#a6ba0c975cfb9341df88ed8b3247520f0" title="Retrieve the worst element from the heap, or the first data object if empty. Cost: O(1)...">worst</a>() <span class="keyword">const</span>; 
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classkche__tree_1_1KHeap.html#aae2aec0d780a9079e289afb63630733e" title="Get the maximum number of elements stored in the heap (also the maximum heap size). Cost: O(1).">get_K</a>() <span class="keyword">const</span>; 
+<a name="l00076"></a>00076   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classkche__tree_1_1KHeap.html#a860b6bb092db529b4b9ee713d4c82eaa" title="Get the number of elements currently in the heap. Cost: O(1).">count</a>() <span class="keyword">const</span>; 
+<a name="l00077"></a>00077 
 <a name="l00078"></a>00078 
-<a name="l00079"></a>00079 
-<a name="l00080"></a>00080   <span class="comment">// STL-based names for heap operations and properties.</span>
-<a name="l00081"></a><a class="code" href="classkche__tree_1_1KHeap.html#ae63c5e8fce73795b1f065ac21e4ae541">00081</a>   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#ae63c5e8fce73795b1f065ac21e4ae541" title="Same as push.">push_front</a>(<span class="keyword">const</span> T &amp;elem) { <span class="keywordflow">return</span> <a class="code" href="classkche__tree_1_1KHeap.html#a119f99eddf6a0967b5d29ccb21e95886" title="Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).">push</a>(elem); } 
-<a name="l00082"></a><a class="code" href="classkche__tree_1_1KHeap.html#a4b170dfcdea493b90b28b415768dd987">00082</a>   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a4b170dfcdea493b90b28b415768dd987" title="Same as push.">push_back</a> (<span class="keyword">const</span> T &amp;elem) { <span class="keywordflow">return</span> <a class="code" href="classkche__tree_1_1KHeap.html#a119f99eddf6a0967b5d29ccb21e95886" title="Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).">push</a>(elem); } 
-<a name="l00083"></a>00083 
-<a name="l00084"></a><a class="code" href="classkche__tree_1_1KHeap.html#ae4a7daf2b6c24ffbd5bd65d0188cd627">00084</a>   <span class="keywordtype">void</span> <a class="code" href="classkche__tree_1_1KHeap.html#ae4a7daf2b6c24ffbd5bd65d0188cd627" title="Same as KHeap::pop_worst.">pop_front</a>() { <a class="code" href="classkche__tree_1_1KHeap.html#a50dbfc5dd34c973c18a12aa424dfbc2e" title="Pop the worst element from the heap. Can be used for reverse sorting. Cost: O(log K)...">pop_worst</a>(); } 
-<a name="l00085"></a><a class="code" href="classkche__tree_1_1KHeap.html#a89fe41832a137ca6bc83e34b65cce339">00085</a>   <span class="keywordtype">void</span> <a class="code" href="classkche__tree_1_1KHeap.html#a89fe41832a137ca6bc83e34b65cce339" title="Same as KHeap::pop_best.">pop_back</a>()  { <a class="code" href="classkche__tree_1_1KHeap.html#aea99fe579af6f2c21a259c54384db982" title="Pop the best element from the heap. Can be used for direct sorting. Cost: O(log K).">pop_best</a>(); } 
-<a name="l00086"></a>00086 
-<a name="l00087"></a><a class="code" href="classkche__tree_1_1KHeap.html#ab67b72ae44a14e9ab50d5d7aec6786de">00087</a>   <span class="keyword">const</span> T &amp;<a class="code" href="classkche__tree_1_1KHeap.html#ab67b72ae44a14e9ab50d5d7aec6786de" title="Same as KHeap::worst.">front</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classkche__tree_1_1KHeap.html#aca49f1f23fdd90da777d9fa28fa044f1" title="Retrieve the worst element from the heap, or the first data object if empty. Cost: O(1)...">worst</a>();  } 
-<a name="l00088"></a><a class="code" href="classkche__tree_1_1KHeap.html#a50f27cc78a61c5c7f931acc374f1d85f">00088</a>   <span class="keyword">const</span> T &amp;<a class="code" href="classkche__tree_1_1KHeap.html#a50f27cc78a61c5c7f931acc374f1d85f" title="Same as KHeap::best.">back</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> <a class="code" href="classkche__tree_1_1KHeap.html#a0c0422706ef9c8b4e6727a5f2c526877" title="Retrieve the best element from the heap, or the first data object if empty. Cost: O(1)...">best</a>(); } 
+<a name="l00079"></a>00079   <span class="comment">// STL-based names for heap operations and properties.</span>
+<a name="l00080"></a><a class="code" href="classkche__tree_1_1KHeap.html#a2313364744977536bcca53e3563c1c5e">00080</a>   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a2313364744977536bcca53e3563c1c5e" title="Same as push.">push_front</a>(<span class="keyword">const</span> T &amp;elem) { <span class="keywordflow">return</span> <a class="code" href="classkche__tree_1_1KHeap.html#a702bf078950c1ad4db8aadd071e48463" title="Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).">push</a>(elem); } 
+<a name="l00081"></a><a class="code" href="classkche__tree_1_1KHeap.html#a194f90334ed3c8e6393600a979d47247">00081</a>   <span class="keywordtype">bool</span> <a class="code" href="classkche__tree_1_1KHeap.html#a194f90334ed3c8e6393600a979d47247" title="Same as push.">push_back</a> (<span class="keyword">const</span> T &amp;elem) { <span class="keywordflow">return</span> <a class="code" href="classkche__tree_1_1KHeap.html#a702bf078950c1ad4db8aadd071e48463" title="Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).">push</a>(elem); } 
+<a name="l00082"></a>00082 
+<a name="l00083"></a><a class="code" href="classkche__tree_1_1KHeap.html#a37e455cfcb0a0a5a75e05c8c7ff78a98">00083</a>   <span class="keywordtype">void</span> <a class="code" href="classkche__tree_1_1KHeap.html#a37e455cfcb0a0a5a75e05c8c7ff78a98" title="Same as KHeap::pop_worst.">pop_front</a>() { <a class="code" href="classkche__tree_1_1KHeap.html#a5ac7e6659527742967b72f3c01f4500d" title="Pop the worst element from the heap. Can be used for reverse sorting. Cost: O(log K)...">pop_worst</a>(); } 
+<a name="l00084"></a><a class="code" href="classkche__tree_1_1KHeap.html#a991c721621bd70d0d8239acebefdbe0b">00084</a>   <span class="keywordtype">void</span> <a class="code" href="classkche__tree_1_1KHeap.html#a991c721621bd70d0d8239acebefdbe0b" title="Same as KHeap::pop_best.">pop_back</a>()  { <a class="code" href="classkche__tree_1_1KHeap.html#a5940262aa8cdaf45ded057fe492710e1" title="Pop the best element from the heap. Can be used for direct sorting. Cost: O(log K).">pop_best</a>(); } 
+<a name="l00085"></a>00085 
+<a name="l00086"></a><a class="code" href="classkche__tree_1_1KHeap.html#a3242917ba5b3990cf35da73792363bfe">00086</a>   <span class="keyword">const</span> T &amp;<a class="code" href="classkche__tree_1_1KHeap.html#a3242917ba5b3990cf35da73792363bfe" title="Same as KHeap::worst.">front</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classkche__tree_1_1KHeap.html#a6ba0c975cfb9341df88ed8b3247520f0" title="Retrieve the worst element from the heap, or the first data object if empty. Cost: O(1)...">worst</a>();  } 
+<a name="l00087"></a><a class="code" href="classkche__tree_1_1KHeap.html#a254b03bf6aa8ff773217cc40f051c833">00087</a>   <span class="keyword">const</span> T &amp;<a class="code" href="classkche__tree_1_1KHeap.html#a254b03bf6aa8ff773217cc40f051c833" title="Same as KHeap::best.">back</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> <a class="code" href="classkche__tree_1_1KHeap.html#aaa5bad69a1c006f47d442baca1516114" title="Retrieve the best element from the heap, or the first data object if empty. Cost: O(1)...">best</a>(); } 
+<a name="l00088"></a>00088 
 <a name="l00089"></a>00089 
-<a name="l00090"></a>00090 
-<a name="l00091"></a>00091 <span class="keyword">protected</span>:
-<a name="l00092"></a><a class="code" href="classkche__tree_1_1KHeap.html#a03eb57a5299068c234892542816cca79">00092</a>   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classkche__tree_1_1KHeap.html#a03eb57a5299068c234892542816cca79" title="Maximum number of best elements stored (also maximum heap size).">K</a>; 
-<a name="l00093"></a><a class="code" href="classkche__tree_1_1KHeap.html#ab5633a392b9a0b4ea4c3f86532fe2e4d">00093</a>   T *<a class="code" href="classkche__tree_1_1KHeap.html#ab5633a392b9a0b4ea4c3f86532fe2e4d" title="Array of stored elements (0-indexed).">data</a>; 
-<a name="l00094"></a>00094 
-<a name="l00095"></a><a class="code" href="classkche__tree_1_1KHeap.html#ac31fe327af108d5516f5ed6f23cbcdc1">00095</a>   <span class="keyword">const</span> Compare &amp;<a class="code" href="classkche__tree_1_1KHeap.html#ac31fe327af108d5516f5ed6f23cbcdc1" title="Comparison object used by internal heaps.">compare</a>; 
-<a name="l00096"></a><a class="code" href="classkche__tree_1_1KHeap.html#a1175ab738b93b00f7a4ef55a37ab0f11">00096</a>   <span class="keyword">static</span> <span class="keyword">const</span> idx <a class="code" href="classkche__tree_1_1KHeap.html#a1175ab738b93b00f7a4ef55a37ab0f11" title="Root index of the heap.">root</a> = 1; 
-<a name="l00097"></a>00097 
-<a name="l00098"></a><a class="code" href="classkche__tree_1_1KHeap.html#a25d264ef4045d8d9ca909cb5c910692a">00098</a>   <a class="code" href="classkche__tree_1_1IndirectHeap.html" title="Define a reference-based heap over an array of existing data that can be accessed and modified while ...">IndirectHeap&lt;T, Compare, idx&gt;</a> <a class="code" href="classkche__tree_1_1KHeap.html#a25d264ef4045d8d9ca909cb5c910692a" title="Heap storing best data indices.">bestHeap</a>; 
-<a name="l00099"></a><a class="code" href="classkche__tree_1_1KHeap.html#a3169bba01de74a13961b250cb51e86e1">00099</a>   <a class="code" href="classkche__tree_1_1IndirectHeap.html" title="Define a reference-based heap over an array of existing data that can be accessed and modified while ...">IndirectHeap&lt;T, std::binary_negate&lt;Compare&gt;</a>, idx&gt; <a class="code" href="classkche__tree_1_1KHeap.html#a3169bba01de74a13961b250cb51e86e1" title="Heap storing worst data indices.">worstHeap</a>; 
-<a name="l00100"></a>00100 };
-<a name="l00101"></a>00101 
-<a name="l00102"></a>00102 } <span class="comment">// namespace kche_tree</span>
-<a name="l00103"></a>00103 
-<a name="l00104"></a>00104 <span class="comment">// Template implementation.</span>
-<a name="l00105"></a>00105 <span class="preprocessor">#include &quot;k-heap.tpp&quot;</span>
-<a name="l00106"></a>00106 
-<a name="l00107"></a>00107 <span class="preprocessor">#endif</span>
+<a name="l00090"></a>00090 <span class="keyword">protected</span>:
+<a name="l00091"></a><a class="code" href="classkche__tree_1_1KHeap.html#aaf66dd3588e0b55cfa5ca1858176024a">00091</a>   <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classkche__tree_1_1KHeap.html#aaf66dd3588e0b55cfa5ca1858176024a" title="Maximum number of best elements stored (also maximum heap size).">K</a>; 
+<a name="l00092"></a><a class="code" href="classkche__tree_1_1KHeap.html#a9708d05644313bbfb656cd6a59b9de5f">00092</a>   T *<a class="code" href="classkche__tree_1_1KHeap.html#a9708d05644313bbfb656cd6a59b9de5f" title="Array of stored elements (0-indexed).">data</a>; 
+<a name="l00093"></a>00093 
+<a name="l00094"></a><a class="code" href="classkche__tree_1_1KHeap.html#a030bfe0e11fd98f1a929ecfc30a2d885">00094</a>   <span class="keyword">const</span> Compare &amp;<a class="code" href="classkche__tree_1_1KHeap.html#a030bfe0e11fd98f1a929ecfc30a2d885" title="Comparison object used by internal heaps.">compare</a>; 
+<a name="l00095"></a><a class="code" href="classkche__tree_1_1KHeap.html#a4c9d822ddc3e8f5e51bf635c3b7e8c30">00095</a>   <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classkche__tree_1_1KHeap.html#a4c9d822ddc3e8f5e51bf635c3b7e8c30" title="Root index of the heap.">root</a> = 1; 
+<a name="l00096"></a>00096 
+<a name="l00097"></a><a class="code" href="classkche__tree_1_1KHeap.html#a0cbfa21101f4655704b118503196a170">00097</a>   <a class="code" href="classkche__tree_1_1IndirectHeap.html">IndirectHeap&lt;T, Compare, unsigned int&gt;</a> <a class="code" href="classkche__tree_1_1KHeap.html#a0cbfa21101f4655704b118503196a170" title="Heap storing best data indices.">bestHeap</a>; 
+<a name="l00098"></a><a class="code" href="classkche__tree_1_1KHeap.html#aba3d979ede4b545828fe8e410e9905f9">00098</a>   <a class="code" href="classkche__tree_1_1IndirectHeap.html" title="Define a reference-based heap over an array of existing data that can be accessed and modified while ...">IndirectHeap&lt;T, std::binary_negate&lt;Compare&gt;</a>, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>&gt; <a class="code" href="classkche__tree_1_1KHeap.html#aba3d979ede4b545828fe8e410e9905f9" title="Heap storing worst data indices.">worstHeap</a>; 
+<a name="l00099"></a>00099 };
+<a name="l00100"></a>00100 
+<a name="l00101"></a>00101 } <span class="comment">// namespace kche_tree</span>
+<a name="l00102"></a>00102 
+<a name="l00103"></a>00103 <span class="comment">// Template implementation.</span>
+<a name="l00104"></a>00104 <span class="preprocessor">#include &quot;k-heap.tpp&quot;</span>
+<a name="l00105"></a>00105 
+<a name="l00106"></a>00106 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Sun Jun 26 2011 22:02:48 for Kche-tree by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Jun 28 2011 00:19:53 for Kche-tree by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>
