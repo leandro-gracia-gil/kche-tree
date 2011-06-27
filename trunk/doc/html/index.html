@@ -39,9 +39,9 @@ Introduction</h2>
 <p>Kche-tree is a template for generic cache-aware and non-mutable kd-trees. Its main purpose is to provide an easy to use but powerful implementation of the typical kd-tree structure functionality with very low latencies.</p>
 <p>It provides the following basic operations:</p>
 <ul>
-<li><a class="el" href="classkche__tree_1_1KDTree.html#a51d04c499016f902fde5afabb65d8b0a">Build</a>: create a kd-tree from a training set of feature vectors. Median splitting is used to keep the tree balanced. Cost: O(n log² n).</li>
-<li><a class="el" href="classkche__tree_1_1KDTree.html#ad3107a1ae40a3ab492621ae18c4c64d0">K nearest neighbours</a>: retrieve the K nearest neighbours of a given feature vector. Estimated average cost: O(log K log n).</li>
-<li><a class="el" href="classkche__tree_1_1KDTree.html#a626ca00dc85218fd9b507a8a286843c8">All neighbours within a range</a>: retrieve all the neighbours inside a maximum distance radius from a given feature vector. Estimated average cost: O(log m log n) with <em>m</em> the number of neighbours in the range.</li>
+<li><a class="el" href="classkche__tree_1_1KDTree.html#af93d90a7a669a545542afd7dccc6c491">Build</a>: create a kd-tree from a training set of feature vectors. Median splitting is used to keep the tree balanced. Cost: O(n log² n).</li>
+<li><a class="el" href="classkche__tree_1_1KDTree.html#a76a4b3b392c430e037bb53803f4cc4dd">K nearest neighbours</a>: retrieve the K nearest neighbours of a given feature vector. Estimated average cost: O(log K log n).</li>
+<li><a class="el" href="classkche__tree_1_1KDTree.html#a5fa534e27e8cf8b3f49247517bda5d1d">All neighbours within a range</a>: retrieve all the neighbours inside a maximum distance radius from a given feature vector. Estimated average cost: O(log m log n) with <em>m</em> the number of neighbours in the range.</li>
 </ul>
 <p>The template has been designed to minimize the number of cache misses combined with many algorithmic techniques and ideas.<br/>
  Here are some of its features:</p>
@@ -64,12 +64,22 @@ Introduction</h2>
 <li><b>knn simple example</b>: shows a quite simple use of the template. Can be found in the file examples/knn_simple.cpp.</li>
 <li><b>custom types example</b>: shows how to use a custom type with Kche-tree. Can be found in the file examples/custom_type.cpp.</li>
 </ul>
-<h2><a class="anchor" id="installation"></a>
+<h2><a class="anchor" id="usage"></a>
 Usage</h2>
 <p>Kche-trees are quite simple to use. Just include the <code><a class="el" href="kche-tree_8h.html" title="Main kche-tree library header.">kche-tree.h</a></code> file, use its namespace like you would normally do with STL and proceed like in the usage example <code>knn_simple.cpp</code>. Since it's a template no additional files required to be compiled or linked. However it requires the <code>kche-tree</code> folder to be present in an include path. This can also be achieved by running <code>make</code> <code>install</code>, will copy the template files to your /usr/include folder by default. To undo this run <code>make</code> <code>uninstall</code>.</p>
-<p>In case of using the floating point/24 dimension SSE specialization, the file tools/kd-tree_sse_24d.h and the compilation flag <code>-msse</code> (in GCC) will be also required. </p>
+<p>In case of using the floating point/24 dimension SSE specialization, the file tools/kd-tree_sse_24d.h and the compilation flag <code>-msse</code> (in GCC) will be also required.</p>
+<h2><a class="anchor" id="CPP0x"></a>
+About C++0x</h2>
+<p>Kche-trees use by default C++0x features available in the most modern compilers to enhance its use and operations. If C++0x is not supported by your compiler it can be disabled by simply defining the macro <code>KCHE_TREE_DISABLE_CPP0X</code> before including the library. Additionally it can be disabled when building the examples and tools by using <code>make</code> <code>c++0x=disabled</code>.</p>
+<p>However, be aware that disabling C++0x has some consequences:</p>
+<ul>
+<li>When calling the <a class="el" href="classkche__tree_1_1KDTree.html#a76a4b3b392c430e037bb53803f4cc4dd">knn</a> method it will be required to explicitly provide the K-Neighbour container template type, where in the C++0x version it automatically defaults to <a class="el" href="classkche__tree_1_1KVector.html">KVector</a>. See the <code>knn_simple</code> example for details.</li>
+<li>Any static assert that the library may make will leave no explanation message, just some kind of compiler error mentioning COMPILE_ASSERT_FAILURE.</li>
+<li>Some type traits might not be available, leading to possible misses of automatic optimization chances.</li>
+</ul>
+<p>Expect the previous list to grow and the possible future addition of C++0x-only features. It is also possible that the support for non-C++0x code can be completely removed in future releases. </p>
 </div></div>
-<hr class="footer"/><address class="footer"><small>Generated on Sun Jun 26 2011 22:02:48 for Kche-tree by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Jun 28 2011 00:19:53 for Kche-tree by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

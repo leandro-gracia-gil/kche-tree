@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>Kche-tree: kche_tree::KHeap&lt; T, Compare, idx &gt; Class Template Reference</title>
+<title>Kche-tree: kche_tree::KHeap&lt; T, Compare &gt; Class Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -48,7 +48,7 @@
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#pro-static-attribs">Static Protected Attributes</a>  </div>
   <div class="headertitle">
-<div class="title">kche_tree::KHeap&lt; T, Compare, idx &gt; Class Template Reference</div>  </div>
+<div class="title">kche_tree::KHeap&lt; T, Compare &gt; Class Template Reference</div>  </div>
 </div>
 <div class="contents">
 <!-- doxytag: class="kche_tree::KHeap" -->
@@ -61,70 +61,71 @@
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a560f5dfde390402eabc5bed6f81d8cd3">KHeap</a> (unsigned int k)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">K-heap constructor.  <a href="#a560f5dfde390402eabc5bed6f81d8cd3"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#acae8a924239c63c70b04aa15b1eaa6c1">KHeap</a> (const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> &amp;heap)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor.  <a href="#acae8a924239c63c70b04aa15b1eaa6c1"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a1bd5fa591e3bfceed778cdeed099dd16">~KHeap</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#a1bd5fa591e3bfceed778cdeed099dd16"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a24ac96fdede7f353a122814807c12646">operator=</a> (const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> &amp;heap)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator.  <a href="#a24ac96fdede7f353a122814807c12646"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a5155ce3ca8c47beec2c603350748f783">operator==</a> (const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> &amp;heap) const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator.  <a href="#a5155ce3ca8c47beec2c603350748f783"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a119f99eddf6a0967b5d29ccb21e95886">push</a> (const T &amp;elem)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).  <a href="#a119f99eddf6a0967b5d29ccb21e95886"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#aea99fe579af6f2c21a259c54384db982">pop_best</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Pop the best element from the heap. Can be used for direct sorting. Cost: O(log K).  <a href="#aea99fe579af6f2c21a259c54384db982"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a50dbfc5dd34c973c18a12aa424dfbc2e">pop_worst</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Pop the worst element from the heap. Can be used for reverse sorting. Cost: O(log K).  <a href="#a50dbfc5dd34c973c18a12aa424dfbc2e"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a734008cb4f8386faacca547829aa5656">full</a> () const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the heap is full (it has already K elements). Cost: O(1).  <a href="#a734008cb4f8386faacca547829aa5656"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a925d0bdc6ff7e355a320ebf8df9c3c1d">empty</a> () const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the heap is empty. Cost: O(1).  <a href="#a925d0bdc6ff7e355a320ebf8df9c3c1d"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a70fd5e633a441a2389b468292263ee24">size</a> () const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of elements in the heap. Cost: O(1).  <a href="#a70fd5e633a441a2389b468292263ee24"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a0c0422706ef9c8b4e6727a5f2c526877">best</a> () const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the best element from the heap, or the first data object if empty. Cost: O(1).  <a href="#a0c0422706ef9c8b4e6727a5f2c526877"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#aca49f1f23fdd90da777d9fa28fa044f1">worst</a> () const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the worst element from the heap, or the first data object if empty. Cost: O(1).  <a href="#aca49f1f23fdd90da777d9fa28fa044f1"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#ab141f2c5263f395c0eaa914367ade5ab">get_K</a> () const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum number of elements stored in the heap (also the maximum heap size). Cost: O(1).  <a href="#ab141f2c5263f395c0eaa914367ade5ab"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#ade4bb28a6a1506095ea7b2f7565b8a5a">count</a> () const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of elements currently in the heap. Cost: O(1).  <a href="#ade4bb28a6a1506095ea7b2f7565b8a5a"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#ae63c5e8fce73795b1f065ac21e4ae541">push_front</a> (const T &amp;elem)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#a119f99eddf6a0967b5d29ccb21e95886">push</a>.  <a href="#ae63c5e8fce73795b1f065ac21e4ae541"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a4b170dfcdea493b90b28b415768dd987">push_back</a> (const T &amp;elem)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#a119f99eddf6a0967b5d29ccb21e95886">push</a>.  <a href="#a4b170dfcdea493b90b28b415768dd987"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#ae4a7daf2b6c24ffbd5bd65d0188cd627">pop_front</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#a50dbfc5dd34c973c18a12aa424dfbc2e">KHeap::pop_worst</a>.  <a href="#ae4a7daf2b6c24ffbd5bd65d0188cd627"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a89fe41832a137ca6bc83e34b65cce339">pop_back</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#aea99fe579af6f2c21a259c54384db982">KHeap::pop_best</a>.  <a href="#a89fe41832a137ca6bc83e34b65cce339"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#ab67b72ae44a14e9ab50d5d7aec6786de">front</a> () const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#aca49f1f23fdd90da777d9fa28fa044f1">KHeap::worst</a>.  <a href="#ab67b72ae44a14e9ab50d5d7aec6786de"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a50f27cc78a61c5c7f931acc374f1d85f">back</a> () const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#a0c0422706ef9c8b4e6727a5f2c526877">KHeap::best</a>.  <a href="#a50f27cc78a61c5c7f931acc374f1d85f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a7bdf4ecfc230f03bdc3240d4a6f6cbad">KHeap</a> (unsigned int k)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">K-heap constructor.  <a href="#a7bdf4ecfc230f03bdc3240d4a6f6cbad"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#af0fed6720c429ddf7d6d631ea25e64bf">KHeap</a> (const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> &amp;heap)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy constructor.  <a href="#af0fed6720c429ddf7d6d631ea25e64bf"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#af32c92e7bd318aa180bd1460ba9c190a">~KHeap</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#af32c92e7bd318aa180bd1460ba9c190a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#ae9849df65f563f365f884f780d73f4e9">operator=</a> (const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> &amp;heap)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Assignment operator.  <a href="#ae9849df65f563f365f884f780d73f4e9"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a15edd9337c4a2d81620996287b3c0bba">operator==</a> (const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> &amp;heap) const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison operator.  <a href="#a15edd9337c4a2d81620996287b3c0bba"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a702bf078950c1ad4db8aadd071e48463">push</a> (const T &amp;elem)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).  <a href="#a702bf078950c1ad4db8aadd071e48463"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a5940262aa8cdaf45ded057fe492710e1">pop_best</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Pop the best element from the heap. Can be used for direct sorting. Cost: O(log K).  <a href="#a5940262aa8cdaf45ded057fe492710e1"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a5ac7e6659527742967b72f3c01f4500d">pop_worst</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Pop the worst element from the heap. Can be used for reverse sorting. Cost: O(log K).  <a href="#a5ac7e6659527742967b72f3c01f4500d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a225be5b5e417f175019073f5bfdb0126">full</a> () const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the heap is full (it has already K elements). Cost: O(1).  <a href="#a225be5b5e417f175019073f5bfdb0126"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a08c948ae412bce093fb5c45c17bb3af2">empty</a> () const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the heap is empty. Cost: O(1).  <a href="#a08c948ae412bce093fb5c45c17bb3af2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#aab8792d209f5c4e34d9476ac053e5b61">size</a> () const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of elements in the heap. Cost: O(1).  <a href="#aab8792d209f5c4e34d9476ac053e5b61"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#aaa5bad69a1c006f47d442baca1516114">best</a> () const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the best element from the heap, or the first data object if empty. Cost: O(1).  <a href="#aaa5bad69a1c006f47d442baca1516114"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a6ba0c975cfb9341df88ed8b3247520f0">worst</a> () const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the worst element from the heap, or the first data object if empty. Cost: O(1).  <a href="#a6ba0c975cfb9341df88ed8b3247520f0"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#aae2aec0d780a9079e289afb63630733e">get_K</a> () const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the maximum number of elements stored in the heap (also the maximum heap size). Cost: O(1).  <a href="#aae2aec0d780a9079e289afb63630733e"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a860b6bb092db529b4b9ee713d4c82eaa">count</a> () const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of elements currently in the heap. Cost: O(1).  <a href="#a860b6bb092db529b4b9ee713d4c82eaa"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a2313364744977536bcca53e3563c1c5e">push_front</a> (const T &amp;elem)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#a702bf078950c1ad4db8aadd071e48463">push</a>.  <a href="#a2313364744977536bcca53e3563c1c5e"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a194f90334ed3c8e6393600a979d47247">push_back</a> (const T &amp;elem)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#a702bf078950c1ad4db8aadd071e48463">push</a>.  <a href="#a194f90334ed3c8e6393600a979d47247"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a37e455cfcb0a0a5a75e05c8c7ff78a98">pop_front</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#a5ac7e6659527742967b72f3c01f4500d">KHeap::pop_worst</a>.  <a href="#a37e455cfcb0a0a5a75e05c8c7ff78a98"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a991c721621bd70d0d8239acebefdbe0b">pop_back</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#a5940262aa8cdaf45ded057fe492710e1">KHeap::pop_best</a>.  <a href="#a991c721621bd70d0d8239acebefdbe0b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a3242917ba5b3990cf35da73792363bfe">front</a> () const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#a6ba0c975cfb9341df88ed8b3247520f0">KHeap::worst</a>.  <a href="#a3242917ba5b3990cf35da73792363bfe"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a254b03bf6aa8ff773217cc40f051c833">back</a> () const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as <a class="el" href="classkche__tree_1_1KHeap.html#aaa5bad69a1c006f47d442baca1516114">KHeap::best</a>.  <a href="#a254b03bf6aa8ff773217cc40f051c833"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a03eb57a5299068c234892542816cca79">K</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of best elements stored (also maximum heap size).  <a href="#a03eb57a5299068c234892542816cca79"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#ab5633a392b9a0b4ea4c3f86532fe2e4d">data</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Array of stored elements (0-indexed).  <a href="#ab5633a392b9a0b4ea4c3f86532fe2e4d"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">const Compare &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#ac31fe327af108d5516f5ed6f23cbcdc1">compare</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison object used by internal heaps.  <a href="#ac31fe327af108d5516f5ed6f23cbcdc1"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classkche__tree_1_1IndirectHeap.html">IndirectHeap</a>&lt; T, Compare, idx &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a25d264ef4045d8d9ca909cb5c910692a">bestHeap</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Heap storing best data indices.  <a href="#a25d264ef4045d8d9ca909cb5c910692a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#aaf66dd3588e0b55cfa5ca1858176024a">K</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum number of best elements stored (also maximum heap size).  <a href="#aaf66dd3588e0b55cfa5ca1858176024a"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a9708d05644313bbfb656cd6a59b9de5f">data</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Array of stored elements (0-indexed).  <a href="#a9708d05644313bbfb656cd6a59b9de5f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const Compare &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a030bfe0e11fd98f1a929ecfc30a2d885">compare</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Comparison object used by internal heaps.  <a href="#a030bfe0e11fd98f1a929ecfc30a2d885"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classkche__tree_1_1IndirectHeap.html">IndirectHeap</a>&lt; T, Compare, <br class="typebreak"/>
+unsigned int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a0cbfa21101f4655704b118503196a170">bestHeap</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Heap storing best data indices.  <a href="#a0cbfa21101f4655704b118503196a170"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classkche__tree_1_1IndirectHeap.html">IndirectHeap</a>&lt; T, <br class="typebreak"/>
 std::binary_negate&lt; Compare &gt;<br class="typebreak"/>
-, idx &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a3169bba01de74a13961b250cb51e86e1">worstHeap</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Heap storing worst data indices.  <a href="#a3169bba01de74a13961b250cb51e86e1"></a><br/></td></tr>
+, unsigned int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#aba3d979ede4b545828fe8e410e9905f9">worstHeap</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Heap storing worst data indices.  <a href="#aba3d979ede4b545828fe8e410e9905f9"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pro-static-attribs"></a>
 Static Protected Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static const idx&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a1175ab738b93b00f7a4ef55a37ab0f11">root</a> = 1</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Root index of the heap.  <a href="#a1175ab738b93b00f7a4ef55a37ab0f11"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KHeap.html#a4c9d822ddc3e8f5e51bf635c3b7e8c30">root</a> = 1</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Root index of the heap.  <a href="#a4c9d822ddc3e8f5e51bf635c3b7e8c30"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
-<div class="textblock"><h3>template&lt;typename T, typename Compare = std::less&lt;T&gt;, typename idx = unsigned int&gt;<br/>
-class kche_tree::KHeap&lt; T, Compare, idx &gt;</h3>
+<div class="textblock"><h3>template&lt;typename T, typename Compare = std::less&lt;T&gt;&gt;<br/>
+class kche_tree::KHeap&lt; T, Compare &gt;</h3>
 
 <p>Define a reference-based heap that holds the K best elements on it allowing to push them in logarithmic time. </p>
 <dl class="note"><dt><b>Note:</b></dt><dd>Even if asyntotically optimal it could be slower than <a class="el" href="classkche__tree_1_1KVector.html">k-vectors</a> for small values of K due to extra operations and cache misses.</dd></dl>
@@ -132,19 +133,18 @@ class kche_tree::KHeap&lt; T, Compare, idx &gt;</h3>
   <table class="">
     <tr><td class="paramname">T</td><td>Type of the data stored in the k-heap. </td></tr>
     <tr><td class="paramname">Compare</td><td>Type of the comparison object. The class must inherit from <code>std::binary_function</code> an define its <code>bool</code> (<code>const</code> <code>&amp;T</code>, <code>const</code> <code>&amp;T</code>) <code>const</code> operator. </td></tr>
-    <tr><td class="paramname">idx</td><td>Type used for encoding data vector indices. Defaults to unsigned int, but can be reduced to short or char for small K values. </td></tr>
   </table>
   </dd>
 </dl>
 </div><hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a560f5dfde390402eabc5bed6f81d8cd3"></a><!-- doxytag: member="kche_tree::KHeap::KHeap" ref="a560f5dfde390402eabc5bed6f81d8cd3" args="(unsigned int k)" -->
+<a class="anchor" id="a7bdf4ecfc230f03bdc3240d4a6f6cbad"></a><!-- doxytag: member="kche_tree::KHeap::KHeap" ref="a7bdf4ecfc230f03bdc3240d4a6f6cbad" args="(unsigned int k)" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::<a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> </td>
+          <td class="memname"><a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::<a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> </td>
           <td>(</td>
           <td class="paramtype">unsigned int&#160;</td>
           <td class="paramname"><em>k</em></td><td>)</td>
@@ -158,16 +158,16 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="acae8a924239c63c70b04aa15b1eaa6c1"></a><!-- doxytag: member="kche_tree::KHeap::KHeap" ref="acae8a924239c63c70b04aa15b1eaa6c1" args="(const KHeap &amp;heap)" -->
+<a class="anchor" id="af0fed6720c429ddf7d6d631ea25e64bf"></a><!-- doxytag: member="kche_tree::KHeap::KHeap" ref="af0fed6720c429ddf7d6d631ea25e64bf" args="(const KHeap &amp;heap)" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::<a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> </td>
+          <td class="memname"><a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::<a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a>&lt; T, Compare, idx &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a>&lt; T, Compare &gt; &amp;&#160;</td>
           <td class="paramname"><em>heap</em></td><td>)</td>
           <td></td>
         </tr>
@@ -179,14 +179,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="a1bd5fa591e3bfceed778cdeed099dd16"></a><!-- doxytag: member="kche_tree::KHeap::~KHeap" ref="a1bd5fa591e3bfceed778cdeed099dd16" args="()" -->
+<a class="anchor" id="af32c92e7bd318aa180bd1460ba9c190a"></a><!-- doxytag: member="kche_tree::KHeap::~KHeap" ref="af32c92e7bd318aa180bd1460ba9c190a" args="()" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::~<a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> </td>
+          <td class="memname"><a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::~<a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -200,14 +200,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a50f27cc78a61c5c7f931acc374f1d85f"></a><!-- doxytag: member="kche_tree::KHeap::back" ref="a50f27cc78a61c5c7f931acc374f1d85f" args="() const " -->
+<a class="anchor" id="a254b03bf6aa8ff773217cc40f051c833"></a><!-- doxytag: member="kche_tree::KHeap::back" ref="a254b03bf6aa8ff773217cc40f051c833" args="() const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const T&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::back </td>
+          <td class="memname">const T&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::back </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const<code> [inline]</code></td>
@@ -216,18 +216,18 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 </div>
 <div class="memdoc">
 
-<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#a0c0422706ef9c8b4e6727a5f2c526877">KHeap::best</a>. </p>
+<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#aaa5bad69a1c006f47d442baca1516114">KHeap::best</a>. </p>
 
 </div>
 </div>
-<a class="anchor" id="a0c0422706ef9c8b4e6727a5f2c526877"></a><!-- doxytag: member="kche_tree::KHeap::best" ref="a0c0422706ef9c8b4e6727a5f2c526877" args="() const " -->
+<a class="anchor" id="aaa5bad69a1c006f47d442baca1516114"></a><!-- doxytag: member="kche_tree::KHeap::best" ref="aaa5bad69a1c006f47d442baca1516114" args="() const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const T&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::best </td>
+          <td class="memname">const T&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::best </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -240,14 +240,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="ade4bb28a6a1506095ea7b2f7565b8a5a"></a><!-- doxytag: member="kche_tree::KHeap::count" ref="ade4bb28a6a1506095ea7b2f7565b8a5a" args="() const " -->
+<a class="anchor" id="a860b6bb092db529b4b9ee713d4c82eaa"></a><!-- doxytag: member="kche_tree::KHeap::count" ref="a860b6bb092db529b4b9ee713d4c82eaa" args="() const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::count </td>
+          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::count </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -260,14 +260,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="a925d0bdc6ff7e355a320ebf8df9c3c1d"></a><!-- doxytag: member="kche_tree::KHeap::empty" ref="a925d0bdc6ff7e355a320ebf8df9c3c1d" args="() const " -->
+<a class="anchor" id="a08c948ae412bce093fb5c45c17bb3af2"></a><!-- doxytag: member="kche_tree::KHeap::empty" ref="a08c948ae412bce093fb5c45c17bb3af2" args="() const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::empty </td>
+          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::empty </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -280,14 +280,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="ab67b72ae44a14e9ab50d5d7aec6786de"></a><!-- doxytag: member="kche_tree::KHeap::front" ref="ab67b72ae44a14e9ab50d5d7aec6786de" args="() const " -->
+<a class="anchor" id="a3242917ba5b3990cf35da73792363bfe"></a><!-- doxytag: member="kche_tree::KHeap::front" ref="a3242917ba5b3990cf35da73792363bfe" args="() const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const T&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::front </td>
+          <td class="memname">const T&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::front </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const<code> [inline]</code></td>
@@ -296,18 +296,18 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 </div>
 <div class="memdoc">
 
-<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#aca49f1f23fdd90da777d9fa28fa044f1">KHeap::worst</a>. </p>
+<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#a6ba0c975cfb9341df88ed8b3247520f0">KHeap::worst</a>. </p>
 
 </div>
 </div>
-<a class="anchor" id="a734008cb4f8386faacca547829aa5656"></a><!-- doxytag: member="kche_tree::KHeap::full" ref="a734008cb4f8386faacca547829aa5656" args="() const " -->
+<a class="anchor" id="a225be5b5e417f175019073f5bfdb0126"></a><!-- doxytag: member="kche_tree::KHeap::full" ref="a225be5b5e417f175019073f5bfdb0126" args="() const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::full </td>
+          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::full </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -320,14 +320,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="ab141f2c5263f395c0eaa914367ade5ab"></a><!-- doxytag: member="kche_tree::KHeap::get_K" ref="ab141f2c5263f395c0eaa914367ade5ab" args="() const " -->
+<a class="anchor" id="aae2aec0d780a9079e289afb63630733e"></a><!-- doxytag: member="kche_tree::KHeap::get_K" ref="aae2aec0d780a9079e289afb63630733e" args="() const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::get_K </td>
+          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::get_K </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -340,16 +340,16 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="a24ac96fdede7f353a122814807c12646"></a><!-- doxytag: member="kche_tree::KHeap::operator=" ref="a24ac96fdede7f353a122814807c12646" args="(const KHeap &amp;heap)" -->
+<a class="anchor" id="ae9849df65f563f365f884f780d73f4e9"></a><!-- doxytag: member="kche_tree::KHeap::operator=" ref="ae9849df65f563f365f884f780d73f4e9" args="(const KHeap &amp;heap)" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a>&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::operator= </td>
+          <td class="memname"><a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a>&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::operator= </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a>&lt; T, Compare, idx &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a>&lt; T, Compare &gt; &amp;&#160;</td>
           <td class="paramname"><em>heap</em></td><td>)</td>
           <td></td>
         </tr>
@@ -361,16 +361,16 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="a5155ce3ca8c47beec2c603350748f783"></a><!-- doxytag: member="kche_tree::KHeap::operator==" ref="a5155ce3ca8c47beec2c603350748f783" args="(const KHeap &amp;heap) const " -->
+<a class="anchor" id="a15edd9337c4a2d81620996287b3c0bba"></a><!-- doxytag: member="kche_tree::KHeap::operator==" ref="a15edd9337c4a2d81620996287b3c0bba" args="(const KHeap &amp;heap) const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::operator== </td>
+          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::operator== </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a>&lt; T, Compare, idx &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classkche__tree_1_1KHeap.html">KHeap</a>&lt; T, Compare &gt; &amp;&#160;</td>
           <td class="paramname"><em>heap</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -382,14 +382,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="a89fe41832a137ca6bc83e34b65cce339"></a><!-- doxytag: member="kche_tree::KHeap::pop_back" ref="a89fe41832a137ca6bc83e34b65cce339" args="()" -->
+<a class="anchor" id="a991c721621bd70d0d8239acebefdbe0b"></a><!-- doxytag: member="kche_tree::KHeap::pop_back" ref="a991c721621bd70d0d8239acebefdbe0b" args="()" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::pop_back </td>
+          <td class="memname">void <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::pop_back </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [inline]</code></td>
@@ -398,18 +398,18 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 </div>
 <div class="memdoc">
 
-<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#aea99fe579af6f2c21a259c54384db982">KHeap::pop_best</a>. </p>
+<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#a5940262aa8cdaf45ded057fe492710e1">KHeap::pop_best</a>. </p>
 
 </div>
 </div>
-<a class="anchor" id="aea99fe579af6f2c21a259c54384db982"></a><!-- doxytag: member="kche_tree::KHeap::pop_best" ref="aea99fe579af6f2c21a259c54384db982" args="()" -->
+<a class="anchor" id="a5940262aa8cdaf45ded057fe492710e1"></a><!-- doxytag: member="kche_tree::KHeap::pop_best" ref="a5940262aa8cdaf45ded057fe492710e1" args="()" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::pop_best </td>
+          <td class="memname">void <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::pop_best </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -422,14 +422,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="ae4a7daf2b6c24ffbd5bd65d0188cd627"></a><!-- doxytag: member="kche_tree::KHeap::pop_front" ref="ae4a7daf2b6c24ffbd5bd65d0188cd627" args="()" -->
+<a class="anchor" id="a37e455cfcb0a0a5a75e05c8c7ff78a98"></a><!-- doxytag: member="kche_tree::KHeap::pop_front" ref="a37e455cfcb0a0a5a75e05c8c7ff78a98" args="()" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::pop_front </td>
+          <td class="memname">void <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::pop_front </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [inline]</code></td>
@@ -438,18 +438,18 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 </div>
 <div class="memdoc">
 
-<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#a50dbfc5dd34c973c18a12aa424dfbc2e">KHeap::pop_worst</a>. </p>
+<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#a5ac7e6659527742967b72f3c01f4500d">KHeap::pop_worst</a>. </p>
 
 </div>
 </div>
-<a class="anchor" id="a50dbfc5dd34c973c18a12aa424dfbc2e"></a><!-- doxytag: member="kche_tree::KHeap::pop_worst" ref="a50dbfc5dd34c973c18a12aa424dfbc2e" args="()" -->
+<a class="anchor" id="a5ac7e6659527742967b72f3c01f4500d"></a><!-- doxytag: member="kche_tree::KHeap::pop_worst" ref="a5ac7e6659527742967b72f3c01f4500d" args="()" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::pop_worst </td>
+          <td class="memname">void <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::pop_worst </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -462,14 +462,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="a119f99eddf6a0967b5d29ccb21e95886"></a><!-- doxytag: member="kche_tree::KHeap::push" ref="a119f99eddf6a0967b5d29ccb21e95886" args="(const T &amp;elem)" -->
+<a class="anchor" id="a702bf078950c1ad4db8aadd071e48463"></a><!-- doxytag: member="kche_tree::KHeap::push" ref="a702bf078950c1ad4db8aadd071e48463" args="(const T &amp;elem)" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::push </td>
+          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::push </td>
           <td>(</td>
           <td class="paramtype">const T &amp;&#160;</td>
           <td class="paramname"><em>elem</em></td><td>)</td>
@@ -483,14 +483,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="a4b170dfcdea493b90b28b415768dd987"></a><!-- doxytag: member="kche_tree::KHeap::push_back" ref="a4b170dfcdea493b90b28b415768dd987" args="(const T &amp;elem)" -->
+<a class="anchor" id="a194f90334ed3c8e6393600a979d47247"></a><!-- doxytag: member="kche_tree::KHeap::push_back" ref="a194f90334ed3c8e6393600a979d47247" args="(const T &amp;elem)" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::push_back </td>
+          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::push_back </td>
           <td>(</td>
           <td class="paramtype">const T &amp;&#160;</td>
           <td class="paramname"><em>elem</em></td><td>)</td>
@@ -500,18 +500,18 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 </div>
 <div class="memdoc">
 
-<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#a119f99eddf6a0967b5d29ccb21e95886">push</a>. </p>
+<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#a702bf078950c1ad4db8aadd071e48463">push</a>. </p>
 
 </div>
 </div>
-<a class="anchor" id="ae63c5e8fce73795b1f065ac21e4ae541"></a><!-- doxytag: member="kche_tree::KHeap::push_front" ref="ae63c5e8fce73795b1f065ac21e4ae541" args="(const T &amp;elem)" -->
+<a class="anchor" id="a2313364744977536bcca53e3563c1c5e"></a><!-- doxytag: member="kche_tree::KHeap::push_front" ref="a2313364744977536bcca53e3563c1c5e" args="(const T &amp;elem)" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::push_front </td>
+          <td class="memname">bool <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::push_front </td>
           <td>(</td>
           <td class="paramtype">const T &amp;&#160;</td>
           <td class="paramname"><em>elem</em></td><td>)</td>
@@ -521,18 +521,18 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 </div>
 <div class="memdoc">
 
-<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#a119f99eddf6a0967b5d29ccb21e95886">push</a>. </p>
+<p>Same as <a class="el" href="classkche__tree_1_1KHeap.html#a702bf078950c1ad4db8aadd071e48463">push</a>. </p>
 
 </div>
 </div>
-<a class="anchor" id="a70fd5e633a441a2389b468292263ee24"></a><!-- doxytag: member="kche_tree::KHeap::size" ref="a70fd5e633a441a2389b468292263ee24" args="() const " -->
+<a class="anchor" id="aab8792d209f5c4e34d9476ac053e5b61"></a><!-- doxytag: member="kche_tree::KHeap::size" ref="aab8792d209f5c4e34d9476ac053e5b61" args="() const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::size </td>
+          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::size </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -545,14 +545,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="aca49f1f23fdd90da777d9fa28fa044f1"></a><!-- doxytag: member="kche_tree::KHeap::worst" ref="aca49f1f23fdd90da777d9fa28fa044f1" args="() const " -->
+<a class="anchor" id="a6ba0c975cfb9341df88ed8b3247520f0"></a><!-- doxytag: member="kche_tree::KHeap::worst" ref="a6ba0c975cfb9341df88ed8b3247520f0" args="() const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const T&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::worst </td>
+          <td class="memname">const T&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::worst </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -566,14 +566,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 </div>
 </div>
 <hr/><h2>Member Data Documentation</h2>
-<a class="anchor" id="a25d264ef4045d8d9ca909cb5c910692a"></a><!-- doxytag: member="kche_tree::KHeap::bestHeap" ref="a25d264ef4045d8d9ca909cb5c910692a" args="" -->
+<a class="anchor" id="a0cbfa21101f4655704b118503196a170"></a><!-- doxytag: member="kche_tree::KHeap::bestHeap" ref="a0cbfa21101f4655704b118503196a170" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classkche__tree_1_1IndirectHeap.html">IndirectHeap</a>&lt;T, Compare, idx&gt; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#a25d264ef4045d8d9ca909cb5c910692a">bestHeap</a><code> [protected]</code></td>
+          <td class="memname"><a class="el" href="classkche__tree_1_1IndirectHeap.html">IndirectHeap</a>&lt;T, Compare, unsigned int&gt; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#a0cbfa21101f4655704b118503196a170">bestHeap</a><code> [protected]</code></td>
         </tr>
       </table>
 </div>
@@ -583,14 +583,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="ac31fe327af108d5516f5ed6f23cbcdc1"></a><!-- doxytag: member="kche_tree::KHeap::compare" ref="ac31fe327af108d5516f5ed6f23cbcdc1" args="" -->
+<a class="anchor" id="a030bfe0e11fd98f1a929ecfc30a2d885"></a><!-- doxytag: member="kche_tree::KHeap::compare" ref="a030bfe0e11fd98f1a929ecfc30a2d885" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const Compare&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#ac31fe327af108d5516f5ed6f23cbcdc1">compare</a><code> [protected]</code></td>
+          <td class="memname">const Compare&amp; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#a030bfe0e11fd98f1a929ecfc30a2d885">compare</a><code> [protected]</code></td>
         </tr>
       </table>
 </div>
@@ -600,14 +600,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="ab5633a392b9a0b4ea4c3f86532fe2e4d"></a><!-- doxytag: member="kche_tree::KHeap::data" ref="ab5633a392b9a0b4ea4c3f86532fe2e4d" args="" -->
+<a class="anchor" id="a9708d05644313bbfb656cd6a59b9de5f"></a><!-- doxytag: member="kche_tree::KHeap::data" ref="a9708d05644313bbfb656cd6a59b9de5f" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">T* <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#ab5633a392b9a0b4ea4c3f86532fe2e4d">data</a><code> [protected]</code></td>
+          <td class="memname">T* <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#a9708d05644313bbfb656cd6a59b9de5f">data</a><code> [protected]</code></td>
         </tr>
       </table>
 </div>
@@ -617,14 +617,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="a03eb57a5299068c234892542816cca79"></a><!-- doxytag: member="kche_tree::KHeap::K" ref="a03eb57a5299068c234892542816cca79" args="" -->
+<a class="anchor" id="aaf66dd3588e0b55cfa5ca1858176024a"></a><!-- doxytag: member="kche_tree::KHeap::K" ref="aaf66dd3588e0b55cfa5ca1858176024a" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#a03eb57a5299068c234892542816cca79">K</a><code> [protected]</code></td>
+          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#aaf66dd3588e0b55cfa5ca1858176024a">K</a><code> [protected]</code></td>
         </tr>
       </table>
 </div>
@@ -634,14 +634,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="a1175ab738b93b00f7a4ef55a37ab0f11"></a><!-- doxytag: member="kche_tree::KHeap::root" ref="a1175ab738b93b00f7a4ef55a37ab0f11" args="" -->
+<a class="anchor" id="a4c9d822ddc3e8f5e51bf635c3b7e8c30"></a><!-- doxytag: member="kche_tree::KHeap::root" ref="a4c9d822ddc3e8f5e51bf635c3b7e8c30" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const idx <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#a1175ab738b93b00f7a4ef55a37ab0f11">root</a> = 1<code> [static, protected]</code></td>
+          <td class="memname">const unsigned int <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#a4c9d822ddc3e8f5e51bf635c3b7e8c30">root</a> = 1<code> [static, protected]</code></td>
         </tr>
       </table>
 </div>
@@ -651,14 +651,14 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 
 </div>
 </div>
-<a class="anchor" id="a3169bba01de74a13961b250cb51e86e1"></a><!-- doxytag: member="kche_tree::KHeap::worstHeap" ref="a3169bba01de74a13961b250cb51e86e1" args="" -->
+<a class="anchor" id="aba3d979ede4b545828fe8e410e9905f9"></a><!-- doxytag: member="kche_tree::KHeap::worstHeap" ref="aba3d979ede4b545828fe8e410e9905f9" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  = unsigned int&gt; </div>
+template&lt;typename T , typename Compare  = std::less&lt;T&gt;&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classkche__tree_1_1IndirectHeap.html">IndirectHeap</a>&lt;T, std::binary_negate&lt;Compare&gt;, idx&gt; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare, idx &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#a3169bba01de74a13961b250cb51e86e1">worstHeap</a><code> [protected]</code></td>
+          <td class="memname"><a class="el" href="classkche__tree_1_1IndirectHeap.html">IndirectHeap</a>&lt;T, std::binary_negate&lt;Compare&gt;, unsigned int&gt; <a class="el" href="classkche__tree_1_1KHeap.html">kche_tree::KHeap</a>&lt; T, Compare &gt;::<a class="el" href="classkche__tree_1_1KHeap.html#aba3d979ede4b545828fe8e410e9905f9">worstHeap</a><code> [protected]</code></td>
         </tr>
       </table>
 </div>
@@ -672,7 +672,7 @@ template&lt;typename T , typename Compare  = std::less&lt;T&gt;, typename idx  =
 <li>kche-tree/<a class="el" href="k-heap_8h_source.html">k-heap.h</a></li>
 </ul>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Sun Jun 26 2011 22:02:48 for Kche-tree by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Jun 28 2011 00:19:53 for Kche-tree by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>

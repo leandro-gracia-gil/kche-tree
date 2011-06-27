@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
-<title>Kche-tree: kche_tree::KDTree&lt; T, D, S &gt; Class Template Reference</title>
+<title>Kche-tree: kche_tree::KDTree&lt; T, D &gt; Class Template Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css"/>
 </head>
@@ -52,7 +52,7 @@
 <a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="#friends">Friends</a>  </div>
   <div class="headertitle">
-<div class="title">kche_tree::KDTree&lt; T, D, S &gt; Class Template Reference</div>  </div>
+<div class="title">kche_tree::KDTree&lt; T, D &gt; Class Template Reference</div>  </div>
 </div>
 <div class="contents">
 <!-- doxytag: class="kche_tree::KDTree" -->
@@ -65,56 +65,57 @@
 <table class="memberdecls">
 <tr><td colspan="2"><h2><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classkche__tree_1_1Vector.html">Vector</a>&lt; T, D &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a20da77e2c3bdb34eca3068095aa0adcf">Point</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Consider compatible feature vectors as D-dimensional points in the space.  <a href="#a20da77e2c3bdb34eca3068095aa0adcf"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="structkche__tree_1_1VectorDistance.html">VectorDistance</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a221656fc2a0074507979cbdf69f59663">Neighbour</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the type used for kd-tree neighbours.  <a href="#a221656fc2a0074507979cbdf69f59663"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classkche__tree_1_1Vector.html">Vector</a>&lt; T, D &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#aee8bd2c6eacaacf4ed1ef30071fa23e5">Point</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Consider compatible feature vectors as D-dimensional points in the space.  <a href="#aee8bd2c6eacaacf4ed1ef30071fa23e5"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="structkche__tree_1_1VectorDistance.html">VectorDistance</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#aab69522a4cc353a4e19fc26eab85a6de">Neighbour</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the type used for kd-tree neighbours.  <a href="#aab69522a4cc353a4e19fc26eab85a6de"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a482dcb26142af68a6fa3fd5c1306cec4">KDTree</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Creates an empty and uninitialized kd-tree.  <a href="#a482dcb26142af68a6fa3fd5c1306cec4"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a1be5d22d0fbd071fe519ecaacbb0a57e">~KDTree</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#a1be5d22d0fbd071fe519ecaacbb0a57e"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a51d04c499016f902fde5afabb65d8b0a">build</a> (const <a class="el" href="classkche__tree_1_1DataSet.html">DataSet</a>&lt; T, D &gt; &amp;train_set, unsigned int bucket_size=32)</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a kd-tree from a set of training vectors. Cost: O(n log² n).  <a href="#a51d04c499016f902fde5afabb65d8b0a"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#ad3107a1ae40a3ab492621ae18c4c64d0">knn</a> (const <a class="el" href="classkche__tree_1_1Vector.html">Point</a> &amp;p, unsigned int K, std::vector&lt; <a class="el" href="structkche__tree_1_1VectorDistance.html">Neighbour</a> &gt; &amp;output, const T &amp;epsilon=<a class="el" href="structkche__tree_1_1Traits.html">Traits</a>&lt; T &gt;::zero(), bool ignore_p_in_tree=false) const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).  <a href="#ad3107a1ae40a3ab492621ae18c4c64d0"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a626ca00dc85218fd9b507a8a286843c8">all_in_range</a> (const <a class="el" href="classkche__tree_1_1Vector.html">Point</a> &amp;p, const T &amp;distance, std::vector&lt; <a class="el" href="structkche__tree_1_1VectorDistance.html">Neighbour</a> &gt; &amp;output, bool ignore_p_in_tree=false) const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.  <a href="#a626ca00dc85218fd9b507a8a286843c8"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classkche__tree_1_1Vector.html">Point</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a4acfe6c4a94b9c5760bfb0927f632711">operator[]</a> (unsigned int index) const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscript operator for accesing stored data (will fail on non-built kd-trees).  <a href="#a4acfe6c4a94b9c5760bfb0927f632711"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a00a32435c3b73df5ea2da4bce4599f9d">size</a> () const </td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of elements stored in the tree.  <a href="#a00a32435c3b73df5ea2da4bce4599f9d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#aa9dd52be28b2a9e421580b001332593f">KDTree</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor. Creates an empty and uninitialized kd-tree.  <a href="#aa9dd52be28b2a9e421580b001332593f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a7385cc696f1173d10c00c94d5b304748">~KDTree</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#a7385cc696f1173d10c00c94d5b304748"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#af93d90a7a669a545542afd7dccc6c491">build</a> (const <a class="el" href="classkche__tree_1_1DataSet.html">DataSet</a>&lt; T, D &gt; &amp;train_set, unsigned int bucket_size=32)</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a kd-tree from a set of training vectors. Cost: O(n log² n).  <a href="#af93d90a7a669a545542afd7dccc6c491"></a><br/></td></tr>
+<tr><td class="memTemplParams" colspan="2">template&lt;template&lt; typename, typename Compare &gt; class KContainer = KVector&gt; </td></tr>
+<tr><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a76a4b3b392c430e037bb53803f4cc4dd">knn</a> (const <a class="el" href="classkche__tree_1_1Vector.html">Point</a> &amp;p, unsigned int K, std::vector&lt; <a class="el" href="structkche__tree_1_1VectorDistance.html">Neighbour</a> &gt; &amp;output, const T &amp;epsilon=<a class="el" href="structkche__tree_1_1Traits.html">Traits</a>&lt; T &gt;::zero(), bool ignore_p_in_tree=false) const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).  <a href="#a76a4b3b392c430e037bb53803f4cc4dd"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a5fa534e27e8cf8b3f49247517bda5d1d">all_in_range</a> (const <a class="el" href="classkche__tree_1_1Vector.html">Point</a> &amp;p, const T &amp;distance, std::vector&lt; <a class="el" href="structkche__tree_1_1VectorDistance.html">Neighbour</a> &gt; &amp;output, bool ignore_p_in_tree=false) const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.  <a href="#a5fa534e27e8cf8b3f49247517bda5d1d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classkche__tree_1_1Vector.html">Point</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#ac59d50582b4fe9053199ddb92a01f52c">operator[]</a> (unsigned int index) const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Subscript operator for accesing stored data (will fail on non-built kd-trees).  <a href="#ac59d50582b4fe9053199ddb92a01f52c"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a154eee97e9f4965e86a10567e210e3b2">size</a> () const </td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of elements stored in the tree.  <a href="#a154eee97e9f4965e86a10567e210e3b2"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static unsigned const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#ad7f93d1411222251bd727bda00fbdd45">Dimensions</a> = D</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the number of dimensions of the kd-tree.  <a href="#ad7f93d1411222251bd727bda00fbdd45"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static unsigned const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a053ddb020228c77825c0773821b17458">Dimensions</a> = D</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Define the number of dimensions of the kd-tree.  <a href="#a053ddb020228c77825c0773821b17458"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#ae1c91608a072b0eeb4c9ad66ea924027">release</a> ()</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Release memory allocated by the kd-tree including tree nodes.  <a href="#ae1c91608a072b0eeb4c9ad66ea924027"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#aac81bc088c2bc9dda4418e5ede04c666">release</a> ()</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Release memory allocated by the kd-tree including tree nodes.  <a href="#aac81bc088c2bc9dda4418e5ede04c666"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="structkche__tree_1_1KDNode.html">KDNode</a>&lt; T, D &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#ad31536f97ef6ded324a9fefb501879db">root</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Root node of the tree. Will be <code>NULL</code> in empty trees.  <a href="#ad31536f97ef6ded324a9fefb501879db"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classkche__tree_1_1Vector.html">Point</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a9868c51d9248470915633d2519b35d11">data</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Data of the kd-tree. Copied with element permutations during the tree building.  <a href="#a9868c51d9248470915633d2519b35d11"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a7cedc8b02cc0152c2ab77039cbe6c583">permutation</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Permutation indices applied to kd-tree data to enhance cache behaviour.  <a href="#a7cedc8b02cc0152c2ab77039cbe6c583"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a7bec748bc0a7ee1609a60f15b70c01d9">inverse_perm</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Inverse of the permutation applied to indices in the permutation array.  <a href="#a7bec748bc0a7ee1609a60f15b70c01d9"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#ac3a2c7e74736719213e7ae609187765f">num_elements</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of elements currently in the tree.  <a href="#ac3a2c7e74736719213e7ae609187765f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="structkche__tree_1_1KDNode.html">KDNode</a>&lt; T, D &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a857feaa21d74342a8ce759defa7056ea">root</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Root node of the tree. Will be <code>NULL</code> in empty trees.  <a href="#a857feaa21d74342a8ce759defa7056ea"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classkche__tree_1_1Vector.html">Point</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a062d9154667a450acf0a9bfdb87b385b">data</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Data of the kd-tree. Copied with element permutations during the tree building.  <a href="#a062d9154667a450acf0a9bfdb87b385b"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#ae742b8058d11f5412a471978c709a300">permutation</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Permutation indices applied to kd-tree data to enhance cache behaviour.  <a href="#ae742b8058d11f5412a471978c709a300"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a31e29e00e14b266f271529d0eaa70452">inverse_perm</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Inverse of the permutation applied to indices in the permutation array.  <a href="#a31e29e00e14b266f271529d0eaa70452"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a4938acfd0b4e731cfb54e7d89f84c662">num_elements</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of elements currently in the tree.  <a href="#a4938acfd0b4e731cfb54e7d89f84c662"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="pri-static-attribs"></a>
 Static Private Attributes</h2></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#ac223daaa86a063bd26f426b871d5b82e">file_header</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Header written when serializing kd-trees.  <a href="#ac223daaa86a063bd26f426b871d5b82e"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static const unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#ae260ecdb11d0cc3b0b41c9167095e3df">file_header_length</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Length in bytes of the header.  <a href="#ae260ecdb11d0cc3b0b41c9167095e3df"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static const unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a9ca04ff460d782cb5455e0447fe8695f">file_version</a> [2]</td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuple of major and minor version of the current kd-tree file format.  <a href="#a9ca04ff460d782cb5455e0447fe8695f"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">static const unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#aea660738629dac2f976edc439d1bf27d">signature</a></td></tr>
-<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Signature value used to check the end of file according to the format.  <a href="#aea660738629dac2f976edc439d1bf27d"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a77fed49e4d657e0ec2c88aad6827634f">file_header</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Header written when serializing kd-trees.  <a href="#a77fed49e4d657e0ec2c88aad6827634f"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a4bff3cbe24e9319445110768d19093e2">file_header_length</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Length in bytes of the header.  <a href="#a4bff3cbe24e9319445110768d19093e2"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#abb5c5b72fb47e1235370cab47b5a8109">file_version</a> [2]</td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Tuple of major and minor version of the current kd-tree file format.  <a href="#abb5c5b72fb47e1235370cab47b5a8109"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const unsigned short&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a9b86aed8e170a0bc2f0143566cebf6cd">signature</a></td></tr>
+<tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Signature value used to check the end of file according to the format.  <a href="#a9b86aed8e170a0bc2f0143566cebf6cd"></a><br/></td></tr>
 <tr><td colspan="2"><h2><a name="friends"></a>
 Friends</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">std::istream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classkche__tree_1_1KDTree.html#a787e4eea593735478921718498e3d8f7">operator&gt;&gt;</a> (std::istream &amp;in, <a class="el" href="classkche__tree_1_1KDTree.html">KDTree</a> &amp;kdtree)</td></tr>
@@ -123,8 +124,8 @@ Friends</h2></td></tr>
 <tr><td class="mdescLeft">&#160;</td><td class="mdescRight">Output operator for kd-trees (save to stream).  <a href="#aa16d3334c3e2a72ec1a44bc3d9ce38db"></a><br/></td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
-<div class="textblock"><h3>template&lt;typename T, const unsigned int D, typename S = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt;<br/>
-class kche_tree::KDTree&lt; T, D, S &gt;</h3>
+<div class="textblock"><h3>template&lt;typename T, const unsigned int D&gt;<br/>
+class kche_tree::KDTree&lt; T, D &gt;</h3>
 
 <p>Template for generic cache-aware kd-trees of any type. </p>
 <p>Element insertions and deletions are not currently supported in behalf of a design based on cache efficiency. </p>
@@ -138,14 +139,14 @@ class kche_tree::KDTree&lt; T, D, S &gt;</h3>
   </dd>
 </dl>
 </div><hr/><h2>Member Typedef Documentation</h2>
-<a class="anchor" id="a221656fc2a0074507979cbdf69f59663"></a><!-- doxytag: member="kche_tree::KDTree::Neighbour" ref="a221656fc2a0074507979cbdf69f59663" args="" -->
+<a class="anchor" id="aab69522a4cc353a4e19fc26eab85a6de"></a><!-- doxytag: member="kche_tree::KDTree::Neighbour" ref="aab69522a4cc353a4e19fc26eab85a6de" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">typedef <a class="el" href="structkche__tree_1_1VectorDistance.html">VectorDistance</a>&lt;T&gt; <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="structkche__tree_1_1VectorDistance.html">Neighbour</a></td>
+          <td class="memname">typedef <a class="el" href="structkche__tree_1_1VectorDistance.html">VectorDistance</a>&lt;T&gt; <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="structkche__tree_1_1VectorDistance.html">Neighbour</a></td>
         </tr>
       </table>
 </div>
@@ -155,14 +156,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="a20da77e2c3bdb34eca3068095aa0adcf"></a><!-- doxytag: member="kche_tree::KDTree::Point" ref="a20da77e2c3bdb34eca3068095aa0adcf" args="" -->
+<a class="anchor" id="aee8bd2c6eacaacf4ed1ef30071fa23e5"></a><!-- doxytag: member="kche_tree::KDTree::Point" ref="aee8bd2c6eacaacf4ed1ef30071fa23e5" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">typedef <a class="el" href="classkche__tree_1_1Vector.html">Vector</a>&lt;T, D&gt; <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1Vector.html">Point</a></td>
+          <td class="memname">typedef <a class="el" href="classkche__tree_1_1Vector.html">Vector</a>&lt;T, D&gt; <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1Vector.html">Point</a></td>
         </tr>
       </table>
 </div>
@@ -173,14 +174,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 </div>
 </div>
 <hr/><h2>Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a482dcb26142af68a6fa3fd5c1306cec4"></a><!-- doxytag: member="kche_tree::KDTree::KDTree" ref="a482dcb26142af68a6fa3fd5c1306cec4" args="()" -->
+<a class="anchor" id="aa9dd52be28b2a9e421580b001332593f"></a><!-- doxytag: member="kche_tree::KDTree::KDTree" ref="aa9dd52be28b2a9e421580b001332593f" args="()" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html">KDTree</a> </td>
+          <td class="memname"><a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html">KDTree</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -193,14 +194,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="a1be5d22d0fbd071fe519ecaacbb0a57e"></a><!-- doxytag: member="kche_tree::KDTree::~KDTree" ref="a1be5d22d0fbd071fe519ecaacbb0a57e" args="()" -->
+<a class="anchor" id="a7385cc696f1173d10c00c94d5b304748"></a><!-- doxytag: member="kche_tree::KDTree::~KDTree" ref="a7385cc696f1173d10c00c94d5b304748" args="()" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::~<a class="el" href="classkche__tree_1_1KDTree.html">KDTree</a> </td>
+          <td class="memname"><a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::~<a class="el" href="classkche__tree_1_1KDTree.html">KDTree</a> </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -214,14 +215,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 </div>
 </div>
 <hr/><h2>Member Function Documentation</h2>
-<a class="anchor" id="a626ca00dc85218fd9b507a8a286843c8"></a><!-- doxytag: member="kche_tree::KDTree::all_in_range" ref="a626ca00dc85218fd9b507a8a286843c8" args="(const Point &amp;p, const T &amp;distance, std::vector&lt; Neighbour &gt; &amp;output, bool ignore_p_in_tree=false) const " -->
+<a class="anchor" id="a5fa534e27e8cf8b3f49247517bda5d1d"></a><!-- doxytag: member="kche_tree::KDTree::all_in_range" ref="a5fa534e27e8cf8b3f49247517bda5d1d" args="(const Point &amp;p, const T &amp;distance, std::vector&lt; Neighbour &gt; &amp;output, bool ignore_p_in_tree=false) const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::all_in_range </td>
+          <td class="memname">void <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::all_in_range </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classkche__tree_1_1Vector.html">Point</a> &amp;&#160;</td>
           <td class="paramname"><em>p</em>, </td>
@@ -257,14 +258,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="a51d04c499016f902fde5afabb65d8b0a"></a><!-- doxytag: member="kche_tree::KDTree::build" ref="a51d04c499016f902fde5afabb65d8b0a" args="(const DataSet&lt; T, D &gt; &amp;train_set, unsigned int bucket_size=32)" -->
+<a class="anchor" id="af93d90a7a669a545542afd7dccc6c491"></a><!-- doxytag: member="kche_tree::KDTree::build" ref="af93d90a7a669a545542afd7dccc6c491" args="(const DataSet&lt; T, D &gt; &amp;train_set, unsigned int bucket_size=32)" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::build </td>
+          <td class="memname">bool <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::build </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classkche__tree_1_1DataSet.html">DataSet</a>&lt; T, D &gt; &amp;&#160;</td>
           <td class="paramname"><em>train_set</em>, </td>
@@ -288,14 +289,16 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="ad3107a1ae40a3ab492621ae18c4c64d0"></a><!-- doxytag: member="kche_tree::KDTree::knn" ref="ad3107a1ae40a3ab492621ae18c4c64d0" args="(const Point &amp;p, unsigned int K, std::vector&lt; Neighbour &gt; &amp;output, const T &amp;epsilon=Traits&lt; T &gt;::zero(), bool ignore_p_in_tree=false) const " -->
+<a class="anchor" id="a76a4b3b392c430e037bb53803f4cc4dd"></a><!-- doxytag: member="kche_tree::KDTree::knn" ref="a76a4b3b392c430e037bb53803f4cc4dd" args="(const Point &amp;p, unsigned int K, std::vector&lt; Neighbour &gt; &amp;output, const T &amp;epsilon=Traits&lt; T &gt;::zero(), bool ignore_p_in_tree=false) const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
+<div class="memtemplate">
+template&lt;template&lt; typename, typename Compare &gt; class KContainer = KVector&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::knn </td>
+          <td class="memname">void <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::knn </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="classkche__tree_1_1Vector.html">Point</a> &amp;&#160;</td>
           <td class="paramname"><em>p</em>, </td>
@@ -337,14 +340,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="a4acfe6c4a94b9c5760bfb0927f632711"></a><!-- doxytag: member="kche_tree::KDTree::operator[]" ref="a4acfe6c4a94b9c5760bfb0927f632711" args="(unsigned int index) const " -->
+<a class="anchor" id="ac59d50582b4fe9053199ddb92a01f52c"></a><!-- doxytag: member="kche_tree::KDTree::operator[]" ref="ac59d50582b4fe9053199ddb92a01f52c" args="(unsigned int index) const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="classkche__tree_1_1Vector.html">Point</a>&amp; <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::operator[] </td>
+          <td class="memname">const <a class="el" href="classkche__tree_1_1Vector.html">Point</a>&amp; <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::operator[] </td>
           <td>(</td>
           <td class="paramtype">unsigned int&#160;</td>
           <td class="paramname"><em>index</em></td><td>)</td>
@@ -358,14 +361,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="ae1c91608a072b0eeb4c9ad66ea924027"></a><!-- doxytag: member="kche_tree::KDTree::release" ref="ae1c91608a072b0eeb4c9ad66ea924027" args="()" -->
+<a class="anchor" id="aac81bc088c2bc9dda4418e5ede04c666"></a><!-- doxytag: member="kche_tree::KDTree::release" ref="aac81bc088c2bc9dda4418e5ede04c666" args="()" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::release </td>
+          <td class="memname">void <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::release </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td><code> [private]</code></td>
@@ -378,14 +381,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="a00a32435c3b73df5ea2da4bce4599f9d"></a><!-- doxytag: member="kche_tree::KDTree::size" ref="a00a32435c3b73df5ea2da4bce4599f9d" args="() const " -->
+<a class="anchor" id="a154eee97e9f4965e86a10567e210e3b2"></a><!-- doxytag: member="kche_tree::KDTree::size" ref="a154eee97e9f4965e86a10567e210e3b2" args="() const " -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::size </td>
+          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::size </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const<code> [inline]</code></td>
@@ -403,7 +406,7 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">std::ostream&amp; operator&lt;&lt; </td>
@@ -414,7 +417,7 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classkche__tree_1_1KDTree.html">KDTree</a>&lt; T, D, S &gt; &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classkche__tree_1_1KDTree.html">KDTree</a>&lt; T, D &gt; &amp;&#160;</td>
           <td class="paramname"><em>kdtree</em>&#160;</td>
         </tr>
         <tr>
@@ -434,7 +437,7 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">std::istream&amp; operator&gt;&gt; </td>
@@ -445,7 +448,7 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classkche__tree_1_1KDTree.html">KDTree</a>&lt; T, D, S &gt; &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="classkche__tree_1_1KDTree.html">KDTree</a>&lt; T, D &gt; &amp;&#160;</td>
           <td class="paramname"><em>kdtree</em>&#160;</td>
         </tr>
         <tr>
@@ -462,14 +465,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 </div>
 </div>
 <hr/><h2>Member Data Documentation</h2>
-<a class="anchor" id="a9868c51d9248470915633d2519b35d11"></a><!-- doxytag: member="kche_tree::KDTree::data" ref="a9868c51d9248470915633d2519b35d11" args="" -->
+<a class="anchor" id="a062d9154667a450acf0a9bfdb87b385b"></a><!-- doxytag: member="kche_tree::KDTree::data" ref="a062d9154667a450acf0a9bfdb87b385b" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classkche__tree_1_1Vector.html">Point</a>* <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a9868c51d9248470915633d2519b35d11">data</a><code> [private]</code></td>
+          <td class="memname"><a class="el" href="classkche__tree_1_1Vector.html">Point</a>* <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a062d9154667a450acf0a9bfdb87b385b">data</a><code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -479,14 +482,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="ad7f93d1411222251bd727bda00fbdd45"></a><!-- doxytag: member="kche_tree::KDTree::Dimensions" ref="ad7f93d1411222251bd727bda00fbdd45" args="" -->
+<a class="anchor" id="a053ddb020228c77825c0773821b17458"></a><!-- doxytag: member="kche_tree::KDTree::Dimensions" ref="a053ddb020228c77825c0773821b17458" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">unsigned const int <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#ad7f93d1411222251bd727bda00fbdd45">Dimensions</a> = D<code> [static]</code></td>
+          <td class="memname">unsigned const int <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a053ddb020228c77825c0773821b17458">Dimensions</a> = D<code> [static]</code></td>
         </tr>
       </table>
 </div>
@@ -496,14 +499,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="ac223daaa86a063bd26f426b871d5b82e"></a><!-- doxytag: member="kche_tree::KDTree::file_header" ref="ac223daaa86a063bd26f426b871d5b82e" args="" -->
+<a class="anchor" id="a77fed49e4d657e0ec2c88aad6827634f"></a><!-- doxytag: member="kche_tree::KDTree::file_header" ref="a77fed49e4d657e0ec2c88aad6827634f" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const char* <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#ac223daaa86a063bd26f426b871d5b82e">file_header</a><code> [static, private]</code></td>
+          <td class="memname">const char* <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a77fed49e4d657e0ec2c88aad6827634f">file_header</a><code> [static, private]</code></td>
         </tr>
       </table>
 </div>
@@ -513,14 +516,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="ae260ecdb11d0cc3b0b41c9167095e3df"></a><!-- doxytag: member="kche_tree::KDTree::file_header_length" ref="ae260ecdb11d0cc3b0b41c9167095e3df" args="" -->
+<a class="anchor" id="a4bff3cbe24e9319445110768d19093e2"></a><!-- doxytag: member="kche_tree::KDTree::file_header_length" ref="a4bff3cbe24e9319445110768d19093e2" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const unsigned short <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#ae260ecdb11d0cc3b0b41c9167095e3df">file_header_length</a><code> [static, private]</code></td>
+          <td class="memname">const unsigned short <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a4bff3cbe24e9319445110768d19093e2">file_header_length</a><code> [static, private]</code></td>
         </tr>
       </table>
 </div>
@@ -530,14 +533,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="a9ca04ff460d782cb5455e0447fe8695f"></a><!-- doxytag: member="kche_tree::KDTree::file_version" ref="a9ca04ff460d782cb5455e0447fe8695f" args="[2]" -->
+<a class="anchor" id="abb5c5b72fb47e1235370cab47b5a8109"></a><!-- doxytag: member="kche_tree::KDTree::file_version" ref="abb5c5b72fb47e1235370cab47b5a8109" args="[2]" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const unsigned short <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a9ca04ff460d782cb5455e0447fe8695f">file_version</a>[2]<code> [static, private]</code></td>
+          <td class="memname">const unsigned short <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#abb5c5b72fb47e1235370cab47b5a8109">file_version</a>[2]<code> [static, private]</code></td>
         </tr>
       </table>
 </div>
@@ -547,14 +550,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="a7bec748bc0a7ee1609a60f15b70c01d9"></a><!-- doxytag: member="kche_tree::KDTree::inverse_perm" ref="a7bec748bc0a7ee1609a60f15b70c01d9" args="" -->
+<a class="anchor" id="a31e29e00e14b266f271529d0eaa70452"></a><!-- doxytag: member="kche_tree::KDTree::inverse_perm" ref="a31e29e00e14b266f271529d0eaa70452" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int* <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a7bec748bc0a7ee1609a60f15b70c01d9">inverse_perm</a><code> [private]</code></td>
+          <td class="memname">unsigned int* <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a31e29e00e14b266f271529d0eaa70452">inverse_perm</a><code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -564,14 +567,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="ac3a2c7e74736719213e7ae609187765f"></a><!-- doxytag: member="kche_tree::KDTree::num_elements" ref="ac3a2c7e74736719213e7ae609187765f" args="" -->
+<a class="anchor" id="a4938acfd0b4e731cfb54e7d89f84c662"></a><!-- doxytag: member="kche_tree::KDTree::num_elements" ref="a4938acfd0b4e731cfb54e7d89f84c662" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#ac3a2c7e74736719213e7ae609187765f">num_elements</a><code> [private]</code></td>
+          <td class="memname">unsigned int <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a4938acfd0b4e731cfb54e7d89f84c662">num_elements</a><code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -581,14 +584,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="a7cedc8b02cc0152c2ab77039cbe6c583"></a><!-- doxytag: member="kche_tree::KDTree::permutation" ref="a7cedc8b02cc0152c2ab77039cbe6c583" args="" -->
+<a class="anchor" id="ae742b8058d11f5412a471978c709a300"></a><!-- doxytag: member="kche_tree::KDTree::permutation" ref="ae742b8058d11f5412a471978c709a300" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">unsigned int* <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a7cedc8b02cc0152c2ab77039cbe6c583">permutation</a><code> [private]</code></td>
+          <td class="memname">unsigned int* <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#ae742b8058d11f5412a471978c709a300">permutation</a><code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -598,14 +601,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="ad31536f97ef6ded324a9fefb501879db"></a><!-- doxytag: member="kche_tree::KDTree::root" ref="ad31536f97ef6ded324a9fefb501879db" args="" -->
+<a class="anchor" id="a857feaa21d74342a8ce759defa7056ea"></a><!-- doxytag: member="kche_tree::KDTree::root" ref="a857feaa21d74342a8ce759defa7056ea" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structkche__tree_1_1KDNode.html">KDNode</a>&lt;T, D&gt;* <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#ad31536f97ef6ded324a9fefb501879db">root</a><code> [private]</code></td>
+          <td class="memname"><a class="el" href="structkche__tree_1_1KDNode.html">KDNode</a>&lt;T, D&gt;* <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a857feaa21d74342a8ce759defa7056ea">root</a><code> [private]</code></td>
         </tr>
       </table>
 </div>
@@ -615,14 +618,14 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 
 </div>
 </div>
-<a class="anchor" id="aea660738629dac2f976edc439d1bf27d"></a><!-- doxytag: member="kche_tree::KDTree::signature" ref="aea660738629dac2f976edc439d1bf27d" args="" -->
+<a class="anchor" id="a9b86aed8e170a0bc2f0143566cebf6cd"></a><!-- doxytag: member="kche_tree::KDTree::signature" ref="a9b86aed8e170a0bc2f0143566cebf6cd" args="" -->
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDistance&lt;T&gt;, VectorDistance&lt;T&gt; &gt;&gt; </div>
+template&lt;typename T , const unsigned int D&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">const unsigned short <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D, S &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#aea660738629dac2f976edc439d1bf27d">signature</a><code> [static, private]</code></td>
+          <td class="memname">const unsigned short <a class="el" href="classkche__tree_1_1KDTree.html">kche_tree::KDTree</a>&lt; T, D &gt;::<a class="el" href="classkche__tree_1_1KDTree.html#a9b86aed8e170a0bc2f0143566cebf6cd">signature</a><code> [static, private]</code></td>
         </tr>
       </table>
 </div>
@@ -636,7 +639,7 @@ template&lt;typename T , const unsigned int D, typename S  = KVector&lt;VectorDi
 <li>kche-tree/<a class="el" href="kd-tree_8h_source.html">kd-tree.h</a></li>
 </ul>
 </div>
-<hr class="footer"/><address class="footer"><small>Generated on Sun Jun 26 2011 22:02:48 for Kche-tree by&#160;
+<hr class="footer"/><address class="footer"><small>Generated on Tue Jun 28 2011 00:19:53 for Kche-tree by&#160;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.4 </small></address>
 </body>
