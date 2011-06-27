@@ -60,7 +60,7 @@
  * - <b>custom types example</b>: shows how to use a custom type with Kche-tree. Can be found in the file examples/custom_type.cpp.
  *
  *
- * \section installation Usage
+ * \section usage Usage
  * Kche-trees are quite simple to use. Just include the \c kche-tree.h file, use its
  * namespace like you would normally do with STL and proceed like in the usage example \c knn_simple.cpp.
  * Since it's a template no additional files required to be compiled or linked. However it requires
@@ -69,6 +69,18 @@
  *
  * In case of using the floating point/24 dimension SSE specialization,
  * the file tools/kd-tree_sse_24d.h and the compilation flag \c -msse (in GCC) will be also required.
+ *
+ * \section CPP0x About C++0x
+ * Kche-trees use by default C++0x features available in the most modern compilers to enhance its use and operations.
+ * If C++0x is not supported by your compiler it can be disabled by simply defining the macro \c KCHE_TREE_DISABLE_CPP0X before including the library.
+ * Additionally it can be disabled when building the examples and tools by using \c make \c c++0x=disabled.
+ *
+ * However, be aware that disabling C++0x has some consequences:
+ * - When calling the \link kche_tree::KDTree::knn knn\endlink method it will be required to explicitly provide the K-Neighbour container template type, where in the C++0x version it automatically defaults to \link kche_tree::KVector KVector\endlink. See the \c knn_simple example for details.
+ * - Any static assert that the library may make will leave no explanation message, just some kind of compiler error mentioning COMPILE_ASSERT_FAILURE.
+ * - Some type traits might not be available, leading to possible misses of automatic optimization chances.
+ *
+ * Expect the previous list to grow and the possible future addition of C++0x-only features. It is also possible that the support for non-C++0x code can be completely removed in future releases.
 */
 
 /**

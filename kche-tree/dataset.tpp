@@ -24,7 +24,7 @@
  * \author Leandro Graciá Gil
 */
 
-// Include STL strings and auto_ptr.
+// Include smart pointers and STL strings.
 #include <memory>
 #include <string>
 
@@ -223,7 +223,12 @@ std::istream& operator >> (std::istream& in, DataSet<T, D> &dataset) {
     throw std::runtime_error("error reading type name length data");
 
   // Read type name.
+  #ifdef KCHE_TREE_DISABLE_CPP0X
   std::auto_ptr<char> type_name(new char[name_length + 1]);
+  #else
+  std::unique_ptr<char> type_name(new char[name_length + 1]);
+  #endif
+
   assert(type_name.get());
   in.read(type_name.get(), name_length);
   if (!in.good())

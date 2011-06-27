@@ -30,8 +30,8 @@ namespace kche_tree {
  * Default kd-tree constructor.
  * Creates an empty and uninitialized kd-tree.
  */
-template <typename T, const unsigned int D, typename S>
-KDTree<T, D, S>::KDTree()
+template <typename T, const unsigned int D>
+KDTree<T, D>::KDTree()
   : root(NULL),
     data(NULL),
     permutation(NULL),
@@ -41,8 +41,8 @@ KDTree<T, D, S>::KDTree()
 /**
  * Default kd-tree desstructor.
  */
-template <typename T, const unsigned int D, typename S>
-KDTree<T, D, S>::~KDTree() {
+template <typename T, const unsigned int D>
+KDTree<T, D>::~KDTree() {
 
   // Delete allocated contents.
   release();
@@ -51,8 +51,8 @@ KDTree<T, D, S>::~KDTree() {
 /**
  * Release any existing contents in the kd-tree.
  */
-template <typename T, const unsigned int D, typename S>
-void KDTree<T, D, S>::release() {
+template <typename T, const unsigned int D>
+void KDTree<T, D>::release() {
 
   // Release tree nodes and data arrays.
   delete root;
@@ -76,8 +76,8 @@ void KDTree<T, D, S>::release() {
  * \param index Index of the data being accessed.
  * \return Reference to the index-th element provided when building the tree (internal copy).
  */
-template <typename T, const unsigned int D, typename S>
-const typename KDTree<T, D, S>::Point & KDTree<T, D, S>::operator [] (unsigned int index) const {
+template <typename T, const unsigned int D>
+const typename KDTree<T, D>::Point & KDTree<T, D>::operator [] (unsigned int index) const {
   return data[inverse_perm[index]];
 }
 
@@ -88,8 +88,8 @@ const typename KDTree<T, D, S>::Point & KDTree<T, D, S>::operator [] (unsigned i
  * \param bucket_size Number of elements that should be grouped in leaf nodes.
  * \return \c true if successful, \c false otherwise.
  */
-template <typename T, const unsigned int D, typename S>
-bool KDTree<T, D, S>::build(const DataSet<T, D>& train_set, unsigned int bucket_size) {
+template <typename T, const unsigned int D>
+bool KDTree<T, D>::build(const DataSet<T, D>& train_set, unsigned int bucket_size) {
 
   // Check params.
   unsigned int num_points = train_set.size();
@@ -129,8 +129,8 @@ bool KDTree<T, D, S>::build(const DataSet<T, D>& train_set, unsigned int bucket_
  * \param epsilon Acceptable distance margin to ignore regions during kd-tree exploration. Defaults to zero (deterministic).
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
-template <typename T, const unsigned int D, typename S>
-void KDTree<T, D, S>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const T &epsilon, bool ignore_p_in_tree) const {
+template <typename T, const unsigned int D> template <template <typename, typename> class KContainer>
+void KDTree<T, D>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const T &epsilon, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || num_elements == 0 || K == 0)
@@ -143,7 +143,7 @@ void KDTree<T, D, S>::knn(const Point &p, unsigned int K, std::vector<Neighbour>
   search_data.hyperrect_distance = epsilon * epsilon;
 
   // Build a special sorted container for the current K nearest neighbour candidates.
-  S best_k(K);
+  KContainer<VectorDistance<T>, VectorDistance<T> > best_k(K);
 
   // Start an exploration traversal from the root.
   root->explore(NULL, search_data, best_k);
@@ -166,8 +166,8 @@ void KDTree<T, D, S>::knn(const Point &p, unsigned int K, std::vector<Neighbour>
  * \param output STL vector where the neighbours within the specified range will be appended. Elements are not sorted by distance.
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
-template <typename T, const unsigned int D, typename S>
-void KDTree<T, D, S>::all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, bool ignore_p_in_tree) const {
+template <typename T, const unsigned int D>
+void KDTree<T, D>::all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || num_elements == 0 || distance <= Traits<T>::zero())
@@ -194,9 +194,9 @@ void KDTree<T, D, S>::all_in_range(const Point &p, const T &distance, std::vecto
   }
 }
 
-#ifdef _KCHE_TREE_DEBUG_
-template <typename T, const unsigned int D, typename S>
-bool KDTree<T, D, S>::verify() const {
+#ifdef KCHE_TREE_DEBUG
+template <typename T, const unsigned int D>
+bool KDTree<T, D>::verify() const {
   return root->verify(data, 0);
 }
 #endif

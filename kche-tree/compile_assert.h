@@ -20,13 +20,14 @@
 
 /**
  * \file compile_assert.h
- * \brief Provide compile-time assertions to check invalid template instantiations and conditions.
+ * \brief Provide compile-time assertions in non-C++0x environments to check invalid template instantiations and conditions.
  * \author Leandro Graciá Gil
 */
 
 #ifndef _KCHE_TREE_COMPILE_ASSERT_H_
 #define _KCHE_TREE_COMPILE_ASSERT_H_
 
+#ifdef KCHE_TREE_DISABLE_CPP0X
 namespace kche_tree {
 
 /// Auxiliary struct to provide compile-time assertions. You should see this name on an error if the assertion fails.
@@ -38,11 +39,14 @@ template <> struct COMPILE_ASSERT_FAILURE<true> { enum { x = 1 }; };
 /// Auxiliary struct to provide compile-time assertions.
 template <size_t> struct CompileAssertTest {};
 
-/// Macro used to check assertions in compile time.
-#define KCHE_TREE_COMPILE_ASSERT(x) \
+/// Macro used to check assertions in compile time. Any error messages are dropped.
+#define KCHE_TREE_COMPILE_ASSERT(x, msg) \
   typedef ::kche_tree::CompileAssertTest< \
   sizeof(::kche_tree::COMPILE_ASSERT_FAILURE<(bool)(x)>)> _CompileAssertType
 
 } // namespace kche_tree
+#else
+#define KCHE_TREE_COMPILE_ASSERT(x, msg) static_assert(x, msg)
+#endif
 
 #endif
