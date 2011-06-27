@@ -27,7 +27,12 @@
 #ifndef _KCHE_TREE_TRAITS_H_
 #define _KCHE_TREE_TRAITS_H_
 
+#ifdef KCHE_TREE_DISABLE_CPP0X
 #include <tr1/type_traits>
+#else
+#include <type_traits>
+#endif
+
 #include "compile_assert.h"
 
 namespace kche_tree {
@@ -46,7 +51,13 @@ namespace kche_tree {
  * \tparam T Type which information is being provided.
  */
 template <typename T>
-struct has_trivial_equal : public std::tr1::integral_constant<bool, std::tr1::is_fundamental<T>::value> {};
+struct has_trivial_equal :
+#ifdef KCHE_TREE_DISABLE_CPP0X
+    std::tr1::integral_constant<bool, std::tr1::is_fundamental<T>::value>
+#else
+    std::integral_constant<bool, std::is_fundamental<T>::value>
+#endif
+    {};
 
 // Forward-declare the templates provided here.
 template <typename T> struct Traits;
@@ -160,7 +171,11 @@ struct CopyTraits<T, false> {
 template <typename T>
 struct Traits : TraitsBase<T>,
                 AccumulationTraits<T>,
+                #ifdef KCHE_TREE_DISABLE_CPP0X
                 CopyTraits<T, std::tr1::has_trivial_copy<T>::value>,
+                #else
+                CopyTraits<T, std::has_trivial_copy_constructor<T>::value>,
+                #endif
                 EqualTraits<T, has_trivial_equal<T>::value> {};
 
 } // namespace kche_tree

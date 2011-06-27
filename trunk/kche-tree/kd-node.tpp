@@ -28,7 +28,7 @@
 #include <algorithm>
 
 // Includes to ouput debug information about the kd-tree structure.
-#ifdef _KCHE_TREE_DEBUG_
+#ifdef KCHE_TREE_DEBUG
 #include <iomanip>
 #include <iostream>
 #endif
@@ -416,7 +416,7 @@ void KDLeaf<T, D>::intersect_ignoring_same(KDSearchData<T, D> &search_data, C &c
   }
 }
 
-#ifdef _KCHE_TREE_DEBUG_
+#ifdef KCHE_TREE_DEBUG
 template <typename T, const unsigned int D>
 bool KDNode<T, D>::verify(const Vector<T, D> *data, int axis) const {
 
@@ -483,6 +483,6 @@ bool KDLeaf<T, D>::verify_op(const Vector<T, D> *data, float value, int axis, co
   return true;
 }
 
-#endif // _KCHE_TREE_DEBUG_
+#endif // KCHE_TREE_DEBUG
 
 } // namespace kche_tree

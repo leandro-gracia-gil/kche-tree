@@ -122,7 +122,11 @@ int main(int argc, char *argv[]) {
 
     // Retrieve the K nearest neighbours.
     std::vector<KDTreeTest::Neighbour> neighbours;
+    #ifdef KCHE_TREE_DISABLE_CPP0X
+    kdtree.knn<KVector>(test_set[i], K, neighbours);
+    #else
     kdtree.knn(test_set[i], K, neighbours);
+    #endif
 
     // Print distances to the K nearest neighbours.
     printf("Distance to the %d nearest neighbours in test case %d: ", K, i + 1);

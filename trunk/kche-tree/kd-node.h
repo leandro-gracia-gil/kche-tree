@@ -76,7 +76,7 @@ struct KDLeaf {
   /// Write to stream.
   bool write_to_binary_stream(std::ostream &out);
 
-#ifdef _KCHE_TREE_DEBUG_
+#ifdef KCHE_TREE_DEBUG
   template <typename Op>
   bool verify_op(const Vector<T, D> *data, float value, int axis, const Op &op) const;
 #endif
@@ -114,7 +114,7 @@ struct KDNode {
   KDNode(std::istream &input); ///< Construct from an input stream.
   ~KDNode(); ///< Default destructor.
 
-#ifdef _KCHE_TREE_DEBUG_
+#ifdef KCHE_TREE_DEBUG
   bool verify(const Vector<T, D> *data, int axis) const;
 
   template <typename Op>

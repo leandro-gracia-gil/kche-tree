@@ -31,7 +31,7 @@
 #include <ctime>
 
 // Enable kd-tree structure debugging.
-#define _KCHE_TREE_DEBUG_
+#define KCHE_TREE_DEBUG
 
 // Include the generic kche-tree templates or the SSE-enabled specialization for floats and 24 dimensions.
 #ifdef SSE
@@ -239,7 +239,10 @@ int main(int argc, char *argv[]) {
       // Get the K nearest neighbours.
       unsigned int K = cmdline_args.knn_arg;
       vector<KDTreeTest::Neighbour> knn;
-      kdtree.knn(test_set[i], K, knn, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
+      if (cmdline_args.use_k_heap_flag)
+        kdtree.knn<KHeap>(test_set[i], K, knn, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
+      else
+        kdtree.knn<KVector>(test_set[i], K, knn, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
 
       // Check the k nearest neighbours returned.
       unsigned int num_elems = min(static_cast<unsigned int>(knn.size()), K);

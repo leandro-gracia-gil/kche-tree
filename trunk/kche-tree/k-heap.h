@@ -43,9 +43,8 @@ namespace kche_tree {
  *
  * \tparam T Type of the data stored in the k-heap.
  * \tparam Compare Type of the comparison object. The class must inherit from \c std::binary_function an define its \c bool (\c const \c &T, \c const \c &T) \c const operator.
- * \tparam idx Type used for encoding data vector indices. Defaults to unsigned int, but can be reduced to short or char for small K values.
 */
-template <typename T, typename Compare = std::less<T>, typename idx = unsigned int>
+template <typename T, typename Compare = std::less<T> >
 class KHeap {
 public:
 
@@ -93,10 +92,10 @@ protected:
   T *data; ///< Array of stored elements (0-indexed).
 
   const Compare &compare; ///< Comparison object used by internal heaps.
-  static const idx root = 1; ///< Root index of the heap.
+  static const unsigned int root = 1; ///< Root index of the heap.
 
-  IndirectHeap<T, Compare, idx> bestHeap; ///< Heap storing best data indices.
-  IndirectHeap<T, std::binary_negate<Compare>, idx> worstHeap; ///< Heap storing worst data indices.
+  IndirectHeap<T, Compare, unsigned int> bestHeap; ///< Heap storing best data indices.
+  IndirectHeap<T, std::binary_negate<Compare>, unsigned int> worstHeap; ///< Heap storing worst data indices.
 };
 
 } // namespace kche_tree

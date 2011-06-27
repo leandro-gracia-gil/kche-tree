@@ -24,21 +24,19 @@
  * \author Leandro Graciá Gil
  */
 
-// STL auto_ptr, exceptions, strings and runtime type information.
+// STL smart pointers, exceptions, strings and runtime type information.
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
 
-// Include STL strings and auto_ptr.
-
 namespace kche_tree {
 
 // File serialization settings.
-template <typename T, const unsigned int D, typename S> const char *KDTree<T, D, S>::file_header = "kdtree";
-template <typename T, const unsigned int D, typename S> const unsigned short KDTree<T, D, S>::file_header_length = 6;
-template <typename T, const unsigned int D, typename S> const unsigned short KDTree<T, D, S>::file_version[2] = { 1, 0 };
-template <typename T, const unsigned int D, typename S> const unsigned short KDTree<T, D, S>::signature = 0xCAFE;
+template <typename T, const unsigned int D> const char *KDTree<T, D>::file_header = "kdtree";
+template <typename T, const unsigned int D> const unsigned short KDTree<T, D>::file_header_length = 6;
+template <typename T, const unsigned int D> const unsigned short KDTree<T, D>::file_version[2] = { 1, 0 };
+template <typename T, const unsigned int D> const unsigned short KDTree<T, D>::signature = 0xCAFE;
 
 /**
  * Standard input stream operator.
@@ -50,8 +48,8 @@ template <typename T, const unsigned int D, typename S> const unsigned short KDT
  * \param kdtree Kd-tree where results will be saved.
  * \return Input stream after reading the data.
  */
-template <typename T, const unsigned int D, typename S>
-std::istream & operator >> (std::istream &in, KDTree<T, D, S> &kdtree) {
+template <typename T, const unsigned int D>
+std::istream & operator >> (std::istream &in, KDTree<T, D> &kdtree) {
 
   // Read header.
   char header[kdtree.file_header_length + 1];
@@ -81,7 +79,12 @@ std::istream & operator >> (std::istream &in, KDTree<T, D, S> &kdtree) {
     throw std::runtime_error("error reading type name length data");
 
   // Read type name.
+  #ifdef KCHE_TREE_DISABLE_CPP0X
   std::auto_ptr<char> type_name(new char[name_length + 1]);
+  #else
+  std::unique_ptr<char> type_name(new char[name_length + 1]);
+  #endif
+
   in.read(type_name.get(), name_length);
   if (!in.good())
     throw std::runtime_error("error reading type name");
@@ -166,8 +169,8 @@ std::istream & operator >> (std::istream &in, KDTree<T, D, S> &kdtree) {
  * \param kdtree Kd-tree being saved.
  * \return Output stream after writting the data.
  */
-template <typename T, const unsigned int D, typename S>
-std::ostream & operator << (std::ostream &out, const KDTree<T, D, S> &kdtree) {
+template <typename T, const unsigned int D>
+std::ostream & operator << (std::ostream &out, const KDTree<T, D> &kdtree) {
 
   // Define aliases for local kd-tree types.
   typedef Vector<T, D> PointType;

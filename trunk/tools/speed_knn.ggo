@@ -21,6 +21,7 @@ option "test-save-random" - "Save the randomly generated test set to the specifi
 
 # Other options.
 section "Other options"
+option "use-k-heap" - "Use a k-heap container for the KNN operation instead of a k-vector (see doc for details)." flag off
 option "tolerance" l "Tolerance value used when comparing the distance values to the exhaustive search version." float default="1e-3" no
 option "bucket-size" b "Size of the buckets containing elements at the leaf nodes of the kd-tree." int default="32" no
 option "test-from-train" x "Set the % probability of test entries to be random elements from the train set." float default="20" no

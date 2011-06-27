@@ -164,7 +164,10 @@ int main(int argc, char *argv[]) {
 
     // Get the K nearest neighbours.
     vector<KDTreeTest::Neighbour> knn;
-    kdtree.knn(test_set[i], cmdline_args.knn_arg, knn, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
+    if (cmdline_args.use_k_heap_flag)
+      kdtree.knn<KHeap>(test_set[i], cmdline_args.knn_arg, knn, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
+    else
+      kdtree.knn<KVector>(test_set[i], cmdline_args.knn_arg, knn, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
   }
   clock_t t2_test = clock();
 

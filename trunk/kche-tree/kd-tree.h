@@ -47,14 +47,14 @@
 namespace kche_tree {
 
 // Forward-declare the class.
-template <typename T, const unsigned int D, typename S> class KDTree;
+template <typename T, const unsigned int D> class KDTree;
 
 // Forward-declare the stream operators.
-template <typename T, const unsigned int D, typename S>
-std::istream & operator >> (std::istream &in, KDTree<T, D, S> &kdtree); ///< Input operator for kd-trees (read from stream). Throws an exception in case of error.
+template <typename T, const unsigned int D>
+std::istream & operator >> (std::istream &in, KDTree<T, D> &kdtree); ///< Input operator for kd-trees (read from stream). Throws an exception in case of error.
 
-template <typename T, const unsigned int D, typename S>
-std::ostream & operator << (std::ostream &out, const KDTree<T, D, S> &kdtree); ///< Output operator for kd-trees (save to stream).
+template <typename T, const unsigned int D>
+std::ostream & operator << (std::ostream &out, const KDTree<T, D> &kdtree); ///< Output operator for kd-trees (save to stream).
 
 /**
  * \brief Template for generic cache-aware kd-trees of any type.
@@ -67,7 +67,7 @@ std::ostream & operator << (std::ostream &out, const KDTree<T, D, S> &kdtree); /
  * \tparam S (Optional) K-best elements container. Responds to empty, size, back, push_back and pop_front.
  *  Defaults to KVector<VectorDistance<T>, VectorDistance<T> >, but KHeap<VectorDistance<T>, VectorDistance<T> > is also valid.
  */
-template <typename T, const unsigned int D, typename S = KVector<VectorDistance<T>, VectorDistance<T> > >
+template <typename T, const unsigned int D>
 class KDTree {
 public:
   /// Define the number of dimensions of the kd-tree.
@@ -85,7 +85,15 @@ public:
 
   // Basic kd-tree operations.
   bool build(const DataSet<T, D>& train_set, unsigned int bucket_size = 32); ///< Build a kd-tree from a set of training vectors. Cost: O(n log² n).
+
+  #ifdef KCHE_TREE_DISABLE_CPP0X
+  template <template <typename, typename Compare> class KContainer>
   void knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const T &epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
+  #else
+  template <template <typename, typename Compare> class KContainer = KVector>
+  void knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const T &epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
+  #endif
+
   void all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, bool ignore_p_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
 
   /// Subscript operator for accesing stored data (will fail on non-built kd-trees).
@@ -98,7 +106,7 @@ public:
   // Kd-tree properties.
   unsigned int size() const { return num_elements; } ///< Get the number of elements stored in the tree.
 
-#ifdef _KCHE_TREE_DEBUG_
+#ifdef KCHE_TREE_DEBUG
   bool verify() const;
 #endif
 
