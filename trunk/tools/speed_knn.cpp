@@ -53,6 +53,7 @@ const unsigned int D = 24;
 /// Alias for the specific KDTree and data set types being used.
 typedef KDTree<float, D> KDTreeTest;
 typedef DataSet<float, D> DataSetTest;
+static EuclideanMetric<float, D> metric;
 
 /**
  * Parse command line commands into \a args_info structure (uses gengetopt).
@@ -165,15 +166,15 @@ int main(int argc, char *argv[]) {
     // Get the K nearest neighbours.
     vector<KDTreeTest::Neighbour> knn;
     if (cmdline_args.use_k_heap_flag)
-      kdtree.knn<KHeap>(test_set[i], cmdline_args.knn_arg, knn, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
+      kdtree.knn<KHeap>(test_set[i], cmdline_args.knn_arg, knn, metric, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
     else
-      kdtree.knn<KVector>(test_set[i], cmdline_args.knn_arg, knn, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
+      kdtree.knn<KVector>(test_set[i], cmdline_args.knn_arg, knn, metric, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
   }
   clock_t t2_test = clock();
 
   // Calculate times.
   double time_build = (t2_build - t1_build) / (double) CLOCKS_PER_SEC;
-  double time_test  = (t2_test  - t1_test ) / (double) CLOCKS_PER_SEC;
+  double time_test  = (t2_test  - t1_test) / (double) CLOCKS_PER_SEC;
 
   // Report results.
   printf("Kd-tree testing with D = %d, %d neighbours, epsilon %.2f, training set size %d, test set size %d\n",

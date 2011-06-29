@@ -37,11 +37,12 @@
 #include "k-heap.h"
 #include "k-vector.h"
 
-// Include data sets, vectors, type traits and kd-tree nodes.
+// Include data sets, vectors, type traits, kd-tree nodes and metrics.
 #include "dataset.h"
 #include "vector.h"
 #include "traits.h"
 #include "kd-node.h"
+#include "metrics.h"
 
 /// Namespace of the Kche-tree template library.
 namespace kche_tree {
@@ -62,10 +63,8 @@ std::ostream & operator << (std::ostream &out, const KDTree<T, D> &kdtree); ///<
  * Element insertions and deletions are not currently supported in behalf of a design based on cache efficiency.
  * \warning This class is currently not thread-safe. This feature will be added in future releases.
  *
- * \tparam T Data type of the elements in the kd-tree. Requires copy, internal + += = *, external (* int) and comparison < <= > operators.
+ * \tparam T Data type of the elements in the kd-tree. Requires copy construction, asignment and the < <= > == operators. Further operators may be required by the metrics used. Check the documentation for EuclideanMetric if using the default metric values.
  * \tparam D Number of dimensions in the input data.
- * \tparam S (Optional) K-best elements container. Responds to empty, size, back, push_back and pop_front.
- *  Defaults to KVector<VectorDistance<T>, VectorDistance<T> >, but KHeap<VectorDistance<T>, VectorDistance<T> > is also valid.
  */
 template <typename T, const unsigned int D>
 class KDTree {
@@ -90,14 +89,20 @@ public:
   bool build(const DataSet<T, D>& train_set, unsigned int bucket_size = 32); ///< Build a kd-tree from a set of training vectors. Cost: O(n log² n).
 
   #ifdef KCHE_TREE_DISABLE_CPP0X
-  template <template <typename, typename Compare> class KContainer>
-  void knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const T &epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
+  template <template <typename, typename Compare> class KContainer, typename M>
+  void knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const M &metric = EuclideanMetric<T, D>(), const T &epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
   #else
-  template <template <typename, typename Compare> class KContainer = KVector>
-  void knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const T &epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
+  template <template <typename, typename Compare> class KContainer = KVector, typename M = EuclideanMetric<T, D> >
+  void knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const M &metric = M(), const T &epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
   #endif
 
-  void all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, bool ignore_p_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
+  #ifdef KCHE_TREE_DISABLE_CPP0X
+  template <typename M>
+  void all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, const M &metric = EuclideanMetric<T, D>(), bool ignore_p_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
+  #else
+  template <typename M = EuclideanMetric<T, D> >
+  void all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, const M &metric = M(), bool ignore_p_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
+  #endif
 
   /// Subscript operator for accesing stored data (will fail on non-built kd-trees).
   const Point &operator [] (unsigned int index) const;

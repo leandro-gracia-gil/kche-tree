@@ -151,72 +151,15 @@ KDNode<T, D>::~KDNode() {
  * \param K Number of neighbours to retrieve.
  * \param ignore_null_distances_arg Indicate that points with null distance should be ignored.
  */
-template <typename T, const unsigned int D>
-KDSearchData<T, D>::KDSearchData(const Vector<T, D> &p, const Vector<T, D> *data, unsigned int K, bool ignore_null_distances_arg)
-  : p(p),
+template <typename T, const unsigned int D, typename M>
+KDSearchData<T, D, M>::KDSearchData(const Vector<T, D> &p, const Vector<T, D> *data, unsigned int K, bool ignore_null_distances_arg)
+  : M::IncrementalType::SearchDataExtras(p, data),
+    p(p),
     data(data),
     K(K),
     hyperrect_distance(Traits<T>::zero()),
     farthest_distance(Traits<T>::zero()),
-    ignore_null_distances(ignore_null_distances_arg) {
-
-  // Fill per-axis data contents.
-  for (unsigned int d=0; d<D; ++d) {
-    axis[d].p = p[d];
-    axis[d].nearest = p[d];
-  }
-}
-
-/**
- * Apply the incremental operations corresponding to traverse the tree by its left branch.
- *
- * \param node Current node in the sub-hyperrectangular region.
- * \param parent Parent node that halves the hyperspace in two.
- * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
- */
-template <typename T, const unsigned int D>
-KDIncremental<T, D>::KDIncremental(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D> &search_data)
-  : search_data(search_data),
-    parent_axis(0),
-    modified(false),
-    previous_axis_nearest(Traits<T>::zero()),
-    previous_hyperrect_distance(Traits<T>::zero()) {
-
-  // Check parent.
-  if (parent == NULL)
-    return;
-
-  // Get splitting axis data.
-  parent_axis = parent->axis & KDNode<T, D>::axis_mask;
-  typename KDSearchData<T, D>::AxisData *axis = &search_data.axis[parent_axis];
-
-  // Check if current branch modifies the bounding hyperrectangle.
-  if ((parent->left_branch  == node && parent->split_value > axis->nearest) ||
-      (parent->right_branch == node && parent->split_value < axis->nearest))
-    return;
-
-  // Store current values before any update.
-  modified = true;
-  previous_axis_nearest = axis->nearest;
-  previous_hyperrect_distance = search_data.hyperrect_distance;
-
-  // Perform incremental update (simplification of the equation local * (local + 2 * (p - nearest)) with local = nearest - split).
-  search_data.hyperrect_distance += (parent->split_value - axis->nearest) * (axis->nearest + parent->split_value - axis->p - axis->p);
-  axis->nearest = parent->split_value;
-}
-
-/**
- * Restore the updated values to their previous ones, if modified.
- */
-template <typename T, const unsigned int D>
-KDIncremental<T, D>::~KDIncremental() {
-
-  // Restore previous values if modified.
-  if (modified) {
-    search_data.axis[parent_axis].nearest = previous_axis_nearest;
-    search_data.hyperrect_distance = previous_hyperrect_distance;
-  }
-}
+    ignore_null_distances(ignore_null_distances_arg) {}
 
 /**
  * Traverse the kd-tree looking for nearest neighbours candidates, but do not discard any regions of the space.
@@ -225,11 +168,11 @@ KDIncremental<T, D>::~KDIncremental() {
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
-template <typename T, const unsigned int D> template <typename C>
-void KDNode<T, D>::explore(const KDNode *parent, KDSearchData<T, D> &search_data, C &candidates) const {
+template <typename T, const unsigned int D> template <typename M, typename C>
+void KDNode<T, D>::explore(const KDNode *parent, KDSearchData<T, D, M> &search_data, C &candidates) const {
 
   // Intersection data is updated incrementally when the object is created, and restored when destroyed.
-  KDIncremental<T, D> incremental_update(this, parent, search_data);
+  typename M::IncrementalType incremental_update(this, parent, search_data);
 
   // Check which branch should be explored first.
   KDNode<T, D> *first_branch = NULL, *second_branch = NULL;
@@ -292,19 +235,19 @@ void KDNode<T, D>::explore(const KDNode *parent, KDSearchData<T, D> &search_data
 }
 
 /**
- * Traverse the kd-tree while discarding regions of space with hypersphere-hyperrectangle intersections.
+ * Traverse the kd-tree while discarding regions of space with hyperrectangle intersections.
  *
  * \param parent Parent node of the one being explored.
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
-template <typename T, const unsigned int D> template <typename C>
-void KDNode<T, D>::intersect(const KDNode<T, D> *parent, KDSearchData<T, D> &search_data, C &candidates) const {
+template <typename T, const unsigned int D> template <typename M, typename C>
+void KDNode<T, D>::intersect(const KDNode<T, D> *parent, KDSearchData<T, D, M> &search_data, C &candidates) const {
 
   // Intersection data is updated incrementally when the object is created, and restored when destroyed.
-  KDIncremental<T, D> incremental_update(this, parent, search_data);
+  typename M::IncrementalType incremental_update(this, parent, search_data);
 
-  // Check if the hypersphere from current worst neighbour candidate intersects the region hyperrectangle.
+  // Check if the volume defined by the distance from current worst neighbour candidate intersects the region hyperrectangle.
   if (!(search_data.hyperrect_distance < search_data.farthest_distance))
     return;
 
@@ -335,23 +278,23 @@ void KDNode<T, D>::intersect(const KDNode<T, D> *parent, KDSearchData<T, D> &sea
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
-template <typename T, const unsigned int D> template <typename C>
-void KDLeaf<T, D>::explore(KDSearchData<T, D> &search_data, C &candidates) const {
+template <typename T, const unsigned int D> template <typename M, typename C>
+void KDLeaf<T, D>::explore(KDSearchData<T, D, M> &search_data, C &candidates) const {
 
   if (search_data.ignore_null_distances) {
 
     // Process only the bucket elements different to p.
     for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
-      const T &distance = search_data.p.distance_to(search_data.data[i]);
+      const T &distance = search_data.metric(search_data.p, search_data.data[i]);
       if (distance > Traits<T>::zero())
-        candidates.push_back(VectorDistance<T>(i, search_data.p.distance_to(search_data.data[i])));
+        candidates.push_back(VectorDistance<T>(i, search_data.metric(search_data.p, search_data.data[i])));
     }
 
   } else {
     // Process all the buckets in the node.
     for (unsigned int i=first_index; i < first_index + num_elements; ++i)
       // Create a new neighbour candidate with the point referenced by this node and push it into the K best ones.
-      candidates.push_back(VectorDistance<T>(i, search_data.p.distance_to(search_data.data[i])));
+      candidates.push_back(VectorDistance<T>(i, search_data.metric(search_data.p, search_data.data[i])));
   }
 
   // Update current farthest nearest neighbour distance.
@@ -365,14 +308,14 @@ void KDLeaf<T, D>::explore(KDSearchData<T, D> &search_data, C &candidates) const
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
-template <typename T, const unsigned int D> template <typename C>
-void KDLeaf<T, D>::intersect(KDSearchData<T, D> &search_data, C &candidates) const {
+template <typename T, const unsigned int D> template <typename M, typename C>
+void KDLeaf<T, D>::intersect(KDSearchData<T, D, M> &search_data, C &candidates) const {
 
   // Process all the buckets in the node.
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
 
     // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
-    const T &new_distance = search_data.p.distance_to(search_data.data[i], search_data.farthest_distance);
+    const T &new_distance = search_data.metric(search_data.p, search_data.data[i], search_data.farthest_distance);
 
     // If less than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
     if (new_distance <= search_data.farthest_distance) {
@@ -393,14 +336,14 @@ void KDLeaf<T, D>::intersect(KDSearchData<T, D> &search_data, C &candidates) con
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
-template <typename T, const unsigned int D> template <typename C>
-void KDLeaf<T, D>::intersect_ignoring_same(KDSearchData<T, D> &search_data, C &candidates) const {
+template <typename T, const unsigned int D> template <typename M, typename C>
+void KDLeaf<T, D>::intersect_ignoring_same(KDSearchData<T, D, M> &search_data, C &candidates) const {
 
   // Process all the buckets in the node.
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
 
     // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
-    const T &new_distance = search_data.p.distance_to(search_data.data[i], search_data.farthest_distance);
+    const T &new_distance = search_data.metric(search_data.p, search_data.data[i], search_data.farthest_distance);
     if (new_distance == Traits<T>::zero())
       continue;
 

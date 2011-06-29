@@ -178,6 +178,14 @@ struct Traits : TraitsBase<T>,
                 #endif
                 EqualTraits<T, has_trivial_equal<T>::value> {};
 
+// Bring to the kche_tree namespace the appropriate is_same template.
+using
+#ifdef KCHE_TREE_DISABLE_CPP0X
+    std::tr1::is_same;
+#else
+    std::is_same;
+#endif
+
 } // namespace kche_tree
 
 #endif

@@ -46,7 +46,7 @@ template <size_t> struct CompileAssertTest {};
 
 } // namespace kche_tree
 #else
-#define KCHE_TREE_COMPILE_ASSERT(x, msg) static_assert(x, msg)
+#define KCHE_TREE_COMPILE_ASSERT(x, msg) static_assert((x), msg)
 #endif
 
 #endif

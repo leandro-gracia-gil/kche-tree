@@ -52,18 +52,17 @@ public:
     value_ = 100.0f * (rand() / (2.0f * RAND_MAX) - 1.0f);
   }
 
-  // Operators required by the Euclidean metric.
-  // FIXME: this is likely to be changed when introducing different metrics.
-  Custom operator + (const Custom &a) const { Custom r; r.value_ = value_ + a.value_; return r; }
-  Custom operator - (const Custom &a) const { Custom r; r.value_ = value_ - a.value_; return r; }
-  Custom operator * (const Custom &a) const { Custom r; r.value_ = value_ * a.value_; return r; }
-  Custom& operator += (const Custom &a) { value_ += a.value_; return *this; }
-
-  // Operators required by the kd-tree.
+  // Operators required by KDTree. Using default copy constructor and asignment operator.
   bool operator < (const Custom &a) const { return value_ < a.value_; }
   bool operator > (const Custom &a) const { return value_ > a.value_; }
   bool operator <= (const Custom &a) const { return value_ <= a.value_; }
   bool operator == (const Custom &a) const { return value_ == a.value_; }
+
+  // Extra operators required by the Euclidean metric and its incremental calculations.
+  Custom operator + (const Custom &a) const { Custom r; r.value_ = value_ + a.value_; return r; }
+  Custom operator - (const Custom &a) const { Custom r; r.value_ = value_ - a.value_; return r; }
+  Custom operator * (const Custom &a) const { Custom r; r.value_ = value_ * a.value_; return r; }
+  Custom& operator += (const Custom &a) { value_ += a.value_; return *this; }
 
 private:
   float value_;

@@ -31,9 +31,13 @@
 
 namespace kche_tree {
 
-/// Structure holding data for incremental hyperrectangle-hypersphere intersection and nearest neighbour search.
-template <typename T, const unsigned int D>
-struct KDSearchData {
+/**
+ * \brief Structure holding the data specific to search in the tree.
+ *
+ * Will be expanded with any extra data provided by the associated incremental calculation type.
+ */
+template <typename T, const unsigned int D, typename M>
+struct KDSearchData : M::IncrementalType::SearchDataExtras {
 
   const Vector<T, D> &p; ///< Reference input point.
   const Vector<T, D> *data; ///< Pointer to permutated data array.
@@ -43,11 +47,7 @@ struct KDSearchData {
   T farthest_distance; ///< Current distance from the farthest nearest neighbour to the reference point.
   bool ignore_null_distances;  ///< Used to exclude the source point if it's already in the tree.
 
-  /// Axis-ordered point and hyperrectangle structure. Used internally to increase the cache hits.
-  struct AxisData {
-    T p; ///< Per-axis reference input point.
-    T nearest; ///< Per-axis nearest point in the current hyperrectangle.
-  } axis[D]; ///< Per-axis data defined this way to reduce cache misses.
+  M metric; ///< Metric functor used to calculate distances between points.
 
   /// Initialize data for a tree search with incremental intersection calculation.
   KDSearchData(const Vector<T, D> &p, const Vector<T, D> *data, unsigned int K, bool ignore_p_in_tree);
@@ -67,11 +67,16 @@ struct KDLeaf {
   KDLeaf(std::istream &input);
 
   /// Process a leaf node with many buckets on it. Do not use any upper bounds on distance.
-  template <typename C> void explore(KDSearchData<T, D> &data, C &candidates) const;
+  template <typename M, typename C>
+  void explore(KDSearchData<T, D, M> &data, C &candidates) const;
 
   /// Process a leaf node with many buckets on it. Allows partial distance calculations.
-  template <typename C> void intersect(KDSearchData<T, D> &data, C &candidates) const;
-  template <typename C> void intersect_ignoring_same(KDSearchData<T, D> &data, C &candidates) const;
+  template <typename M, typename C>
+  void intersect(KDSearchData<T, D, M> &data, C &candidates) const;
+
+  /// Process a leaf node ignoring any existing instances of the reference point defined in \a data.
+  template <typename M, typename C>
+  void intersect_ignoring_same(KDSearchData<T, D, M> &data, C &candidates) const;
 
   /// Write to stream.
   bool write_to_binary_stream(std::ostream &out);
@@ -144,34 +149,17 @@ struct KDNode {
   // --- Search-related --- //
 
   /// Traverse the kd-tree looking for nearest neighbours candidates based on Manhattan distances.
-  template <typename C> void explore(const KDNode<T, D> *parent, KDSearchData<T, D> &data, C &candidates) const;
+  template <typename M, typename C>
+  void explore(const KDNode<T, D> *parent, KDSearchData<T, D, M> &data, C &candidates) const;
 
-  /// Traverse the kd-tree checking hypersphere-hyperrectangle intersections to discard regions of the space.
-  template <typename C> void intersect(const KDNode<T, D> *parent, KDSearchData<T, D> &data, C &candidates) const;
+  /// Traverse the kd-tree checking hyperrectangle intersections to discard regions of the space.
+  template <typename M, typename C>
+  void intersect(const KDNode<T, D> *parent, KDSearchData<T, D, M> &data, C &candidates) const;
 
   // --- IO-related --- //
 
   /// Write to stream.
   bool write_to_binary_stream(std::ostream &out);
-};
-
-/// Incremental hyperrectangle-hypersphere intersection calculator. Designed so that the object lifespan handles increments.
-template <typename T, const unsigned int D>
-class KDIncremental {
-public:
-  /// Create an temporary incremental calculator object. Will update the current data according with the selected branch.
-  KDIncremental(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D> &data);
-
-  /// Destroy a temporary incremental calculator object. Will restore any previous modifications of the incremental data.
-  ~KDIncremental();
-
-protected:
-  KDSearchData<T, D> &search_data; ///< Reference to the search data being used.
-  unsigned int parent_axis; ///< Axis that defines the hyperspace splitting.
-
-  bool modified; ///< Flag indicating if the values were modified as part of the incremental update.
-  T previous_axis_nearest; ///< Previous value of the local axis in the hyperrectangle.
-  T previous_hyperrect_distance; ///< Previous value of the distance to the nearest point in the hyperrectangle.
 };
 
 } // namespace kche_tree

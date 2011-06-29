@@ -35,22 +35,6 @@
 namespace kche_tree {
 
 /**
- * \brief Functor to calculate the squared difference between elements in 2 arrays.
- *
- * \param a First array.
- * \param b Second array.
- * \param i Index of the dimension being calculated.
- * \return The squared difference between the elements in the \a i-th dimension.
- */
-template <typename T>
-struct DotFunctor {
-  T operator () (const T *a, const T *b, unsigned int i) const {
-    return (a[i] - b[i]) * (a[i] - b[i]);
-  }
-};
-
-
-/**
  * Generic memory allocator operator for feature vector arrays.
  * Defined so that memory-aligned specializations can be defined if required.
  *
@@ -105,49 +89,6 @@ bool Vector<T, D>::operator == (const Vector &p) const {
 template <typename T, const unsigned int D>
 bool Vector<T, D>::operator != (const Vector &p) const {
   return !Traits<T>::equal_arrays(data_, p.data_, D);
-}
-
-/**
- * Generic squared euclidean distance operator for two D-dimensional numeric kd_points.
- * Redefinitions and specializations of this operator are welcome.
- *
- * \param p Point being compared to.
- * \return Euclidean squared distance between the two kd_points.
- */
-template <typename T, const unsigned int D>
-T Vector<T, D>::distance_to(const Vector &p) const {
-
-  // Standard squared distance between two D-dimensional vectors.
-  T acc = Traits<T>::zero();
-  for (unsigned int i=0; i<D; ++i)
-    acc += (data_[i] - p.data_[i]) * (data_[i] - p.data_[i]);
-  return acc;
-}
-
-/**
- * Generic squared euclidean distance operator for two D-dimensional numeric kd_points.
- * Special version with early leaving in case an upper bound value is reached.
- *
- * \param p Point being compared to.
- * \param upper_bound Upper bound for the distance. Will return immediatly if reached.
- * \return Euclidean squared distance between the two kd_points or a partial result greater or equal than \a upper.
- */
-template <typename T, const unsigned int D>
-T Vector<T, D>::distance_to(const Vector &p, const T &upper_bound) const {
-
-  // Constant calculated empirically.
-  const unsigned int D_acc = (unsigned int) (0.4f * D);
-
-  // This has been empirically compared with the MapReduce template metaprogramming class,
-  // but the loop seemed to be always faster because of the code locality.
-  T acc = Traits<T>::zero();
-  for (unsigned int i=0; i<D_acc; ++i)
-    acc += (data_[i] - p.data_[i]) * (data_[i] - p.data_[i]);
-
-  // Calculate the remaining dimensions using an upper bound, and checking it every 4 dimensions.
-  // The template metaprogramming makes sure this interval is performed without actually checking any index or iterator at runtime.
-  // Has been tested to be faster than a loop with the difference being more acute with greater D values.
-  return BoundedMapReduce<T, D, 4, D_acc>::run(DotFunctor<T>(), std::plus<T>(), std::greater<T>(), data_, p.data_, upper_bound, acc);
 }
 
 } // namespace kche_tree
