@@ -66,7 +66,7 @@ void *Vector<float, 24U>::operator new [] (size_t size) {
 #endif // !defined(__APPLE__)
 
 /**
- * SSE-accelerated squared euclidean distance operator for two 24-dimensional single precision kd_points.
+ * SSE-accelerated squared euclidean distance operator for two 24-dimensional single precision vectors.
  *
  * \warning All feature vectors must be allocated aligned to 16 bytes.
  *
@@ -74,25 +74,29 @@ void *Vector<float, 24U>::operator new [] (size_t size) {
  * \return Euclidean squared distance between the two kd_points.
 */
 template <>
-float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p) const {
+float EuclideanMetric<float, 24U>::operator () (const Vector<float, 24U> &v1, const Vector<float, 24U> &v2) const {
+
+  // Check the accumulator type. Currently only float is supported.
+  KCHE_TREE_COMPILE_ASSERT((kche_tree::is_same<typename Traits<float>::AccumulatorType, float>::value),
+      "Accumulation types other than float are not supported by the SSE version");
 
   // Set data pointers as SSE vectors. Let's say each is composed of 6 4-float vectors: A B C D E F.
-  __m128 *this_data = (__m128 *) data_;
-  __m128 *p_data = (__m128 *) p.data_;
+  __m128 *v1_data = (__m128 *) v1.data();
+  __m128 *v2_data = (__m128 *) v2.data();
 
   // Required SSE registers.
   __m128 sqr1, sqr2, acc1, acc2;
 
   // Calculate acc1 = dist(A + B).
-  sqr1 = _mm_sub_ps(this_data[0], p_data[0]);
-  sqr2 = _mm_sub_ps(this_data[1], p_data[1]);
+  sqr1 = _mm_sub_ps(v1_data[0], v2_data[0]);
+  sqr2 = _mm_sub_ps(v1_data[1], v2_data[1]);
   sqr1 = _mm_mul_ps(sqr1, sqr1);
   sqr2 = _mm_mul_ps(sqr2, sqr2);
   acc1 = _mm_add_ps(sqr1, sqr2);
 
   // Calculate acc2 = dist(C + D).
-  sqr1 = _mm_sub_ps(this_data[2], p_data[2]);
-  sqr2 = _mm_sub_ps(this_data[3], p_data[3]);
+  sqr1 = _mm_sub_ps(v1_data[2], v2_data[2]);
+  sqr2 = _mm_sub_ps(v1_data[3], v2_data[3]);
   sqr1 = _mm_mul_ps(sqr1, sqr1);
   sqr2 = _mm_mul_ps(sqr2, sqr2);
   acc2 = _mm_add_ps(sqr1, sqr2);
@@ -101,8 +105,8 @@ float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p) const {
   acc1 = _mm_add_ps(acc1, acc2);
 
   // Calculate acc2 = dist(E + F).
-  sqr1 = _mm_sub_ps(this_data[4], p_data[4]);
-  sqr2 = _mm_sub_ps(this_data[5], p_data[5]);
+  sqr1 = _mm_sub_ps(v1_data[4], v2_data[4]);
+  sqr2 = _mm_sub_ps(v1_data[5], v2_data[5]);
   sqr1 = _mm_mul_ps(sqr1, sqr1);
   sqr2 = _mm_mul_ps(sqr2, sqr2);
   acc2 = _mm_add_ps(sqr1, sqr2);
@@ -116,7 +120,7 @@ float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p) const {
 }
 
 /**
- * SSE-accelerated squared euclidean distance operator for two 24-dimensional single precision kd_points.
+ * SSE-accelerated squared euclidean distance operator for two 24-dimensional single precision vectors.
  * Special version with early leaving in case an upper bound value is reached.
  *
  * \warning All feature vectors must be allocated aligned to 16 bytes.
@@ -126,25 +130,29 @@ float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p) const {
  * \return Euclidean squared distance between the two kd_points or a partial result greater or equal than \a upper.
 */
 template <>
-float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p, const float &upper) const {
+float EuclideanMetric<float, 24U>::operator () (const Vector<float, 24U> &v1, const Vector<float, 24U> &v2, const float &upper) const {
+
+  // Check the accumulator type. Currently only float is supported.
+  KCHE_TREE_COMPILE_ASSERT((kche_tree::is_same<typename Traits<float>::AccumulatorType, float>::value),
+      "Accumulation types other than float are not supported by the SSE version");
 
   // Set data pointers as SSE vectors. Let's say each is composed of 6 4-float vectors: A B C D E F.
-  __m128 *this_data = (__m128 *) data_;
-  __m128 *p_data = (__m128 *) p.data_;
+  __m128 *v1_data = (__m128 *) v1.data();
+  __m128 *v2_data = (__m128 *) v2.data();
 
   // Required SSE registers.
   __m128 sqr1, sqr2, acc1, acc2;
 
   // Calculate acc1 = dist(A + B).
-  sqr1 = _mm_sub_ps(this_data[0], p_data[0]);
-  sqr2 = _mm_sub_ps(this_data[1], p_data[1]);
+  sqr1 = _mm_sub_ps(v1_data[0], v2_data[0]);
+  sqr2 = _mm_sub_ps(v1_data[1], v2_data[1]);
   sqr1 = _mm_mul_ps(sqr1, sqr1);
   sqr2 = _mm_mul_ps(sqr2, sqr2);
   acc1 = _mm_add_ps(sqr1, sqr2);
 
   // Calculate acc2 = dist(C + D).
-  sqr1 = _mm_sub_ps(this_data[2], p_data[2]);
-  sqr2 = _mm_sub_ps(this_data[3], p_data[3]);
+  sqr1 = _mm_sub_ps(v1_data[2], v2_data[2]);
+  sqr2 = _mm_sub_ps(v1_data[3], v2_data[3]);
   sqr1 = _mm_mul_ps(sqr1, sqr1);
   sqr2 = _mm_mul_ps(sqr2, sqr2);
   acc2 = _mm_add_ps(sqr1, sqr2);
@@ -159,8 +167,8 @@ float Vector<float, 24U>::distance_to(const Vector<float, 24U> &p, const float &
     return partial_acc;
 
   // Calculate acc2 = dist(E + F).
-  sqr1 = _mm_sub_ps(this_data[4], p_data[4]);
-  sqr2 = _mm_sub_ps(this_data[5], p_data[5]);
+  sqr1 = _mm_sub_ps(v1_data[4], v2_data[4]);
+  sqr2 = _mm_sub_ps(v1_data[5], v2_data[5]);
   sqr1 = _mm_mul_ps(sqr1, sqr1);
   sqr2 = _mm_mul_ps(sqr2, sqr2);
   acc2 = _mm_add_ps(sqr1, sqr2);

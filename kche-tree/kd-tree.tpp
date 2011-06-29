@@ -126,18 +126,19 @@ bool KDTree<T, D>::build(const DataSet<T, D>& train_set, unsigned int bucket_siz
  * \param p Point whose \a K neighbours should be retrieved.
  * \param K Number of nearest neighbours to retrieve.
  * \param output STL vector where the nearest neighbours will be appended. Sorted result depends on the template parameter S, enabled by default.
+ * \param metric Metric functor that will be used to calculate the distances between points. Defaults to Euclidean metric if C++0x is enabled.
  * \param epsilon Acceptable distance margin to ignore regions during kd-tree exploration. Defaults to zero (deterministic).
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
-template <typename T, const unsigned int D> template <template <typename, typename> class KContainer>
-void KDTree<T, D>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const T &epsilon, bool ignore_p_in_tree) const {
+template <typename T, const unsigned int D> template <template <typename, typename> class KContainer, typename M>
+void KDTree<T, D>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const M &metric, const T &epsilon, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || num_elements == 0 || K == 0)
     return;
 
-  // Create an object for tree traversal and incremental hyperrectangle-hypersphere intersection calculation.
-  KDSearchData<T, D> search_data(p, data, K, ignore_p_in_tree);
+  // Create an object for tree traversal and incremental hyperrectangle intersection calculation.
+  KDSearchData<T, D, M> search_data(p, data, K, ignore_p_in_tree);
 
   // Convert epsilon to a squared distance and set it as initial hyperrectangle distance.
   search_data.hyperrect_distance = epsilon * epsilon;
@@ -164,17 +165,18 @@ void KDTree<T, D>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &o
  * \param p Point whose \a K neighbours should be retrieved.
  * \param distance Euclidean distance margin used to retrieve all points within.
  * \param output STL vector where the neighbours within the specified range will be appended. Elements are not sorted by distance.
+ * \param metric Metric functor that will be used to calculate the distances between points. Defaults to Euclidean metric if C++0x is enabled.
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
-template <typename T, const unsigned int D>
-void KDTree<T, D>::all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, bool ignore_p_in_tree) const {
+template <typename T, const unsigned int D> template <typename M>
+void KDTree<T, D>::all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, const M &metric, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || num_elements == 0 || distance <= Traits<T>::zero())
     return;
 
-  // Create an object for tree traversal and incremental hyperrectangle-hypersphere intersection calculation.
-  KDSearchData<T, D> search_data(p, data, 0, ignore_p_in_tree);
+  // Create an object for tree traversal and incremental hyperrectangle intersection calculation.
+  KDSearchData<T, D, M> search_data(p, data, 0, ignore_p_in_tree);
   search_data.farthest_distance = distance * distance;
 
   // Build a STL vector to hold all the points in range.

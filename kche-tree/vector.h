@@ -50,8 +50,8 @@ public:
   /// Number of dimensions (size) of the vector.
   static const unsigned int Dimensions = D;
 
-  // Constructors.
-  Vector() {} ///< Default constructor.
+  // Direct access to the data array.
+  const T *data() const { return data_; }
 
   // Subscript operators.
   const T & operator [] (unsigned int index) const { return data_[index]; } ///< Const subscript operator.
@@ -60,10 +60,6 @@ public:
   // Comparison operators.
   bool operator == (const Vector &p) const; ///< Equality comparison operator. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
   bool operator != (const Vector &p) const; ///< Non-equality comparison operator. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
-
-  // Squared distance operators for two D-dimensional points of type T.
-  inline T distance_to(const Vector &p) const; ///< Squared distance to a point.
-  inline T distance_to(const Vector &p, const T &upper_bound) const; ///< Squared distance to a point with an upper bound.
 
   // Memory operators: used to allow memory-aligned specializations. For example, for SSE optimizations.
   void *operator new [] (size_t size); ///< Standard allocation for arrays of feature vectors.

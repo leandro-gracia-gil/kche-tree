@@ -36,3 +36,4 @@ KCHE_TREE+= k-heap.h k-heap.tpp indirect_heap.h indirect_heap.tpp
 KCHE_TREE+= k-vector.h k-vector.tpp
 KCHE_TREE+= vector.h vector.tpp dataset.h dataset.tpp
 KCHE_TREE+= traits.h map_reduce.h compile_assert.h
+KCHE_TREE+= metrics.h metrics.tpp incremental.h incremental.tpp

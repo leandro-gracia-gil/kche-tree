@@ -38,7 +38,8 @@
  * The template has been designed to minimize the number of cache misses combined
  * with many algorithmic techniques and ideas.\n
  * Here are some of its features:
- * - Incremental calculation of the hyperrectangle-hypersphere intersections.
+ * - Incremental calculation of the hyperrectangle intersections.
+ * - Can define the metrics to use when exploring the tree: Euclidean, Mahalanobis, Chebyshev, etc.
  * - Internal data permutation to increase cache hits.
  * - Contiguous bucket data to reduce the leaf node size.
  * - Preorder memory allocation during the build to increase cache hits when traversing.

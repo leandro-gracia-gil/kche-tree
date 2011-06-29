@@ -57,6 +57,7 @@ const unsigned int D = 24;
 /// Alias for the specific KDTree and data set types being used.
 typedef KDTree<float, D> KDTreeTest;
 typedef DataSet<float, D> DataSetTest;
+static EuclideanMetric<float, D> metric;
 
 /**
  * Parse command line commands into \a args_info structure (uses gengetopt).
@@ -240,9 +241,9 @@ int main(int argc, char *argv[]) {
       unsigned int K = cmdline_args.knn_arg;
       vector<KDTreeTest::Neighbour> knn;
       if (cmdline_args.use_k_heap_flag)
-        kdtree.knn<KHeap>(test_set[i], K, knn, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
+        kdtree.knn<KHeap>(test_set[i], K, knn, metric, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
       else
-        kdtree.knn<KVector>(test_set[i], K, knn, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
+        kdtree.knn<KVector>(test_set[i], K, knn, metric, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
 
       // Check the k nearest neighbours returned.
       unsigned int num_elems = min(static_cast<unsigned int>(knn.size()), K);
@@ -265,7 +266,7 @@ int main(int argc, char *argv[]) {
         // Check if distance calculations are correct within a tolerance value.
         // Since the knn method uses incremental calculations and floating point arithmetic is not really commutative,
         // the values are expected to be slightly different, possibly more with higher dimension values.
-        float dist1 = sqrt(train_set[knn[k].index].distance_to(test_set[i]));
+        float dist1 = sqrt(metric(train_set[knn[k].index], test_set[i]));
         float dist2 = sqrt(nearest[k].squared_distance);
 
         if (fabs(dist1 - dist2) >= cmdline_args.tolerance_arg) {
@@ -291,7 +292,7 @@ int main(int argc, char *argv[]) {
 
       // Get all the neighbours in a random range.
       vector<KDTreeTest::Neighbour> points_in_range;
-      kdtree.all_in_range(test_set[i], search_range, points_in_range, cmdline_args.ignore_existing_flag);
+      kdtree.all_in_range(test_set[i], search_range, points_in_range, metric, cmdline_args.ignore_existing_flag);
 
       // Check the returned neighbours within the range.
       for (unsigned int k=0; k<points_in_range.size(); ++k) {
@@ -312,7 +313,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Check if returned distances were properly calculated.
-        float dist1 = sqrt(train_set[points_in_range[k].index].distance_to(test_set[i]));
+        float dist1 = sqrt(metric(train_set[points_in_range[k].index], test_set[i]));
         float dist2 = sqrt(points_in_range[k].squared_distance);
 
         if (fabs(dist1 - dist2) >= cmdline_args.tolerance_arg) {
