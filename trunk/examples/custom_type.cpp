@@ -122,7 +122,8 @@ int main(int argc, char *argv[]) {
     // Retrieve the K nearest neighbours.
     std::vector<KDTreeTest::Neighbour> neighbours;
     #ifdef KCHE_TREE_DISABLE_CPP0X
-    kdtree.knn<KVector>(test_set[i], K, neighbours);
+    // The Euclidean metric is used by default if C++0x is enabled, but explicitely required if disabled.
+    kdtree.knn<KVector>(test_set[i], K, neighbours, EuclideanMetric<Custom, D>());
     #else
     kdtree.knn(test_set[i], K, neighbours);
     #endif
