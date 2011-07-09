@@ -28,6 +28,7 @@
 #define _KCHE_TREE_INCREMENTAL_H_
 
 #include "kd-node.h"
+#include "dataset.h"
 #include "vector.h"
 
 namespace kche_tree {
@@ -49,6 +50,12 @@ template <typename T, const unsigned int D> class EuclideanMetric;
 template <typename T, const unsigned int D, typename Metric>
 class IncrementalBase {
 public:
+  /// Use the global data set type by default.
+  typedef typename Settings<T, D>::DataSetType DataSetType;
+
+  /// Use the global vector type by default.
+  typedef typename Settings<T, D>::VectorType VectorType;
+
   /// Extra data required in the KDSearchData struct to be able to perform axis-based incremental hyperrectangle intersection calculations.
   struct SearchData {
 
@@ -59,7 +66,7 @@ public:
     } axis[D]; ///< Per-axis data defined this way to reduce cache misses.
 
     /// Fill per-axis data contents.
-    SearchData(const Vector<T, D> &p, const Vector<T, D> *data);
+    SearchData(const VectorType &p, const DataSetType &data);
   };
 
   /// Type of the data extension applied to the KDSearchData object for incremental calculations.

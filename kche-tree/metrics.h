@@ -35,6 +35,7 @@
 #ifndef _KCHE_TREE_METRICS_H_
 #define _KCHE_TREE_METRICS_H_
 
+#include "kche-tree.h"
 #include "kd-node.h"
 #include "incremental.h"
 #include "vector.h"
@@ -62,11 +63,14 @@ public:
   /// Type for incremental hyperrectangle intersection calculations when using this metric.
   typedef EuclideanIncremental<T, D> IncrementalType;
 
+  /// Use the global vector type by default.
+  typedef typename Settings<T, D>::VectorType VectorType;
+
   /// Squared distance to a feature vector.
-  inline T operator () (const Vector<T, D> &v1, const Vector<T, D> &v2) const;
+  inline T operator () (const VectorType &v1, const VectorType &v2) const;
 
   /// Squared distance to a feature vector with an upper bound.
-  inline T operator () (const Vector<T, D> &v1, const Vector<T, D> &v2, const T &upper_bound) const;
+  inline T operator () (const VectorType &v1, const VectorType &v2, const T &upper_bound) const;
 };
 
 } // namespace kche_tree

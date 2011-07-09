@@ -44,28 +44,6 @@ namespace kche_tree {
 */
 template <typename T, typename Compare = std::less<T>, typename idx = unsigned int>
 class IndirectHeap {
-protected:
-
-  mutable const T *data; ///< Array of stored elements. Shifted to be 1-indexed.
-  idx *heap; ///< Heap structure built as indices to data.
-  idx *inverse; ///< Inverse heap position indices.
-
-  unsigned int size; ///< Heap maximum size.
-  unsigned int used; ///< Number of elements used in the heap.
-  unsigned int last; ///< Position in the data array where last element is (1-indexed).
-
-  const Compare &compare; ///< Comparison object.
-  static const idx root = 1; ///< Root index of the heap.
-
-  inline idx parent_idx(idx index) { return index >> 1; } ///< Get the index of the parent of a node.
-  inline idx left_idx (idx index) { return index << 1; } ///< Get the index of the left child of a node.
-  inline idx right_idx(idx index) { return (index << 1) + 1; } ///< Get the index of the right child of a node.
-
-  inline void swap_elements(idx i1, idx i2); ///< Swap indices and references from a pair of elements.
-  inline void heapify_element(idx index); ///< Adjust the heap structure after inserting a new element in \a index.
-  bool heapify_upwards(idx index); ///< Adjust the heap structure upwards after inserting a new element in \a index.
-  void heapify_downwards(idx index); ///< Adjust the heap structure downwards after inserting a new element in \a index.
-
 public:
 
   // Constructors and destructors.
@@ -104,6 +82,27 @@ public:
   bool empty() const;
   idx topIndex() const;
   T &top() const;
+
+private:
+  mutable const T *data; ///< Array of stored elements. Shifted to be 1-indexed.
+  idx *heap; ///< Heap structure built as indices to data.
+  idx *inverse; ///< Inverse heap position indices.
+
+  unsigned int size; ///< Heap maximum size.
+  unsigned int used; ///< Number of elements used in the heap.
+  unsigned int last; ///< Position in the data array where last element is (1-indexed).
+
+  const Compare &compare; ///< Comparison object.
+  static const idx root = 1; ///< Root index of the heap.
+
+  inline idx parent_idx(idx index) { return index >> 1; } ///< Get the index of the parent of a node.
+  inline idx left_idx (idx index) { return index << 1; } ///< Get the index of the left child of a node.
+  inline idx right_idx(idx index) { return (index << 1) + 1; } ///< Get the index of the right child of a node.
+
+  inline void swap_elements(idx i1, idx i2); ///< Swap indices and references from a pair of elements.
+  inline void heapify_element(idx index); ///< Adjust the heap structure after inserting a new element in \a index.
+  bool heapify_upwards(idx index); ///< Adjust the heap structure upwards after inserting a new element in \a index.
+  void heapify_downwards(idx index); ///< Adjust the heap structure downwards after inserting a new element in \a index.
 };
 
 } // namespace kche_tree

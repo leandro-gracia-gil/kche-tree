@@ -35,5 +35,6 @@ KCHE_TREE+= kd-node.h kd-node.tpp
 KCHE_TREE+= k-heap.h k-heap.tpp indirect_heap.h indirect_heap.tpp
 KCHE_TREE+= k-vector.h k-vector.tpp
 KCHE_TREE+= vector.h vector.tpp dataset.h dataset.tpp
-KCHE_TREE+= traits.h map_reduce.h compile_assert.h
+KCHE_TREE+= traits.h endianness.h compile_assert.h map_reduce.h
+KCHE_TREE+= noncopyable.h smart_ptr.h scoped_ptr.h shared_ptr.h
 KCHE_TREE+= metrics.h metrics.tpp incremental.h incremental.tpp

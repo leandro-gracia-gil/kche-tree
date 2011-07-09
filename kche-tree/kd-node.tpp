@@ -27,12 +27,6 @@
 // Include STL sort.
 #include <algorithm>
 
-// Includes to ouput debug information about the kd-tree structure.
-#ifdef KCHE_TREE_DEBUG
-#include <iomanip>
-#include <iostream>
-#endif
-
 namespace kche_tree {
 
 /**
@@ -47,7 +41,7 @@ namespace kche_tree {
  * \return Node of the tree completely initialized.
  */
 template <typename T, const unsigned int D>
-KDNode<T, D> *KDNode<T, D>::build(const Vector<T, D> *data, unsigned int *indices, unsigned int n,
+KDNode<T, D> *KDNode<T, D>::build(const DataSetType &data, unsigned int *indices, unsigned int n,
     KDNode *parent, unsigned int bucket_size, unsigned int &processed) {
 
   // Handle empty nodes (only for degenerate bucket sizes).
@@ -147,12 +141,12 @@ KDNode<T, D>::~KDNode() {
  * Initialize a data searching structure with incremental hyperrectangle intersection calculation.
  *
  * \param p Reference point being used in the search.
- * \param data Array of permutated data points.
+ * \param data Permutated training set stored by the tree.
  * \param K Number of neighbours to retrieve.
  * \param ignore_null_distances_arg Indicate that points with null distance should be ignored.
  */
 template <typename T, const unsigned int D, typename M>
-KDSearchData<T, D, M>::KDSearchData(const Vector<T, D> &p, const Vector<T, D> *data, unsigned int K, bool ignore_null_distances_arg)
+KDSearchData<T, D, M>::KDSearchData(const VectorType &p, const DataSetType &data, unsigned int K, bool ignore_null_distances_arg)
   : M::IncrementalType::SearchDataExtras(p, data),
     p(p),
     data(data),
@@ -359,73 +353,50 @@ void KDLeaf<T, D>::intersect_ignoring_same(KDSearchData<T, D, M> &search_data, C
   }
 }
 
-#ifdef KCHE_TREE_DEBUG
 template <typename T, const unsigned int D>
-bool KDNode<T, D>::verify(const Vector<T, D> *data, int axis) const {
+void KDNode<T, D>::verify_properties(const DataSetType &data, int axis) const {
 
-  bool result;
   if (is_leaf & left_bit)
-    result = left_leaf->verify_op(data, split_value, axis, std::less_equal<T>());
+    left_leaf->verify_properties(data, split_value, axis, std::less_equal<T>());
   else
-    result = left_branch->verify_op(data, split_value, axis, std::less_equal<T>());
-
-  if (!result)
-    return false;
+    left_branch->verify_properties(data, split_value, axis, std::less_equal<T>());
 
   if (is_leaf & right_bit)
-    result = right_leaf->verify_op(data, split_value, axis, std::greater_equal<T>());
+    right_leaf->verify_properties(data, split_value, axis, std::greater_equal<T>());
   else
-    result = right_branch->verify_op(data, split_value, axis, std::greater_equal<T>());
-
-  if (!result)
-    return false;
+    right_branch->verify_properties(data, split_value, axis, std::greater_equal<T>());
 
   if (!(is_leaf & left_bit))
-    result = left_branch->verify(data, (axis + 1) % D);
-
-  if (!result)
-    return false;
+    left_branch->verify_properties(data, (axis + 1) % D);
 
   if (!(is_leaf & right_bit))
-    result = right_branch->verify(data, (axis + 1) % D);
-
-  return result;
+    right_branch->verify_properties(data, (axis + 1) % D);
 }
 
 template <typename T, const unsigned int D> template <typename Op>
-bool KDNode<T, D>::verify_op(const Vector<T, D> *data, float value, int axis, const Op &op) const {
+void KDNode<T, D>::verify_properties(const DataSetType &data, const T &value, int axis, const Op &op) const {
 
-  bool result;
   if (is_leaf & left_bit)
-    result = left_leaf->verify_op(data, value, axis, op);
+    left_leaf->verify_properties(data, value, axis, op);
   else
-    result = left_branch->verify_op(data, value, axis, op);
-
-  if (!result)
-    return false;
+    left_branch->verify_properties(data, value, axis, op);
 
   if (is_leaf & right_bit)
-    result = right_leaf->verify_op(data, value, axis, op);
+    right_leaf->verify_properties(data, value, axis, op);
   else
-    result = right_branch->verify_op(data, value, axis, op);
-
-  return result;
+    right_branch->verify_properties(data, value, axis, op);
 }
 
 template <typename T, const unsigned int D> template <typename Op>
-bool KDLeaf<T, D>::verify_op(const Vector<T, D> *data, float value, int axis, const Op &op) const {
+void KDLeaf<T, D>::verify_properties(const DataSetType &data, const T &value, int axis, const Op &op) const {
 
-  for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
+  for (uint32_t i=first_index; i < first_index + num_elements; ++i) {
     if (!op(data[i][axis], value)) {
-      std::cerr << "Error: " << std::fixed << std::setprecision(3) << data[i][axis] <<
-          " should be '" << typeid(Op).name() << "' than " << value << " for axis " << axis << std::endl;
-      return false;
+      std::string error_msg = "kd-tree structural error on axis ";
+      error_msg += axis;
+      throw std::runtime_error(error_msg);
     }
   }
-
-  return true;
 }
-
-#endif // KCHE_TREE_DEBUG
 
 } // namespace kche_tree

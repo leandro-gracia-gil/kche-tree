@@ -93,6 +93,36 @@
 #ifndef _KCHE_TREE_KCHE_TREE_H_
 #define _KCHE_TREE_KCHE_TREE_H_
 
+/// Namespace of the Kche-tree template library.
+namespace kche_tree {
+
+// Forward-declare data sets and vectors.
+template <typename T, const unsigned int D> class DataSet;
+template <typename T, const unsigned int D> class Vector;
+
+/**
+ * \brief Compile-time settings for the Kche-tree library.
+ *
+ * Defines the main types to be used by the different classes of the library
+ * and enables some options. Override or specialize to change them.
+ *
+ * \tparam Type of the elements in the provided data.
+ * \tparam D Number of dimensions of the provided data.
+ */
+template <typename T, const unsigned int D>
+struct Settings {
+  /// Type of the data set to use.
+  typedef DataSet<T, D> DataSetType;
+
+  /// Type of the vectors to be used.
+  typedef Vector<T, D> VectorType;
+
+  /// Check if the kd-tree structure should be verified when deserializing. Will not compile the verification code if disabled.
+  static const bool verify_kdtree_after_deserializing = true;
+};
+
+} // namespace kche_tree
+
 // Required library includes.
 #include "kd-tree.h"
 

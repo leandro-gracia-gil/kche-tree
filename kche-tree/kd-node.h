@@ -27,6 +27,8 @@
 #ifndef _KCHE_TREE_KD_NODE_H_
 #define _KCHE_TREE_KD_NODE_H_
 
+// Include type traits and feature vectors.
+#include "traits.h"
 #include "vector.h"
 
 namespace kche_tree {
@@ -39,8 +41,14 @@ namespace kche_tree {
 template <typename T, const unsigned int D, typename M>
 struct KDSearchData : M::IncrementalType::SearchDataExtras {
 
-  const Vector<T, D> &p; ///< Reference input point.
-  const Vector<T, D> *data; ///< Pointer to permutated data array.
+  /// Use the global data set type by default.
+  typedef typename Settings<T, D>::DataSetType DataSetType;
+
+  /// Use the global vector type by default.
+  typedef typename Settings<T, D>::VectorType VectorType;
+
+  const VectorType &p; ///< Reference input point.
+  const DataSetType &data; ///< Permutated training set.
   unsigned int K; ///< Number of neighbours to retrieve.
 
   T hyperrect_distance; ///< Distance to the current nearest point in the hyperrectangle.
@@ -50,21 +58,24 @@ struct KDSearchData : M::IncrementalType::SearchDataExtras {
   M metric; ///< Metric functor used to calculate distances between points.
 
   /// Initialize data for a tree search with incremental intersection calculation.
-  KDSearchData(const Vector<T, D> &p, const Vector<T, D> *data, unsigned int K, bool ignore_p_in_tree);
+  KDSearchData(const VectorType &p, const DataSetType &data, unsigned int K, bool ignore_p_in_tree);
 };
 
 /// Kd-tree leaf node.
 template <typename T, const unsigned int D>
 struct KDLeaf {
-  unsigned int first_index; ///< Index of the first element contained by the leaf node.
-  unsigned int num_elements; ///< Number of elements contained by the node.
+  /// Use the global data set type by default.
+  typedef typename Settings<T, D>::DataSetType DataSetType;
+
+  uint32_t first_index; ///< Index of the first element contained by the leaf node.
+  uint32_t num_elements; ///< Number of elements contained by the node.
 
   /// Leaf constructor.
-  KDLeaf(unsigned int first_index, unsigned int num_elements) :
+  KDLeaf(uint32_t first_index, uint32_t num_elements) :
     first_index(first_index), num_elements(num_elements) {}
 
   /// Construct from an input stream.
-  KDLeaf(std::istream &input);
+  KDLeaf(std::istream &input, Endianness::Type endianness = Endianness::endianness());
 
   /// Process a leaf node with many buckets on it. Do not use any upper bounds on distance.
   template <typename M, typename C>
@@ -79,17 +90,19 @@ struct KDLeaf {
   void intersect_ignoring_same(KDSearchData<T, D, M> &data, C &candidates) const;
 
   /// Write to stream.
-  bool write_to_binary_stream(std::ostream &out);
+  void write_to_binary_stream(std::ostream &out);
 
-#ifdef KCHE_TREE_DEBUG
+  /// Verify the kd-tree properties using the provided functor. Throws std::runtime_error if invalid.
   template <typename Op>
-  bool verify_op(const Vector<T, D> *data, float value, int axis, const Op &op) const;
-#endif
+  void verify_properties(const DataSetType &data, const T &value, int axis, const Op &op) const;
 };
 
 /// Kd-tree branch node.
 template <typename T, const unsigned int D>
 struct KDNode {
+
+  /// Use the global data set type by default.
+  typedef typename Settings<T, D>::DataSetType DataSetType;
 
   union {
     KDNode<T, D> *left_branch; ///< Left branch.
@@ -105,30 +118,30 @@ struct KDNode {
 
   // The leaf flags use the two uppermost bits of the axis index. Won't handle more than 2^30 dimensions.
   union {
-    unsigned int axis; ///< Index of the current axis being split.
-    unsigned int is_leaf; ///< Bitmask used to check if left and right nodes are leafs or branches.
+    uint32_t axis; ///< Index of the current axis being split.
+    uint32_t is_leaf; ///< Bitmask used to check if left and right nodes are leafs or branches.
   };
 
   // Bit masks to access the leaf and axis information.
-  static const unsigned int left_bit  = 0x80000000U; ///< Mask used to access the left branch bit in is_leaf.
-  static const unsigned int right_bit = 0x40000000U; ///< Mask used to access the right branch bit in is_leaf.
-  static const unsigned int axis_mask = 0x3FFFFFFFU; ///< Mask used to access the axis bits.
+  static const uint32_t left_bit  = 0x80000000U; ///< Mask used to access the left branch bit in is_leaf.
+  static const uint32_t right_bit = 0x40000000U; ///< Mask used to access the right branch bit in is_leaf.
+  static const uint32_t axis_mask = 0x3FFFFFFFU; ///< Mask used to access the axis bits.
 
   // Constructors and destructor.
   KDNode() : left_branch(NULL), right_branch(NULL), is_leaf(0) {} ///< Default constructor.
-  KDNode(std::istream &input); ///< Construct from an input stream.
+  KDNode(std::istream &input, Endianness::Type endianness = Endianness::endianness()); ///< Construct from an input stream.
   ~KDNode(); ///< Default destructor.
 
-#ifdef KCHE_TREE_DEBUG
-  bool verify(const Vector<T, D> *data, int axis) const;
+  /// Verify the kd-tree properties from the local node. Throws std::runtime_error if invalid.
+  void verify_properties(const DataSetType &data, int axis) const;
 
+  /// Verify the kd-tree properties using the provided functor. Throws std::runtime_error if invalid.
   template <typename Op>
-  bool verify_op(const Vector<T, D> *data, float value, int axis, const Op &op) const;
-#endif
+  void verify_properties(const DataSetType &data, const T &value, int axis, const Op &op) const;
 
   /// Per axis element comparison functor. Used to apply STL sorting algorithms to individual axes.
   struct AxisComparer {
-    const Vector<T, D> *data; ///< Array of input data.
+    const DataSetType &data; ///< Input training set.
     unsigned int axis; ///< Current axis used for sorting.
 
     /// Axis-th element comparison. Used to perform per-dimension data sorting.
@@ -140,7 +153,7 @@ struct KDNode {
   // --- Training-related --- //
 
   /// Build the kd-tree recursively.
-  static KDNode *build(const Vector<T, D> *data, unsigned int *index, unsigned int n,
+  static KDNode *build(const DataSetType &data, unsigned int *index, unsigned int n,
       KDNode *parent, unsigned int bucket_size, unsigned int &processed);
 
   /// Find a pivot to split the space in two by a chosen dimension during training.
@@ -159,7 +172,7 @@ struct KDNode {
   // --- IO-related --- //
 
   /// Write to stream.
-  bool write_to_binary_stream(std::ostream &out);
+  void write_to_binary_stream(std::ostream &out);
 };
 
 } // namespace kche_tree

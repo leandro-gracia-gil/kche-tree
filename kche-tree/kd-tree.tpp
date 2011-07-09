@@ -26,49 +26,8 @@
 
 namespace kche_tree {
 
-/**
- * Default kd-tree constructor.
- * Creates an empty and uninitialized kd-tree.
- */
-template <typename T, const unsigned int D>
-KDTree<T, D>::KDTree()
-  : root(NULL),
-    data(NULL),
-    permutation(NULL),
-    inverse_perm(NULL),
-    num_elements(0) {}
-
-/**
- * Default kd-tree desstructor.
- */
-template <typename T, const unsigned int D>
-KDTree<T, D>::~KDTree() {
-
-  // Delete allocated contents.
-  release();
-}
-
-/**
- * Release any existing contents in the kd-tree.
- */
-template <typename T, const unsigned int D>
-void KDTree<T, D>::release() {
-
-  // Release tree nodes and data arrays.
-  delete root;
-  delete []data;
-  delete []permutation;
-  delete []inverse_perm;
-
-  // Set NULL pointers.
-  root = NULL;
-  data = NULL;
-  permutation = NULL;
-  inverse_perm = NULL;
-
-  // Reset number of elements.
-  num_elements = 0;
-}
+// Include the out_of_range exception.
+#include <stdexcept>
 
 /**
  * Subscripting operator to access kd-tree data.
@@ -77,8 +36,19 @@ void KDTree<T, D>::release() {
  * \return Reference to the index-th element provided when building the tree (internal copy).
  */
 template <typename T, const unsigned int D>
-const typename KDTree<T, D>::Point & KDTree<T, D>::operator [] (unsigned int index) const {
-  return data[inverse_perm[index]];
+const typename KDTree<T, D>::VectorType &KDTree<T, D>::operator [] (unsigned int index) const {
+
+  // Check boundaries.
+  if (index >= size()) {
+    std::string error_msg = "index out of range (requesting ";
+    error_msg += index;
+    error_msg += ", size ";
+    error_msg += size();
+    error_msg += ")";
+    throw std::out_of_range(error_msg);
+  }
+
+  return data[inverse_permutation[index]];
 }
 
 /**
@@ -89,31 +59,33 @@ const typename KDTree<T, D>::Point & KDTree<T, D>::operator [] (unsigned int ind
  * \return \c true if successful, \c false otherwise.
  */
 template <typename T, const unsigned int D>
-bool KDTree<T, D>::build(const DataSet<T, D>& train_set, unsigned int bucket_size) {
+bool KDTree<T, D>::build(const DataSetType &train_set, unsigned int bucket_size) {
 
   // Check params.
   unsigned int num_points = train_set.size();
   if (num_points == 0 || bucket_size == 0)
     return false;
 
-  // Delete any previous kd-tree.
-  release();
+  // Reallocate permutation arrays if the new size is different from the existing one.
+  if (data.size() != num_points) {
+    permutation.reset(new unsigned int[num_points]);
+    inverse_permutation.reset(new unsigned int[num_points]);
+  }
 
-  // Prepare an array for data index permutations.
-  permutation = new unsigned int[num_points];
+  // Initialize the permutation array to identity.
   for (unsigned int i=0; i<num_points; ++i)
     permutation[i] = i;
 
   // Build the kd-tree recursively (num_elements will contain a recursively-calculated num_points after the call).
-  num_elements = 0;
-  root = KDNode<T, D>::build(&train_set[0], permutation, train_set.size(), NULL, bucket_size, num_elements);
+  unsigned int num_elements = 0;
+  root.reset(KDNode<T, D>::build(train_set, permutation.get(), train_set.size(), NULL, bucket_size, num_elements));
+  assert(num_elements == num_points);
 
   // Make a permutated copy of the input data and calculate the inverse permutation.
-  data = new Point[num_points];
-  inverse_perm = new unsigned int[num_points];
+  data.reset_to_size(num_points);
   for (unsigned int i=0; i<num_points; ++i) {
     data[i] = train_set[permutation[i]];
-    inverse_perm[permutation[i]] = i;
+    inverse_permutation[permutation[i]] = i;
   }
 
   return true;
@@ -121,7 +93,7 @@ bool KDTree<T, D>::build(const DataSet<T, D>& train_set, unsigned int bucket_siz
 
 /**
  * Find the K nearest neighbours of a given Point and push their indices sorted into a given STL vector.
- * In case that there are not enough Points in the tree, all the available ones will be provided.
+ * In case that there are not enough points in the tree, all the available ones will be provided.
  *
  * \param p Point whose \a K neighbours should be retrieved.
  * \param K Number of nearest neighbours to retrieve.
@@ -131,10 +103,10 @@ bool KDTree<T, D>::build(const DataSet<T, D>& train_set, unsigned int bucket_siz
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
 template <typename T, const unsigned int D> template <template <typename, typename> class KContainer, typename M>
-void KDTree<T, D>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &output, const M &metric, const T &epsilon, bool ignore_p_in_tree) const {
+void KDTree<T, D>::knn(const VectorType &p, unsigned int K, std::vector<NeighbourType> &output, const M &metric, const T &epsilon, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
-  if (root == NULL || num_elements == 0 || K == 0)
+  if (root == NULL || size() == 0 || K == 0)
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle intersection calculation.
@@ -151,7 +123,7 @@ void KDTree<T, D>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &o
 
   // Append the nearest neighbours to the output vector in increasing distance correcting index permutations.
   while (!best_k.empty()) {
-    Neighbour neighbour = best_k.back();
+    NeighbourType neighbour = best_k.back();
     neighbour.index = permutation[neighbour.index];
     output.push_back(neighbour);
     best_k.pop_back();
@@ -160,7 +132,7 @@ void KDTree<T, D>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &o
 
 /**
  * Find the K nearest neighbours of a given Point and push their indices sorted into a given STL vector.
- * In case that there are not enough Points in the tree, all the available ones will be provided.
+ * In case that there are not enough points in the tree, all the available ones will be provided.
  *
  * \param p Point whose \a K neighbours should be retrieved.
  * \param distance Euclidean distance margin used to retrieve all points within.
@@ -169,10 +141,10 @@ void KDTree<T, D>::knn(const Point &p, unsigned int K, std::vector<Neighbour> &o
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
 template <typename T, const unsigned int D> template <typename M>
-void KDTree<T, D>::all_in_range(const Point &p, const T &distance, std::vector<Neighbour> &output, const M &metric, bool ignore_p_in_tree) const {
+void KDTree<T, D>::all_in_range(const VectorType &p, const T &distance, std::vector<NeighbourType> &output, const M &metric, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
-  if (root == NULL || num_elements == 0 || distance <= Traits<T>::zero())
+  if (root == NULL || size() == 0 || distance <= Traits<T>::zero())
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle intersection calculation.
@@ -180,27 +152,20 @@ void KDTree<T, D>::all_in_range(const Point &p, const T &distance, std::vector<N
   search_data.farthest_distance = distance * distance;
 
   // Build a STL vector to hold all the points in range.
-  std::vector<Neighbour> points_in_range;
+  std::vector<NeighbourType> points_in_range;
 
   // Store a dummy element in the vector with the distance range (will act as the farthest nearest neighbour during calculations).
-  points_in_range.push_back(Neighbour(-1, search_data.farthest_distance));
+  points_in_range.push_back(NeighbourType(-1, search_data.farthest_distance));
 
   // Start an exploration traversal from the root.
   root->explore(NULL, search_data, points_in_range);
 
   // Append the nearest neighbours to the output vector correcting index permutations.
   for (unsigned int i=1; i<points_in_range.size(); ++i) {
-    Neighbour neighbour = points_in_range[i];
+    NeighbourType neighbour = points_in_range[i];
     neighbour.index = permutation[neighbour.index];
     output.push_back(neighbour);
   }
 }
-
-#ifdef KCHE_TREE_DEBUG
-template <typename T, const unsigned int D>
-bool KDTree<T, D>::verify() const {
-  return root->verify(data, 0);
-}
-#endif
 
 } // namespace kche_tree

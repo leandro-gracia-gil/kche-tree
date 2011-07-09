@@ -48,10 +48,8 @@ void *Vector<T, D>::operator new [] (size_t size) {
   void *p = malloc(size);
 
   // Throw an allocation exception in case of error.
-  if (p == NULL) {
-    std::bad_alloc exception;
-    throw exception;
-  }
+  if (!p)
+    throw std::bad_alloc();
 
   return p;
 }
@@ -90,5 +88,51 @@ template <typename T, const unsigned int D>
 bool Vector<T, D>::operator != (const Vector &p) const {
   return !Traits<T>::equal_arrays(data_, p.data_, D);
 }
+
+/**
+ * \brief Stream deserialization constructor.
+ * Any required endianness correction is performed when reading the data.
+ *
+ * \note This method does not perform any type checking and it's used internally when
+ * serializing data sets. For proper vector serialization, use DataSet objects.
+ *
+ * \param in Input stream.
+ * \param endianness Endianness of the serialized data.
+ * \exception std::runtime_error Thrown in case of read or validation error.
+ */
+template <typename T, const unsigned int D>
+Vector<T, D>::Vector(std::istream &in, Endianness::Type endianness) {
+  deserialize(data_, in, endianness);
+}
+
+/**
+ * \brief Stream serialization operator.
+ *
+ * \note This method does not perform any type checking and it's used internally when
+ * serializing data sets. For proper vector serialization, use DataSet objects.
+ *
+ * \param out Output stream.
+ * \param vector Vector to be serialized.
+ * \exception std::runtime_error Thrown in case of write error.
+ */
+template <typename T, const unsigned int D>
+std::ostream& operator << (std::ostream& out, const Vector<T, D> &vector) {
+  serialize(vector.data_, out);
+  return out;
+}
+
+/**
+ * \brief Define the endianness swap for Vectors based on its element array.
+ *
+ * The \c false argument in the template comes from the fact that kche-tree Vectors
+ * are not fundamental C++ types. It should be deduced by default, but leads
+ * to errors in some compilers if not specified.
+ */
+template <typename T, const unsigned int D>
+struct EndiannessTraits<Vector<T, D>, false> {
+  static const void swap_endianness(Vector<T, D> &value) {
+    kche_tree::swap_endianness(value.data_);
+  }
+};
 
 } // namespace kche_tree

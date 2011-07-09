@@ -47,7 +47,6 @@ namespace kche_tree {
 template <typename T, typename Compare = std::less<T> >
 class KHeap {
 public:
-
   // Constructors and destructors.
   KHeap(unsigned int k); ///< K-heap constructor.
   KHeap(const KHeap &heap); ///< Copy constructor.
@@ -86,8 +85,7 @@ public:
   const T &front() const { return worst();  } ///< Same as \link KHeap::worst\endlink.
   const T &back()  const { return best(); } ///< Same as \link KHeap::best\endlink.
 
-
-protected:
+private:
   unsigned int K; ///< Maximum number of best elements stored (also maximum heap size).
   T *data; ///< Array of stored elements (0-indexed).
 

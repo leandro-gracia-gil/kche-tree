@@ -54,7 +54,7 @@ struct DotFunctor {
  * \return Euclidean squared distance between the two vectors.
  */
 template <typename T, const unsigned int D>
-T EuclideanMetric<T, D>::operator () (const Vector<T, D> &v1, const Vector<T, D> &v2) const {
+T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2) const {
 
   // Standard squared distance between two D-dimensional vectors.
   DotFunctor<T> dot;
@@ -74,7 +74,7 @@ T EuclideanMetric<T, D>::operator () (const Vector<T, D> &v1, const Vector<T, D>
  * \return Euclidean squared distance between the two vectors or a partial result greater than \a upper.
  */
 template <typename T, const unsigned int D>
-T EuclideanMetric<T, D>::operator () (const Vector<T, D> &v1, const Vector<T, D> &v2, const T &upper_bound) const {
+T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2, const T &upper_bound) const {
 
   // Constant calculated empirically.
   const unsigned int D_acc = (unsigned int) (0.4f * D);
