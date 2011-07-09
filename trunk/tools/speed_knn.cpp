@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
   for (unsigned int i=0; i < test_set.size(); ++i) {
 
     // Get the K nearest neighbours.
-    vector<KDTreeTest::Neighbour> knn;
+    vector<KDTreeTest::NeighbourType> knn;
     if (cmdline_args.use_k_heap_flag)
       kdtree.knn<KHeap>(test_set[i], cmdline_args.knn_arg, knn, metric, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
     else

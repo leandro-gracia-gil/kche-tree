@@ -169,12 +169,6 @@ int main(int argc, char *argv[]) {
   KDTreeTest kdtree;
   kdtree.build(train_set, cmdline_args.bucket_size_arg);
 
-  // Verify the properties of the tree.
-  if (!kdtree.verify()) {
-    fprintf(stderr, "Error building the tree: the result does not satisfy the properties of a kd-tree.\n");
-    return 1;
-  }
-
   // Test the kd-tree I/O.
   if (cmdline_args.kdtree_io_flag) {
 
@@ -187,12 +181,6 @@ int main(int argc, char *argv[]) {
     ifstream in_file("kd-tree.test", ios::binary | ios::in);
     in_file >> kdtree;
     in_file.close();
-
-    // Verify the properties of the kd-tree just read.
-    if (!kdtree.verify()) {
-      fprintf(stderr, "Kd-tree I/O failure: the tree read from file does not satisfy the properties of a kd-tree.\n");
-      ok = false;
-    }
   }
 
   // Test the subscript operator.
@@ -206,7 +194,7 @@ int main(int argc, char *argv[]) {
   }
 
   // Allocate memory for the exhaustive calculation of nearest neighbours.
-  KDTreeTest::Neighbour *nearest = new KDTreeTest::Neighbour[train_set.size()];
+  KDTreeTest::NeighbourType* nearest = new KDTreeTest::NeighbourType[train_set.size()];
   assert(nearest);
 
   // Process each test case.
@@ -227,7 +215,7 @@ int main(int argc, char *argv[]) {
         if (cmdline_args.ignore_existing_flag && distance == 0.0f)
           distance = FLT_MAX;
 
-        nearest[n] = KDTreeTest::Neighbour(n, distance);
+        nearest[n] = KDTreeTest::NeighbourType(n, distance);
       }
     }
 
@@ -239,7 +227,7 @@ int main(int argc, char *argv[]) {
 
       // Get the K nearest neighbours.
       unsigned int K = cmdline_args.knn_arg;
-      vector<KDTreeTest::Neighbour> knn;
+      vector<KDTreeTest::NeighbourType> knn;
       if (cmdline_args.use_k_heap_flag)
         kdtree.knn<KHeap>(test_set[i], K, knn, metric, cmdline_args.epsilon_arg, cmdline_args.ignore_existing_flag);
       else
@@ -291,7 +279,7 @@ int main(int argc, char *argv[]) {
       float squared_search_range = search_range * search_range;
 
       // Get all the neighbours in a random range.
-      vector<KDTreeTest::Neighbour> points_in_range;
+      vector<KDTreeTest::NeighbourType> points_in_range;
       kdtree.all_in_range(test_set[i], search_range, points_in_range, metric, cmdline_args.ignore_existing_flag);
 
       // Check the returned neighbours within the range.

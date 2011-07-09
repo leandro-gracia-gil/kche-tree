@@ -32,7 +32,9 @@
 #include <stdexcept>
 #include <typeinfo>
 
-// Include feature vectors.
+// Include smart pointers, type traits and feature vectors.
+#include "smart_ptr.h"
+#include "traits.h"
 #include "vector.h"
 
 namespace kche_tree {
@@ -41,20 +43,33 @@ namespace kche_tree {
 template <typename T, const unsigned int D>
 class DataSet;
 
-/// Input operator (read from stream). Throws an exception in case of error.
+/**
+ * \brief Load the contents of the input stream from the data set.
+ * The original contents of the \a dataset object are not modified in case of error.
+ *
+ * \param in Input stream.
+ * \param dataset DataSet to be deserialized.
+ * \exception std::runtime_error Thrown in case of reading or validation error.
+ */
 template <typename T, const unsigned int D>
-std::istream & operator >> (std::istream &in, DataSet<T, D> &set);
-
-/// Output operator (save to stream).
-template <typename T, const unsigned int D>
-std::ostream & operator << (std::ostream &out, const DataSet<T, D> &set);
+std::istream & operator >> (std::istream &in, DataSet<T, D> &dataset);
 
 /**
- * \brief Template for data sets containing feature vectors.
+ * \brief Save the contents of the data set to the output stream.
  *
- * Encapsulates a list of D-dimensional feature vectors with the provided size.
- * Depending on the constructor used, will allocate the vectors or will use an
- * existing array of them without taking any ownership.
+ * \note Data is serialized with the same endianness as the local host.
+ * \param out Output stream.
+ * \param dataset DataSet to be serialized.
+ * \exception std::runtime_error Thrown in case of writing error.
+ */
+template <typename T, const unsigned int D>
+std::ostream & operator << (std::ostream &out, const DataSet<T, D> &dataset);
+
+/**
+ * \brief Object containing a reference-counted set of feature vectors.
+ *
+ * Encapsulates a set of D-dimensional feature vectors that are shared
+ * between different sets.
  *
  * \tparam T Data type of the elements in each vector.
  * \tparam D Number of dimensions of each vector.
@@ -62,39 +77,38 @@ std::ostream & operator << (std::ostream &out, const DataSet<T, D> &set);
 template <typename T, const unsigned int D>
 class DataSet {
 public:
+  /// Use the global vector type by default.
+  typedef typename Settings<T, D>::VectorType VectorType;
+
   // Constructors and destructors;
   DataSet(); ///< Create an empty data set.
   DataSet(unsigned int size); ///< Create a data set of the specified size.
-  DataSet(Vector<T, D> *vectors, unsigned int size); ///< Create a data set object over an existing vector array of the specified size.
-  ~DataSet(); ///< Destroy the data set. Will release the vectors array if owned by the object.
-
-  // Copy constructor and assignment operator.
-  DataSet(const DataSet& dataset); ///< Copy-construct a data set. Will always make an owned copy of the vectors array.
-  DataSet& operator = (const DataSet& dataset); ///< Assign a data set. Will release the current array if owned and make an owned copy of the other dataset vectors.
+  DataSet(SharedArray<VectorType> vectors, unsigned int size); ///< Create a data set object over shared vector array of the specified size.
 
   // Initialization methods.
   void reset_to_size(unsigned int size); ///< Reset the data set to an uninitialized version of the specified size.
 
   // Attributes.
   unsigned int size() const { return size_; } ///< Returns the number of vectors in the data set.
-  bool is_data_owner() const { return ptr_owner_; } ///< Tells if the vectors are owned by the object and hence will be released by it.
+  const SharedArray<VectorType> vectors() const { return vectors_; } ///< Return the shared pointer of all contiguous vectors.
+  long use_count() const { return vectors_.use_count(); } ///< Return the number of references to the cointained vectors.
 
   // Subscript operators.
-  const Vector<T, D>& operator [] (unsigned int index) const { return vectors_[index]; } ///< Access vectors of the data set without modifying them.
-  Vector<T, D>& operator [] (unsigned int index) { return vectors_[index]; } ///< Access vectors of the data set.
+  const VectorType &operator [] (unsigned int index) const { return vectors_[index]; } ///< Access vectors of the data set without modifying them.
+  VectorType &operator [] (unsigned int index); ///< Access vectors of the data set. Will make a separate copy of the contents if shared with something else.
 
   // Comparison operators.
   bool operator == (const DataSet& dataset) const; ///< Check if the data set is equal to some other. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
   bool operator != (const DataSet& dataset) const; ///< Check if the data set is different to some other. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
 
   // Stream operators.
-  friend std::istream & operator >> <>(std::istream &in, DataSet &set);
-  friend std::ostream & operator << <>(std::ostream &out, const DataSet &set);
+  friend std::istream & operator >> <>(std::istream &in, DataSet &dataset);
+  friend std::ostream & operator << <>(std::ostream &out, const DataSet &dataset);
 
 private:
-  Vector<T, D> *vectors_; ///< Array of the vectors in the data set.
-  unsigned int size_; ///< Number of vectors in the data set.
-  bool ptr_owner_; ///< Flag indicating if the data set owns the vector array and should release it on destruction.
+  SharedArray<VectorType> vectors_; ///< Array of the vectors in the data set.
+  uint32_t size_; ///< Number of vectors in the data set.
+  static const uint16_t version[2]; ///< Tuple of major and minor version of the current data set serialization format.
 };
 
 } // namespace kche_tree

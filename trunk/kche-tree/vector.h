@@ -27,7 +27,25 @@
 #ifndef _KCHE_TREE_VECTOR_H_
 #define _KCHE_TREE_VECTOR_H_
 
+// Include endianness and traits information.
+#include "endianness.h"
+#include "traits.h"
+
 namespace kche_tree {
+
+/**
+ * \brief Stream serialization operator.
+ *
+ * \note This method does not perform any type checking and it's used internally when
+ * serializing data sets. For proper vector serialization, use DataSet objects.
+ * \note Data is serialized with the same endianness as the local host.
+ *
+ * \param out Output stream.
+ * \param vector Vector to be serialized.
+ * \exception std::runtime_error Thrown in case of write error.
+ */
+template <typename T, const unsigned int D>
+std::ostream & operator << (std::ostream &out, const Vector<T, D> &vector);
 
 /**
  * \brief Template for D-dimensional feature vectors.
@@ -50,6 +68,12 @@ public:
   /// Number of dimensions (size) of the vector.
   static const unsigned int Dimensions = D;
 
+  // Default constructor.
+  Vector() {}
+
+  // Read the vector from an input stream.
+  Vector(std::istream &in, Endianness::Type endianness);
+
   // Direct access to the data array.
   const T *data() const { return data_; }
 
@@ -65,9 +89,36 @@ public:
   void *operator new [] (size_t size); ///< Standard allocation for arrays of feature vectors.
   void  operator delete [] (void *p); ///< Standard deallocation for arrays of feature vectors.
 
+  // Friends for endianness swapping and serialization.
+  friend struct EndiannessTraits<Vector<T, D> >;
+  friend std::ostream & operator << <>(std::ostream &out, const Vector &vector);
+
 private:
   /// Contiguous D-dimensional data array.
   T data_[D];
+};
+
+/**
+ * \brief Vectors have trivial serialization if their contents do.
+ */
+template <typename T, const unsigned int D>
+struct has_trivial_serialization<Vector<T, D> > {
+  static const bool value = has_trivial_serialization<T>::value;
+};
+
+/**
+ * \brief Enable trivial equality comparison for vectors if their contents do.
+ *
+ * Vectors do implement the equality comparison operator, but only in order
+ * to perform raw-memory optimizations over all their dimensions.
+ *
+ * Since Vectors are POD objects, it is safe to set them trivial to compare
+ * if their contents are. This allows DataSets to compare arrays of vectors
+ * using raw memory comparisons if possible.
+ */
+template <typename T, const unsigned int D>
+struct has_trivial_equal<Vector<T, D> > {
+  static const bool value = has_trivial_equal<T>::value;
 };
 
 /**

@@ -33,7 +33,7 @@ namespace kche_tree {
  * \param data Input data. Unused in this case.
  */
 template <typename T, const unsigned int D, typename M>
-IncrementalBase<T, D, M>::SearchData::SearchData(const Vector<T, D> &p, const Vector<T, D> *data) {
+IncrementalBase<T, D, M>::SearchData::SearchData(const VectorType &p, const DataSetType &data) {
   for (unsigned int d=0; d<D; ++d) {
     axis[d].p = p[d];
     axis[d].nearest = p[d];
