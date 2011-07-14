@@ -130,7 +130,7 @@ float EuclideanMetric<float, 24U>::operator () (const Vector<float, 24U> &v1, co
  * \return Euclidean squared distance between the two kd_points or a partial result greater or equal than \a upper.
 */
 template <>
-float EuclideanMetric<float, 24U>::operator () (const Vector<float, 24U> &v1, const Vector<float, 24U> &v2, const float &upper) const {
+float EuclideanMetric<float, 24U>::operator () (const Vector<float, 24U> &v1, const Vector<float, 24U> &v2, ConstRef_T upper) const {
 
   // Check the accumulator type. Currently only float is supported.
   KCHE_TREE_COMPILE_ASSERT((kche_tree::is_same<typename Traits<float>::AccumulatorType, float>::value),

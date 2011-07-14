@@ -44,10 +44,11 @@
 // Include STL exceptions.
 #include <stdexcept>
 
-// Include compile-time assertions, endianness operations and smart pointers.
+// Include compile-time assertions, endianness operations, smart pointers and optimized params.
 #include "compile_assert.h"
 #include "endianness.h"
 #include "smart_ptr.h"
+#include "rparam.h"
 
 namespace kche_tree {
 

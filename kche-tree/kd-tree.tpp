@@ -103,7 +103,7 @@ bool KDTree<T, D>::build(const DataSetType &train_set, unsigned int bucket_size)
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
 template <typename T, const unsigned int D> template <template <typename, typename> class KContainer, typename M>
-void KDTree<T, D>::knn(const VectorType &p, unsigned int K, std::vector<NeighbourType> &output, const M &metric, const T &epsilon, bool ignore_p_in_tree) const {
+void KDTree<T, D>::knn(const VectorType &p, unsigned int K, std::vector<NeighbourType> &output, const M &metric, ConstRef_T epsilon, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || size() == 0 || K == 0)
@@ -141,7 +141,7 @@ void KDTree<T, D>::knn(const VectorType &p, unsigned int K, std::vector<Neighbou
  * \param ignore_p_in_tree Assume that \a p is contained in the tree any number of times and ignore them all.
  */
 template <typename T, const unsigned int D> template <typename M>
-void KDTree<T, D>::all_in_range(const VectorType &p, const T &distance, std::vector<NeighbourType> &output, const M &metric, bool ignore_p_in_tree) const {
+void KDTree<T, D>::all_in_range(const VectorType &p, ConstRef_T distance, std::vector<NeighbourType> &output, const M &metric, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
   if (root == NULL || size() == 0 || distance <= Traits<T>::zero())

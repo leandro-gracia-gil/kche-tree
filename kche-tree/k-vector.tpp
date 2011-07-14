@@ -81,7 +81,7 @@ unsigned int KVector<T, Compare>::size() const {
  * \return Reference to the worst element stored.
  */
 template <typename T, typename Compare>
-const T & KVector<T, Compare>::front() const {
+typename KVector<T, Compare>::ConstRef_T  KVector<T, Compare>::front() const {
   return data[0];
 }
 
@@ -91,7 +91,7 @@ const T & KVector<T, Compare>::front() const {
  * \return Reference to the best element stored.
  */
 template <typename T, typename Compare>
-const T & KVector<T, Compare>::back() const {
+typename KVector<T, Compare>::ConstRef_T  KVector<T, Compare>::back() const {
   return data[stored - 1];
 }
 
@@ -110,7 +110,7 @@ void KVector<T, Compare>::pop_back() {
  * \param elem Element being pushed.
  */
 template <typename T, typename Compare>
-void KVector<T, Compare>::push_back(const T &elem) {
+void KVector<T, Compare>::push_back(ConstRef_T elem) {
   if (stored < K)
     push_not_full(elem);
   else
@@ -127,7 +127,7 @@ void KVector<T, Compare>::push_back(const T &elem) {
  * \param elem Element being pushed.
  */
 template <typename T, typename Compare>
-void KVector<T, Compare>::push_not_full(const T &elem) {
+void KVector<T, Compare>::push_not_full(ConstRef_T elem) {
 
   // Look where the new candidate should be placed.
   unsigned int index;
@@ -150,7 +150,7 @@ void KVector<T, Compare>::push_not_full(const T &elem) {
  * \param elem Element being pushed.
  */
 template <typename T, typename Compare>
-void KVector<T, Compare>::push_full(const T &elem) {
+void KVector<T, Compare>::push_full(ConstRef_T elem) {
 
   // Avoid further calculations if candidate is worst than the current worst one.
   if (!compare(elem, data[0]))
