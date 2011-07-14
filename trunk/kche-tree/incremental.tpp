@@ -133,7 +133,7 @@ void IncrementalBase<T, D, Metric>::restore() {
  * \return The updated distance to the hyperrectangle.
  */
 template <typename T, const unsigned int D>
-T EuclideanIncremental<T, D>::IncrementalFunctor::operator () (const T &current_distance, unsigned int axis, const T &split_value, const typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData *axis_data, const KDSearchData<T, D, Metric> &search_data) const {
+T EuclideanIncremental<T, D>::IncrementalFunctor::operator () (ConstRef_T current_distance, unsigned int axis, ConstRef_T split_value, const typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData *axis_data, const KDSearchData<T, D, Metric> &search_data) const {
   return current_distance + (split_value - axis_data->nearest) * (axis_data->nearest + split_value - axis_data->p - axis_data->p);
 }
 

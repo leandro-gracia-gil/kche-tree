@@ -27,9 +27,10 @@
 #ifndef _KCHE_TREE_KD_NODE_H_
 #define _KCHE_TREE_KD_NODE_H_
 
-// Include type traits and feature vectors.
+// Include type traits, feature vectors and optimized params.
 #include "traits.h"
 #include "vector.h"
+#include "rparam.h"
 
 namespace kche_tree {
 
@@ -67,6 +68,9 @@ struct KDLeaf {
   /// Use the global data set type by default.
   typedef typename Settings<T, D>::DataSetType DataSetType;
 
+  /// Use optimized const reference types.
+  typedef typename RParam<T>::Type ConstRef_T;
+
   uint32_t first_index; ///< Index of the first element contained by the leaf node.
   uint32_t num_elements; ///< Number of elements contained by the node.
 
@@ -94,7 +98,7 @@ struct KDLeaf {
 
   /// Verify the kd-tree properties using the provided functor. Throws std::runtime_error if invalid.
   template <typename Op>
-  void verify_properties(const DataSetType &data, const T &value, int axis, const Op &op) const;
+  void verify_properties(const DataSetType &data, ConstRef_T value, int axis, const Op &op) const;
 };
 
 /// Kd-tree branch node.
@@ -103,6 +107,9 @@ struct KDNode {
 
   /// Use the global data set type by default.
   typedef typename Settings<T, D>::DataSetType DataSetType;
+
+  /// Use optimized const reference types.
+  typedef typename RParam<T>::Type ConstRef_T;
 
   union {
     KDNode<T, D> *left_branch; ///< Left branch.
@@ -137,7 +144,7 @@ struct KDNode {
 
   /// Verify the kd-tree properties using the provided functor. Throws std::runtime_error if invalid.
   template <typename Op>
-  void verify_properties(const DataSetType &data, const T &value, int axis, const Op &op) const;
+  void verify_properties(const DataSetType &data, ConstRef_T value, int axis, const Op &op) const;
 
   /// Per axis element comparison functor. Used to apply STL sorting algorithms to individual axes.
   struct AxisComparer {

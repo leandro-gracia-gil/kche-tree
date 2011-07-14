@@ -30,9 +30,10 @@
 // Include the std::less predicate (used by default).
 #include <functional>
 
-// Include indirect heaps and traits information.
+// Include indirect heaps, traits information and optimized params.
 #include "indirect_heap.h"
 #include "traits.h"
+#include "rparam.h"
 
 namespace kche_tree {
 
@@ -47,6 +48,9 @@ namespace kche_tree {
 template <typename T, typename Compare = std::less<T> >
 class KHeap {
 public:
+  /// Use optimized const reference types.
+  typedef typename RParam<T>::Type ConstRef_T;
+
   // Constructors and destructors.
   KHeap(unsigned int k); ///< K-heap constructor.
   KHeap(const KHeap &heap); ///< Copy constructor.
@@ -59,7 +63,7 @@ public:
   bool operator ==(const KHeap &heap) const; ///< Comparison operator.
 
   // Heap operations.
-  bool push(const T &elem); ///< Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).
+  bool push(ConstRef_T elem); ///< Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).
   void pop_best(); ///< Pop the best element from the heap. Can be used for direct sorting. Cost: O(log K).
   void pop_worst(); ///< Pop the worst element from the heap. Can be used for reverse sorting. Cost: O(log K).
 
@@ -68,22 +72,22 @@ public:
   bool empty() const; ///< Check if the heap is empty. Cost: O(1).
   unsigned int size() const; ///< Return the number of elements in the heap. Cost: O(1).
 
-  const T &best() const; ///< Retrieve the best element from the heap, or the first data object if empty. Cost: O(1).
-  const T &worst() const; ///< Retrieve the worst element from the heap, or the first data object if empty. Cost: O(1).
+  ConstRef_T best() const; ///< Retrieve the best element from the heap, or the first data object if empty. Cost: O(1).
+  ConstRef_T worst() const; ///< Retrieve the worst element from the heap, or the first data object if empty. Cost: O(1).
 
   unsigned int get_K() const; ///< Get the maximum number of elements stored in the heap (also the maximum heap size). Cost: O(1).
   unsigned int count() const; ///< Get the number of elements currently in the heap. Cost: O(1).
 
 
   // STL-based names for heap operations and properties.
-  bool push_front(const T &elem) { return push(elem); } ///< Same as \link KHeap::push push\endlink.
-  bool push_back (const T &elem) { return push(elem); } ///< Same as \link KHeap::push push\endlink.
+  bool push_front(ConstRef_T elem) { return push(elem); } ///< Same as \link KHeap::push push\endlink.
+  bool push_back (ConstRef_T elem) { return push(elem); } ///< Same as \link KHeap::push push\endlink.
 
   void pop_front() { pop_worst(); } ///< Same as \link KHeap::pop_worst\endlink.
   void pop_back()  { pop_best(); } ///< Same as \link KHeap::pop_best\endlink.
 
-  const T &front() const { return worst();  } ///< Same as \link KHeap::worst\endlink.
-  const T &back()  const { return best(); } ///< Same as \link KHeap::best\endlink.
+  ConstRef_T front() const { return worst();  } ///< Same as \link KHeap::worst\endlink.
+  ConstRef_T back()  const { return best(); } ///< Same as \link KHeap::best\endlink.
 
 private:
   unsigned int K; ///< Maximum number of best elements stored (also maximum heap size).

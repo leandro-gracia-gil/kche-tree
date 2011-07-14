@@ -27,8 +27,9 @@
 #ifndef _KCHE_TREE_INCREMENTAL_H_
 #define _KCHE_TREE_INCREMENTAL_H_
 
-#include "kd-node.h"
 #include "dataset.h"
+#include "kd-node.h"
+#include "rparam.h"
 #include "vector.h"
 
 namespace kche_tree {
@@ -103,9 +104,12 @@ public:
   /// Metric associated with this incremental calculation.
   typedef EuclideanMetric<T, D> Metric;
 
+  /// Use optimized const reference types.
+  typedef typename RParam<T>::Type ConstRef_T;
+
   /// Euclidean hyperrectangle distance incremental functor.
   struct IncrementalFunctor {
-    T operator () (const T &current_distance, unsigned int axis, const T &split_value,
+    T operator () (ConstRef_T current_distance, unsigned int axis, ConstRef_T split_value,
         const typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData *axis_data, const KDSearchData<T, D, Metric> &search_data) const;
   };
 

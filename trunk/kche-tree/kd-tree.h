@@ -35,12 +35,13 @@
 #include "k-heap.h"
 #include "k-vector.h"
 
-// Include data sets, vectors, type traits, kd-tree nodes and metrics.
+// Include data sets, vectors, type traits, kd-tree nodes, metrics and optimized parameters.
 #include "dataset.h"
 #include "vector.h"
 #include "traits.h"
 #include "kd-node.h"
 #include "metrics.h"
+#include "rparam.h"
 
 namespace kche_tree {
 
@@ -101,6 +102,9 @@ public:
   /// Use the global vector type by default.
   typedef typename Settings<T, D>::VectorType VectorType;
 
+  /// Use optimized const reference types.
+  typedef typename RParam<T>::Type ConstRef_T;
+
   /// Default constructor. Creates an empty and uninitialized kd-tree.
   KDTree() {}
 
@@ -109,18 +113,18 @@ public:
 
   #ifdef KCHE_TREE_DISABLE_CPP0X
   template <template <typename, typename Compare> class KContainer, typename M>
-  void knn(const VectorType &p, unsigned int K, std::vector<NeighbourType> &output, const M &metric = EuclideanMetric<T, D>(), const T &epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
+  void knn(const VectorType &p, unsigned int K, std::vector<NeighbourType> &output, const M &metric = EuclideanMetric<T, D>(), ConstRef_T epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
   #else
   template <template <typename, typename Compare> class KContainer = KVector, typename M = EuclideanMetric<T, D> >
-  void knn(const VectorType &p, unsigned int K, std::vector<NeighbourType> &output, const M &metric = M(), const T &epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
+  void knn(const VectorType &p, unsigned int K, std::vector<NeighbourType> &output, const M &metric = M(), ConstRef_T epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
   #endif
 
   #ifdef KCHE_TREE_DISABLE_CPP0X
   template <typename M>
-  void all_in_range(const VectorType &p, const T &distance, std::vector<NeighbourType> &output, const M &metric = EuclideanMetric<T, D>(), bool ignore_p_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
+  void all_in_range(const VectorType &p, ConstRef_T distance, std::vector<NeighbourType> &output, const M &metric = EuclideanMetric<T, D>(), bool ignore_p_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
   #else
   template <typename M = EuclideanMetric<T, D> >
-  void all_in_range(const VectorType &p, const T &distance, std::vector<NeighbourType> &output, const M &metric = M(), bool ignore_p_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
+  void all_in_range(const VectorType &p, ConstRef_T distance, std::vector<NeighbourType> &output, const M &metric = M(), bool ignore_p_in_tree = false) const; ///< Get all neighbours within a distance from a point. Estimated average Cost: O(log m log n) depending on the number of results m.
   #endif
 
   /// Subscript operator for accesing the original train set data. Will throw an exception if \a index is out of bounds.

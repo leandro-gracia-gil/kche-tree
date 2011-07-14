@@ -74,7 +74,7 @@ T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2
  * \return Euclidean squared distance between the two vectors or a partial result greater than \a upper.
  */
 template <typename T, const unsigned int D>
-T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2, const T &upper_bound) const {
+T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2, ConstRef_T upper_bound) const {
 
   // Constant calculated empirically.
   const unsigned int D_acc = (unsigned int) (0.4f * D);

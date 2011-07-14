@@ -141,7 +141,7 @@ bool KHeap<T, C>::operator == (const KHeap &heap) const {
  * \return \c true if \a elem is kept in the heap, \c false if discarded.
 */
 template <typename T, typename C>
-bool KHeap<T, C>::push(const T &elem) {
+bool KHeap<T, C>::push(ConstRef_T elem) {
 
   // Check if heaps are not yet full.
   if (bestHeap.count() < K) {
@@ -272,7 +272,7 @@ unsigned int KHeap<T, C>::size() const {
  * \return Best element in the heap, or last 'first' element if heap is already \link KHeap::empty empty\endlink.
 */
 template <typename T, typename C>
-const T &KHeap<T, C>::best() const {
+typename KHeap<T, C>::ConstRef_T KHeap<T, C>::best() const {
   if (empty())
     return data[0];
   return bestHeap.top();
@@ -284,7 +284,7 @@ const T &KHeap<T, C>::best() const {
  * \return Worst element in the heap, or last 'first' element if heap is already \link KHeap::empty empty\endlink.
 */
 template <typename T, typename C>
-const T &KHeap<T, C>::worst() const {
+typename KHeap<T, C>::ConstRef_T KHeap<T, C>::worst() const {
   if (empty())
     return data[0];
   return worstHeap.top();

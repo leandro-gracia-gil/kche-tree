@@ -279,7 +279,7 @@ void KDLeaf<T, D>::explore(KDSearchData<T, D, M> &search_data, C &candidates) co
 
     // Process only the bucket elements different to p.
     for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
-      const T &distance = search_data.metric(search_data.p, search_data.data[i]);
+      ConstRef_T distance = search_data.metric(search_data.p, search_data.data[i]);
       if (distance > Traits<T>::zero())
         candidates.push_back(VectorDistance<T>(i, search_data.metric(search_data.p, search_data.data[i])));
     }
@@ -309,7 +309,7 @@ void KDLeaf<T, D>::intersect(KDSearchData<T, D, M> &search_data, C &candidates) 
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
 
     // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
-    const T &new_distance = search_data.metric(search_data.p, search_data.data[i], search_data.farthest_distance);
+    ConstRef_T new_distance = search_data.metric(search_data.p, search_data.data[i], search_data.farthest_distance);
 
     // If less than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
     if (new_distance <= search_data.farthest_distance) {
@@ -337,7 +337,7 @@ void KDLeaf<T, D>::intersect_ignoring_same(KDSearchData<T, D, M> &search_data, C
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
 
     // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
-    const T &new_distance = search_data.metric(search_data.p, search_data.data[i], search_data.farthest_distance);
+    ConstRef_T new_distance = search_data.metric(search_data.p, search_data.data[i], search_data.farthest_distance);
     if (new_distance == Traits<T>::zero())
       continue;
 
@@ -374,7 +374,7 @@ void KDNode<T, D>::verify_properties(const DataSetType &data, int axis) const {
 }
 
 template <typename T, const unsigned int D> template <typename Op>
-void KDNode<T, D>::verify_properties(const DataSetType &data, const T &value, int axis, const Op &op) const {
+void KDNode<T, D>::verify_properties(const DataSetType &data, ConstRef_T value, int axis, const Op &op) const {
 
   if (is_leaf & left_bit)
     left_leaf->verify_properties(data, value, axis, op);
@@ -388,7 +388,7 @@ void KDNode<T, D>::verify_properties(const DataSetType &data, const T &value, in
 }
 
 template <typename T, const unsigned int D> template <typename Op>
-void KDLeaf<T, D>::verify_properties(const DataSetType &data, const T &value, int axis, const Op &op) const {
+void KDLeaf<T, D>::verify_properties(const DataSetType &data, ConstRef_T value, int axis, const Op &op) const {
 
   for (uint32_t i=first_index; i < first_index + num_elements; ++i) {
     if (!op(data[i][axis], value)) {

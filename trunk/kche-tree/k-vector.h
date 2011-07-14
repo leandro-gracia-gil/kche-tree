@@ -30,6 +30,9 @@
 // Include STL less comparison template (used by default).
 #include <functional>
 
+// Include optimized params.
+#include "rparam.h"
+
 namespace kche_tree {
 
 /**
@@ -43,6 +46,9 @@ namespace kche_tree {
 template <typename T, typename Compare = std::less<T> >
 class KVector {
 public:
+  /// Use optimized const reference types.
+  typedef typename RParam<T>::Type ConstRef_T;
+
   /// K-vector constructor.
   KVector(unsigned int K, const Compare &c = Compare());
 
@@ -54,12 +60,12 @@ public:
   bool full() const; ///< Check if the k-vector is full (has K elements). Cost: O(1).
   unsigned int size() const; ///< Get the number of elements currently in the k-vector. Cost: O(1).
 
-  const T &front() const; ///< Get the worst element stored in the k-vector. Cost: O(1).
-  const T &back() const; ///< Get the best element stored in the k-vector. Cost: O(1).
+  ConstRef_T front() const; ///< Get the worst element stored in the k-vector. Cost: O(1).
+  ConstRef_T back() const; ///< Get the best element stored in the k-vector. Cost: O(1).
 
   // Operations.
   void pop_back(); ///< Pop the current worst element from the k-vector. Cost: O(K).
-  void push_back(const T &elem); ///< Push a new element into the k-vector. Cost: O(K).
+  void push_back(ConstRef_T elem); ///< Push a new element into the k-vector. Cost: O(K).
 
 protected:
   T *data; ///< Array of stored elements (sorted with worst one on the first position).
@@ -67,8 +73,8 @@ protected:
   unsigned int stored; ///< Number of elements currently in the k-vector.
   const Compare &compare; ///< Comparison object.
 
-  void push_not_full(const T &elem); ///< Push a new element into the k-vector when the vector is still not full. Cost: O(K).
-  void push_full(const T &elem); ///< Push a new element into the k-vector when the vector is already full. Cost: O(K).
+  void push_not_full(ConstRef_T elem); ///< Push a new element into the k-vector when the vector is still not full. Cost: O(K).
+  void push_full(ConstRef_T elem); ///< Push a new element into the k-vector when the vector is already full. Cost: O(K).
 };
 
 } // namespace kche_tree

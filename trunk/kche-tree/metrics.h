@@ -66,11 +66,14 @@ public:
   /// Use the global vector type by default.
   typedef typename Settings<T, D>::VectorType VectorType;
 
+  /// Use optimized const reference types.
+  typedef typename RParam<T>::Type ConstRef_T;
+
   /// Squared distance to a feature vector.
   inline T operator () (const VectorType &v1, const VectorType &v2) const;
 
   /// Squared distance to a feature vector with an upper bound.
-  inline T operator () (const VectorType &v1, const VectorType &v2, const T &upper_bound) const;
+  inline T operator () (const VectorType &v1, const VectorType &v2, ConstRef_T upper_bound) const;
 };
 
 } // namespace kche_tree

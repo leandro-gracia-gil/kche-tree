@@ -27,9 +27,10 @@
 #ifndef _KCHE_TREE_VECTOR_H_
 #define _KCHE_TREE_VECTOR_H_
 
-// Include endianness and traits information.
+// Include endianness and traits information and optimized params.
 #include "endianness.h"
 #include "traits.h"
+#include "rparam.h"
 
 namespace kche_tree {
 
@@ -131,12 +132,15 @@ struct has_trivial_equal<Vector<T, D> > {
 template <typename T>
 struct VectorDistance : public std::binary_function<VectorDistance<T>, VectorDistance<T>, bool> {
 
+  /// Use optimized const reference types.
+  typedef typename RParam<T>::Type ConstRef_T;
+
   unsigned int index; ///< Index of the feature vector in the data set.
   T squared_distance; ///< Squared distance of the referenced element to an implicit vector.
 
   // Default and convenience constructors.
   VectorDistance() {}
-  VectorDistance(unsigned int index, const T &squared_distance) : index(index), squared_distance(squared_distance) {}
+  VectorDistance(unsigned int index, ConstRef_T squared_distance) : index(index), squared_distance(squared_distance) {}
 
   /// Distance comparison operator for VectorDistances. Allows VectorDistance objects to be used as STL comparison functors.
   bool operator () (const VectorDistance &v1, const VectorDistance &v2) const {
