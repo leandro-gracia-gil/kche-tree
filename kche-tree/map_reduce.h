@@ -27,7 +27,7 @@
 #ifndef _KCHE_TREE_MAPREDUCE_H_
 #define _KCHE_TREE_MAPREDUCE_H_
 
-#include "traits.h"
+#include "rparam.h"
 
 namespace kche_tree {
 
@@ -43,14 +43,14 @@ struct MapReduce {
   /**
    * \brief Run the mapreduce operation.
    *
-   * \param map Functor used to map the corresponding element in the input arrays to some single value.
-   * \param reduce Functor used to fold the results of each map operation across dimensions.
+   * \param map_reduce Functor used to map and reduce the corresponding elements in the input arrays to a single value.
    * \param a First input array.
    * \param b Second input array.
+   * \param accumulator Reference to initial accumulation value and holder of the result when finished.
    */
-  template <typename MapFunctor, typename ReduceFunctor>
-  static T run(const MapFunctor &map, const ReduceFunctor &reduce, const T *a, const T *b) {
-    return reduce(MapReduce<T, D, i+1>::run(map, reduce, a, b), map(a, b, i));
+  template <typename MapReduceFunctor>
+  static void run(const MapReduceFunctor &map_reduce, const T *a, const T *b, T &accumulator) {
+    MapReduce<T, D, i+1>::run(map_reduce, a, b, map_reduce(accumulator, a, b, i));
   }
 };
 
@@ -60,10 +60,8 @@ struct MapReduce {
  */
 template <typename T, unsigned int D>
 struct MapReduce<T, D, D> {
-  template <typename MapFunctor, typename ReduceFunctor>
-  static T run(const MapFunctor &map, const ReduceFunctor &reduce, const T *a, const T *b) {
-    return 0.0;
-  }
+  template <typename MapReduceFunctor>
+  static void run(const MapReduceFunctor &map_reduce, const T *a, const T *b, T &accumulator) {}
 };
 
 
@@ -81,20 +79,25 @@ struct MapReduce<T, D, D> {
  */
 template <typename T, unsigned int D, unsigned int BoundCheckFreq=1, unsigned int i=0, unsigned int NextCheck=BoundCheckFreq>
 struct BoundedMapReduce {
+
+  /// Use optimized const reference types.
+  typedef typename RParam<T>::Type ConstRef_T;
+
   /**
    * \brief Run the bounded map-reduce operation.
    *
-   * \param map Functor used to map the corresponding element in the input arrays to some single value.
-   * \param reduce Functor used to fold the results of each map operation across dimensions.
+   * The result may be a partial accumulator if the boundary check passes.
+   *
+   * \param map_reduce Functor used to map and reduce the corresponding elements in the input arrays to a single value.
    * \param check Functor used for checking the boundaries. Should return \c true when the boundary is crossed. First argument will be the current accumulated value, second will be the \a boundary argument.
    * \param a First input array.
    * \param b Second input array.
    * \param boundary Boundary value used to avoid unnecessary calculations.
-   * \param value Initial accumulation value. Defaults to the zero traits.
+   * \param accumulator Reference to initial accumulation value and holder of the result when finished.
    */
-  template <typename MapFunctor, typename ReduceFunctor, typename BoundaryFunctor>
-  static T run(const MapFunctor &map, const ReduceFunctor &reduce, const BoundaryFunctor& check, const T *a, const T *b, T boundary, T value = Traits<T>::zero()) {
-    return BoundedMapReduce<T, D, BoundCheckFreq, i+1, NextCheck-1>::run(map, reduce, check, a, b, boundary, reduce(value, map(a, b, i)));
+  template <typename MapReduceFunctor, typename BoundaryFunctor>
+  static void run(const MapReduceFunctor &map_reduce, const BoundaryFunctor& check, const T *a, const T *b, ConstRef_T boundary, T &accumulator) {
+    BoundedMapReduce<T, D, BoundCheckFreq, i+1, NextCheck-1>::run(map_reduce, check, a, b, boundary, map_reduce(accumulator, a, b, i));
   }
 };
 
@@ -104,11 +107,13 @@ struct BoundedMapReduce {
  */
 template <typename T, unsigned int D, unsigned int BoundCheckFreq, unsigned int i>
 struct BoundedMapReduce<T, D, BoundCheckFreq, i, 0> {
-  template <typename MapFunctor, typename ReduceFunctor, typename BoundaryFunctor>
-  static T run(const MapFunctor &map, const ReduceFunctor &reduce, const BoundaryFunctor &check, const T *a, const T *b, T boundary, T value) {
-    if (check(value, boundary))
-      return value;
-    return BoundedMapReduce<T, D, BoundCheckFreq, i, BoundCheckFreq>::run(map, reduce, check, a, b, boundary, value);
+  typedef typename RParam<T>::Type ConstRef_T;
+
+  template <typename MapReduceFunctor, typename BoundaryFunctor>
+  static void run(const MapReduceFunctor &map_reduce, const BoundaryFunctor &check, const T *a, const T *b, ConstRef_T boundary, T &accumulator) {
+    if (check(accumulator, boundary))
+      return;
+    BoundedMapReduce<T, D, BoundCheckFreq, i, BoundCheckFreq>::run(map_reduce, check, a, b, boundary, accumulator);
   }
 };
 
@@ -118,10 +123,10 @@ struct BoundedMapReduce<T, D, BoundCheckFreq, i, 0> {
  */
 template <typename T, unsigned int D, unsigned int BoundCheckFreq, unsigned int NextCheck>
 struct BoundedMapReduce<T, D, BoundCheckFreq, D, NextCheck> {
-  template <typename MapFunctor, typename ReduceFunctor, typename BoundaryFunctor>
-  static T run(const MapFunctor &map, const ReduceFunctor &reduce, const BoundaryFunctor& check, const T *a, const T *b, T boundary, T value) {
-    return value;
-  }
+  typedef typename RParam<T>::Type ConstRef_T;
+
+  template <typename MapReduceFunctor, typename BoundaryFunctor>
+  static void run(const MapReduceFunctor &map_reduce, const BoundaryFunctor& check, const T *a, const T *b, ConstRef_T boundary, T &accumulator) {}
 };
 
 /**
@@ -130,10 +135,10 @@ struct BoundedMapReduce<T, D, BoundCheckFreq, D, NextCheck> {
  */
 template <typename T, unsigned int D, unsigned int BoundCheckFreq>
 struct BoundedMapReduce<T, D, BoundCheckFreq, D, 0> {
-  template <typename MapFunctor, typename ReduceFunctor, typename BoundaryFunctor>
-  static T run(const MapFunctor &map, const ReduceFunctor &reduce, const BoundaryFunctor &check, const T *a, const T *b, T boundary, T value) {
-    return value;
-  }
+  typedef typename RParam<T>::Type ConstRef_T;
+
+  template <typename MapReduceFunctor, typename BoundaryFunctor>
+  static void run(const MapReduceFunctor &map_reduce, const BoundaryFunctor &check, const T *a, const T *b, ConstRef_T boundary, T &accumulator) {}
 };
 
 /**
@@ -142,8 +147,10 @@ struct BoundedMapReduce<T, D, BoundCheckFreq, D, 0> {
  */
 template <typename T, unsigned int D, unsigned int i, unsigned int nextCheck>
 struct BoundedMapReduce<T, D, 0, i, nextCheck> {
-  template <typename MapFunctor, typename ReduceFunctor, typename BoundaryFunctor>
-  static T run(const MapFunctor &map, const ReduceFunctor &reduce, const BoundaryFunctor &check, const T *a, const T *b, T boundary, T value) {
+  typedef typename RParam<T>::Type ConstRef_T;
+
+  template <typename MapReduceFunctor, typename BoundaryFunctor>
+  static void run(const MapReduceFunctor &map_reduce, const BoundaryFunctor &check, const T *a, const T *b, ConstRef_T boundary, T &accumulator) {
     // This case should never be reached. BoundCheckFreq == 0 would lead to an infinite loop.
     assert(0);
   }

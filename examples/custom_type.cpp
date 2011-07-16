@@ -52,10 +52,9 @@ public:
   bool operator == (const Custom &a) const { return value_ == a.value_; }
 
   // Extra operators required by the Euclidean metric and its incremental calculations.
-  Custom operator + (const Custom &a) const { Custom r; r.value_ = value_ + a.value_; return r; }
-  Custom operator - (const Custom &a) const { Custom r; r.value_ = value_ - a.value_; return r; }
-  Custom operator * (const Custom &a) const { Custom r; r.value_ = value_ * a.value_; return r; }
   Custom& operator += (const Custom &a) { value_ += a.value_; return *this; }
+  Custom& operator -= (const Custom &a) { value_ -= a.value_; return *this; }
+  Custom& operator *= (const Custom &a) { value_ *= a.value_; return *this; }
 
   // Serialization methods: only required if we want to serialize the kd-tree or the data sets. Otherwise it can be safely ignored.
   // Read from a stream. Required like this instead of the >> operator since it doesn't provide the byte endianness of the data being read.

@@ -38,10 +38,28 @@ namespace kche_tree {
  * \param i Index of the dimension being calculated.
  * \return The dot product of the difference between the elements in the \a i-th dimension.
  */
+template <typename T, bool isFundamental =
+#ifdef KCHE_TREE_DISABLE_CPP0X
+  std::tr1::is_fundamental<T>::value
+#else
+  std::is_fundamental<T>::value
+#endif
+> struct DotFunctor;
+
 template <typename T>
-struct DotFunctor {
-  T operator () (const T *a, const T *b, unsigned int i) const {
-    return (a[i] - b[i]) * (a[i] - b[i]);
+struct DotFunctor<T, true> {
+  T& operator () (T &acc, const T *a, const T *b, unsigned int i) const {
+    return acc += (a[i] - b[i]) * (a[i] - b[i]);
+  }
+};
+
+template <typename T>
+struct DotFunctor<T, false> {
+  T& operator () (T &acc, const T *a, const T *b, unsigned int i) const {
+    T temp = a[i];
+    temp -= b[i];
+    temp *= temp;
+    return acc += temp;
   }
 };
 
@@ -57,10 +75,8 @@ template <typename T, const unsigned int D>
 T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2) const {
 
   // Standard squared distance between two D-dimensional vectors.
-  DotFunctor<T> dot;
   typename Traits<T>::AccumulatorType acc = Traits<T>::zero();
-  for (unsigned int i=0; i<D; ++i)
-    acc += dot(v1.data(), v2.data(), i);
+  MapReduce<T, D>::run(DotFunctor<T>(), v1.data(), v2.data(), acc);
   return acc;
 }
 
@@ -79,17 +95,15 @@ T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2
   // Constant calculated empirically.
   const unsigned int D_acc = (unsigned int) (0.4f * D);
 
-  // This has been empirically compared with the MapReduce template metaprogramming class,
-  // but the loop seemed to be always faster because of the code locality.
-  DotFunctor<T> dot;
+  // Accumulate the first D_acc dimensions without any kind of check.
   typename Traits<T>::AccumulatorType acc = Traits<T>::zero();
-  for (unsigned int i=0; i<D_acc; ++i)
-    acc += dot(v1.data(), v2.data(), i);
+  MapReduce<T, D_acc>::run(DotFunctor<T>(), v1.data(), v2.data(), acc);
 
   // Calculate the remaining dimensions using an upper bound, and checking it every 4 dimensions.
   // The template metaprogramming makes sure this interval is performed without actually checking any index or iterator at runtime.
   // Has been tested to be faster than a loop with the difference being more acute with greater D values.
-  return BoundedMapReduce<T, D, 4, D_acc>::run(DotFunctor<T>(), std::plus<T>(), std::greater<T>(), v1.data(), v2.data(), upper_bound, acc);
+  BoundedMapReduce<T, D, 4, D_acc>::run(DotFunctor<T>(), std::greater<T>(), v1.data(), v2.data(), upper_bound, acc);
+  return acc;
 }
 
 } // namespace kche_tree

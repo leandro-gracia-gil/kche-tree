@@ -53,25 +53,31 @@
 namespace kche_tree {
 
 /**
+ * \brief Define if a type is a fundamental one. This is basically a shortcut to the equivalent STL or TR1 type trait.
+ */
+template <typename T>
+struct IsFundamental :
+#ifdef KCHE_TREE_DISABLE_CPP0X
+    std::tr1::integral_constant<bool, std::tr1::is_fundamental<T>::value>
+#else
+    std::integral_constant<bool, std::is_fundamental<T>::value>
+#endif
+  {};
+
+/**
  * \brief Specify if a given type uses a non-trivial equality operator to enable optimizations.
  *
  * This template allows the use of optimized operations when possible.
  * Any users of custom types that don't require non-trivial equality testing should specialize this to true.
  * An example of this can be found in the custom_type.cpp example.
  *
- * \note Any specialization setting the value to \c true should naturally evaluate \c is_pot<T>::value to \c true.
+ * \note Any specialization setting \a value to \c true should also evaluate \c is_pot<T>::value to \c true.
  *       This is currently not enforced since some compilers do not provide this information yet.
  *
  * \tparam T Type which information is being provided.
  */
 template <typename T>
-struct has_trivial_equal :
-#ifdef KCHE_TREE_DISABLE_CPP0X
-    std::tr1::integral_constant<bool, std::tr1::is_fundamental<T>::value>
-#else
-    std::integral_constant<bool, std::is_fundamental<T>::value>
-#endif
-    {};
+struct has_trivial_equal : IsFundamental<T> {};
 
 /**
  * \brief Specify if a given type uses non-trivial stream operators to enable optimizations.
@@ -83,19 +89,13 @@ struct has_trivial_equal :
  *
  * An example of this can be found in the custom_type.cpp example.
  *
- * \note Any specialization setting the value to \c true should naturally evaluate \c is_pot<T>::value to \c true.
+ * \note Any specialization setting \a value to \c true should also evaluate \c is_pot<T>::value to \c true.
  *       This is currently not enforced since some compilers do not provide this information yet.
  *
  * \tparam T Type which information is being provided.
  */
 template <typename T>
-struct has_trivial_serialization :
-#ifdef KCHE_TREE_DISABLE_CPP0X
-    std::tr1::integral_constant<bool, std::tr1::is_fundamental<T>::value>
-#else
-    std::integral_constant<bool, std::is_fundamental<T>::value>
-#endif
-    {};
+struct has_trivial_serialization : IsFundamental<T> {};
 
 // Forward-declare the templates provided here.
 template <typename T> struct Traits;
@@ -111,13 +111,8 @@ template <typename T, bool hasTrivialCopy =
 #endif
   > struct CopyTraits;
 
-template <typename T, bool IsFundamental =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::is_fundamental<T>::value
-#else
-  std::is_fundamental<T>::value
-#endif
-  > struct EndiannessTraits;
+template <typename T, bool IsFundamental = IsFundamental<T>::value>
+struct EndiannessTraits;
 
 /**
  * \brief Base of the traits information.

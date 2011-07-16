@@ -113,7 +113,8 @@ void KDTree<T, D>::knn(const VectorType &p, unsigned int K, std::vector<Neighbou
   KDSearchData<T, D, M> search_data(p, data, K, ignore_p_in_tree);
 
   // Convert epsilon to a squared distance and set it as initial hyperrectangle distance.
-  search_data.hyperrect_distance = epsilon * epsilon;
+  search_data.hyperrect_distance = epsilon;
+  search_data.hyperrect_distance *= epsilon;
 
   // Build a special sorted container for the current K nearest neighbour candidates.
   KContainer<VectorDistance<T>, VectorDistance<T> > best_k(K);
