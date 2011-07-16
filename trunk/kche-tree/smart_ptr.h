@@ -35,17 +35,13 @@
 
 namespace kche_tree {
 
-/**
- * \brief Default functor for deleting pointers.
- */
+/// Default functor for deleting pointers.
 template <typename T>
 struct PointerDeleter {
   void operator () (T *p) const { delete p; }
 };
 
-/**
- * \brief Default functor for deleting arrays.
- */
+/// Default functor for deleting arrays.
 template <typename T>
 struct ArrayDeleter {
   void operator () (T *p) const { delete []p; }

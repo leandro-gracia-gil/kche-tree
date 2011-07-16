@@ -134,39 +134,14 @@ struct EuclideanIncrementalFunctor<T, D, true> {
   /// Type of the per-axis data provided to the functor.
   typedef typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData AxisType;
 
-  /**
-   * \brief Incrementally update the distance from the implicit reference vector p to the current hyperrectangle.
-   *
-   * The folowing is an explanation of the mathematical foundations used here.
-   *
-   * Let \a i = axis be the dimension that has changed. Let \a p_i be the value of the i-th dimension of the reference vector \a p.
-   * Let \a nearest_i be the value of the \a i-th dimension of the nearest point to \a p inside the current hyperrectangle.
-   * Let \a split_i be the split value from the parent node that halves the hyperspace in the i-th dimension.
-   *
-   * The idea is that during the exploration the current hyperrectangle (defined by the node being explored) changes and consequently the nearest
-   * distance to it might change. This method will be called only when this happens. Since the updates are always performed on a single axis,
-   * this method calculates the appropriate increment to the total squared distance given the local axis increment.
-   * This local increment can be defined as \a inc_i = \a nearest_i - \a split_i.
-   *
-   * In the case of the Euclidean metric, the squared distance is the sum of the squared differences of p and nearest along all the dimensions.
-   * Calling these current per-axis differences \a d_i, then the current distance = \a d_0^2 + \a d_1^2 + ... + \a d_D-1^2.
-   *
-   * If the i-th dimension is increased by inc_i then the new distance = \a d_0^2 + ... + (\a d_i + \a inc_i)^2 + ... + \a d_D-1^2.
-   * The difference between both distances is \a inc^2 + 2 * \a d_i * \a inc_i, which refactored equals to \a inc_i * (\a inc_i + 2 * \a d_i).
-   *
-   * Having \a inc_i = \a nearest_i - \a split_i and \a d_i = \a p_i - \a nearest_i, the contents are just a simplification of the previous formula.
-   *
-   * \param current_distance Current distance to the hyperrectangle. Will be updated with the new distance.
-   * \param axis Number of the axis (dimension) being updated.
-   * \param split_value Split value used to halve the hyperspace across the \a axis dimension.
-   * \param axis_data Current nearest to the hyperrectangle and reference values for the \a axis dimension.
-   * \param search_data KD-tree search data information. Currently not required by the Euclidean metric.
-   */
   T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
       const AxisType *axis_data, const KDSearchData<T, D, Metric> &search_data) const;
 };
 
-/// Especialization for non-fundamental types. Makes use only of the +=, -= and *= operators.
+/**
+ * \brief Functor for the Euclidean incremental distance update.
+ * Especialization for non-fundamental types. Makes use only of the +=, -= and *= operators.
+ */
 template <typename T, const unsigned int D>
 struct EuclideanIncrementalFunctor<T, D, false> {
 
@@ -179,11 +154,6 @@ struct EuclideanIncrementalFunctor<T, D, false> {
   /// Type of the per-axis data provided to the functor.
   typedef typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData AxisType;
 
-  /**
-   * \brief Incrementally update the distance from the implicit reference vector p to the current hyperrectangle.
-   *
-   * See the documentation for the template parameter \c isFundamental = \c true specialization for details.
-   */
   T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
       const AxisType *axis_data, const KDSearchData<T, D, Metric> &search_data) const;
 };

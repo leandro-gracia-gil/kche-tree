@@ -30,32 +30,44 @@
 
 namespace kche_tree {
 
-/**
- * \brief Functor to calculate the dot product of the difference between elements in 2 arrays.
- *
- * \param a First array.
- * \param b Second array.
- * \param i Index of the dimension being calculated.
- * \return The dot product of the difference between the elements in the \a i-th dimension.
- */
-template <typename T, bool isFundamental =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::is_fundamental<T>::value
-#else
-  std::is_fundamental<T>::value
-#endif
-> struct DotFunctor;
+template <typename T, bool isFundamental = IsFundamental<T>::value> struct DotFunctor;
 
+/// Dot product functor especialization for fundamental types.
 template <typename T>
 struct DotFunctor<T, true> {
-  T& operator () (T &acc, const T *a, const T *b, unsigned int i) const {
+  /**
+   * \brief Functor to calculate the dot product from the difference in a given dimension between in 2 arrays.
+   *
+   * \tparam Type used for the accumulator.
+   * \param acc Accumulator to be updated.
+   * \param a First array.
+   * \param b Second array.
+   * \param i Index of the dimension being calculated.
+   */
+  template <typename TAcc>
+  T& operator () (TAcc &acc, const T *a, const T *b, unsigned int i) const {
     return acc += (a[i] - b[i]) * (a[i] - b[i]);
   }
 };
 
+/**
+ * \brief Dot product functor especialization for non-fundamental types.
+ *
+ * Makes use of the =, -= and *= operators for the \a T type and the += operator for the accumulator type.
+ */
 template <typename T>
 struct DotFunctor<T, false> {
-  T& operator () (T &acc, const T *a, const T *b, unsigned int i) const {
+  /**
+   * \brief Functor to calculate the dot product from the difference in a given dimension between in 2 arrays.
+   *
+   * \tparam Type used for the accumulator.
+   * \param acc Accumulator to be updated.
+   * \param a First array.
+   * \param b Second array.
+   * \param i Index of the dimension being calculated.
+   */
+  template <typename TAcc>
+  T& operator () (TAcc &acc, const T *a, const T *b, unsigned int i) const {
     T temp = a[i];
     temp -= b[i];
     temp *= temp;
@@ -68,7 +80,7 @@ struct DotFunctor<T, false> {
  * Redefinitions and specializations of this operator are welcome.
  *
  * \param v1 First feature vector.
- * \param v1 Second feature vector.
+ * \param v2 Second feature vector.
  * \return Euclidean squared distance between the two vectors.
  */
 template <typename T, const unsigned int D>

@@ -43,9 +43,7 @@
 
 namespace kche_tree {
 
-/**
- * \brief Provide information about the endianness of the current platform.
- */
+/// Provide information about the endianness of the current platform.
 struct Endianness {
 
   /// Enumeration type for the endianness.
@@ -91,12 +89,10 @@ struct EndiannessSwapper {
   }
 };
 
-/**
- * \brief Base case specialization for the byte swapping operation.
- * Swap finished case.
- */
+/// Base case specialization for the byte swapping operation. Swap finished case.
 template <typename T, unsigned int Low, unsigned int High>
 struct EndiannessSwapper<T, 0, Low, High> {
+  /// Nothing to do at this point.
   static void run(uint8_t *value) {}
 };
 

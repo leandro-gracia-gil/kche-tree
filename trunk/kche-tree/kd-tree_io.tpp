@@ -39,6 +39,7 @@ template <typename T, const unsigned int D> const uint16_t KDTree<T, D>::signatu
 // KD-Tree content verification
 template <bool enabled> struct VerifyKDTreeContents;
 
+/// Verify the loaded kd-tree structural properties. Specialization to enable the operation.
 template <>
 struct VerifyKDTreeContents<true> {
   template <typename T, const unsigned int D>
@@ -48,12 +49,12 @@ struct VerifyKDTreeContents<true> {
   }
 };
 
+/// Verify the loaded kd-tree structural properties. Specialization to disable the operation.
 template <>
 struct VerifyKDTreeContents<false> {
   template <typename T, const unsigned int D>
   static void verify(const KDNode<T, D> *root, const DataSet<T, D> &data) {}
 };
-
 
 /**
  * \brief Standard input stream operator. Loads the kd-tree from a stream in binary format.

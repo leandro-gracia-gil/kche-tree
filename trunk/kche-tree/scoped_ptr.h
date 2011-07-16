@@ -71,9 +71,7 @@ protected:
   Del deleter_;
 };
 
-/**
- * \brief Swap the contents of two scoped pointers.
- */
+/// Swap the contents of two scoped pointers.
 template <typename T>
 void swap(ScopedPtr<T> &p1, ScopedPtr<T> &p2) { p1.swap(p2); }
 
@@ -94,9 +92,7 @@ public:
   T &operator [](size_t index) { return this->ptr_[index]; }
 };
 
-/**
- * \brief Swap the contents of two scoped arrays.
- */
+/// Swap the contents of two scoped arrays.
 template <typename T>
 void swap(ScopedArray<T> &p1, ScopedArray<T> &p2) { p1.swap(p2); }
 #else

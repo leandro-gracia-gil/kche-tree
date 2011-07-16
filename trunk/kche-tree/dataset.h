@@ -98,8 +98,8 @@ public:
   VectorType &operator [] (unsigned int index); ///< Access vectors of the data set. Will make a separate copy of the contents if shared with something else.
 
   // Comparison operators.
-  bool operator == (const DataSet& dataset) const; ///< Check if the data set is equal to some other. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
-  bool operator != (const DataSet& dataset) const; ///< Check if the data set is different to some other. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
+  bool operator == (const DataSet& dataset) const; ///< Check if the data set is equal to some other. May be optimized if \link kche_tree::HasTrivialEqual HasTrivialEqual::value\endlink is \c true.
+  bool operator != (const DataSet& dataset) const; ///< Check if the data set is different to some other. May be optimized if \link kche_tree::HasTrivialEqual HasTrivialEqual::value\endlink is \c true.
 
   // Stream operators.
   friend std::istream & operator >> <>(std::istream &in, DataSet &dataset);
