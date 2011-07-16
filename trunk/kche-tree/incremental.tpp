@@ -84,7 +84,7 @@ void IncrementalBase<T, D, Metric>::update(const KDNode<T, D> *node, const KDNod
   previous_hyperrect_distance_ = search_data.hyperrect_distance;
 
   // Calculate the new distance to the hyperrectangle.
-  search_data_.hyperrect_distance = updater(search_data_.hyperrect_distance, parent_axis_, parent->split_value, axis_data, search_data);
+  updater(search_data_.hyperrect_distance, parent_axis_, parent->split_value, axis_data, search_data);
 
   // Define the new boundaries of the hyperrectangle.
   axis_data->nearest = parent->split_value;
@@ -133,8 +133,20 @@ void IncrementalBase<T, D, Metric>::restore() {
  * \return The updated distance to the hyperrectangle.
  */
 template <typename T, const unsigned int D>
-T EuclideanIncremental<T, D>::IncrementalFunctor::operator () (ConstRef_T current_distance, unsigned int axis, ConstRef_T split_value, const typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData *axis_data, const KDSearchData<T, D, Metric> &search_data) const {
-  return current_distance + (split_value - axis_data->nearest) * (axis_data->nearest + split_value - axis_data->p - axis_data->p);
+T& EuclideanIncrementalFunctor<T, D, true>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const AxisType *axis_data, const KDSearchData<T, D, Metric> &search_data) const {
+  return current_distance += (split_value - axis_data->nearest) * (axis_data->nearest + split_value - axis_data->p - axis_data->p);
+}
+
+template <typename T, const unsigned int D>
+T& EuclideanIncrementalFunctor<T, D, false>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const AxisType *axis_data, const KDSearchData<T, D, Metric> &search_data) const {
+  T acc1 = split_value;
+  acc1 -= axis_data->nearest;
+  T acc2 = split_value;
+  acc2 += axis_data->nearest;
+  acc2 -= axis_data->p;
+  acc2 -= axis_data->p;
+  acc1 *= acc2;
+  return current_distance += acc1;
 }
 
 } // namespace kche_tree

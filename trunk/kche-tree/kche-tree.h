@@ -74,7 +74,7 @@
  * \section CPP0x About C++0x
  * Kche-trees use by default C++0x features available in the most modern compilers to enhance its use and operations.
  * If C++0x is not supported by your compiler it can be disabled by simply defining the macro \c KCHE_TREE_DISABLE_CPP0X before including the library.
- * Additionally it can be disabled when building the examples and tools by using \c make \c c++0x=disabled.
+ * Additionally it can be disabled when building the examples and tools by using \c make \c disable=c++0x.
  *
  * However, be aware that disabling C++0x has some consequences:
  * - When calling the \link kche_tree::KDTree::knn knn\endlink method it will be required to explicitly provide the K-Neighbour container template type, where in the C++0x version it automatically defaults to \link kche_tree::KVector KVector\endlink. See the \c knn_simple example for details.

@@ -40,7 +40,7 @@ namespace kche_tree {
  * Will be expanded with any extra data provided by the associated incremental calculation type.
  */
 template <typename T, const unsigned int D, typename M>
-struct KDSearchData : M::IncrementalType::SearchDataExtras {
+struct KDSearchData : M::IncrementalUpdaterType::SearchDataExtras {
 
   /// Use the global data set type by default.
   typedef typename Settings<T, D>::DataSetType DataSetType;

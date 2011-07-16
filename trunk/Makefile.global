@@ -15,11 +15,11 @@ MAKEFILE_DEPS=Makefile.global Makefile
 
 # Kche-tree assumes C++0x support by default. Define KCHE_TREE_DISABLE_CPP0X in your code to disable it.
 # Use make C++0x=disabled to disable when building tools and examples.
-ifeq ($(C++0x),disabled)
+ifeq ($(disable),C++0x)
   DISABLE_CPP0X:=1
 endif
 
-ifeq ($(c++0x),disabled)
+ifeq ($(disable),c++0x)
   DISABLE_CPP0X:=1
 endif
 

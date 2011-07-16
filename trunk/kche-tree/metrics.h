@@ -61,7 +61,7 @@ public:
   static unsigned const int Dimensions = D;
 
   /// Type for incremental hyperrectangle intersection calculations when using this metric.
-  typedef EuclideanIncremental<T, D> IncrementalType;
+  typedef EuclideanIncrementalUpdater<T, D> IncrementalUpdaterType;
 
   /// Use the global vector type by default.
   typedef typename Settings<T, D>::VectorType VectorType;

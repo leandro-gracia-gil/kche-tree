@@ -147,7 +147,7 @@ KDNode<T, D>::~KDNode() {
  */
 template <typename T, const unsigned int D, typename M>
 KDSearchData<T, D, M>::KDSearchData(const VectorType &p, const DataSetType &data, unsigned int K, bool ignore_null_distances_arg)
-  : M::IncrementalType::SearchDataExtras(p, data),
+  : M::IncrementalUpdaterType::SearchDataExtras(p, data),
     p(p),
     data(data),
     K(K),
@@ -166,7 +166,7 @@ template <typename T, const unsigned int D> template <typename M, typename C>
 void KDNode<T, D>::explore(const KDNode *parent, KDSearchData<T, D, M> &search_data, C &candidates) const {
 
   // Intersection data is updated incrementally when the object is created, and restored when destroyed.
-  typename M::IncrementalType incremental_update(this, parent, search_data);
+  typename M::IncrementalUpdaterType incremental_update(this, parent, search_data);
 
   // Check which branch should be explored first.
   KDNode<T, D> *first_branch = NULL, *second_branch = NULL;
@@ -239,7 +239,7 @@ template <typename T, const unsigned int D> template <typename M, typename C>
 void KDNode<T, D>::intersect(const KDNode<T, D> *parent, KDSearchData<T, D, M> &search_data, C &candidates) const {
 
   // Intersection data is updated incrementally when the object is created, and restored when destroyed.
-  typename M::IncrementalType incremental_update(this, parent, search_data);
+  typename M::IncrementalUpdaterType incremental_update(this, parent, search_data);
 
   // Check if the volume defined by the distance from current worst neighbour candidate intersects the region hyperrectangle.
   if (!(search_data.hyperrect_distance < search_data.farthest_distance))
