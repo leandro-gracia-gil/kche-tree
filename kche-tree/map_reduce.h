@@ -54,10 +54,7 @@ struct MapReduce {
   }
 };
 
-/**
- * \brief Base case specialization for the map-reduce operation: \a i = \a D.
- * End of arrays case.
- */
+/// Base case specialization for the map-reduce operation: \a i = \a D. End of arrays case.
 template <typename T, unsigned int D>
 struct MapReduce<T, D, D> {
   template <typename MapReduceFunctor>
@@ -101,10 +98,7 @@ struct BoundedMapReduce {
   }
 };
 
-/**
- * \brief Base case specialization for the bounded map-reduce operation: \a NextCheck = \c 0.
- * Perform boundaries check.
- */
+/// Base case specialization for the bounded map-reduce operation: \a NextCheck = \c 0. Perform boundaries check.
 template <typename T, unsigned int D, unsigned int BoundCheckFreq, unsigned int i>
 struct BoundedMapReduce<T, D, BoundCheckFreq, i, 0> {
   typedef typename RParam<T>::Type ConstRef_T;
@@ -117,10 +111,7 @@ struct BoundedMapReduce<T, D, BoundCheckFreq, i, 0> {
   }
 };
 
-/**
- * \brief Base case specialization for the bounded map-reduce operation: \a i = \a D.
- * End of arrays.
- */
+/// Base case specialization for the bounded map-reduce operation: \a i = \a D. End of arrays.
 template <typename T, unsigned int D, unsigned int BoundCheckFreq, unsigned int NextCheck>
 struct BoundedMapReduce<T, D, BoundCheckFreq, D, NextCheck> {
   typedef typename RParam<T>::Type ConstRef_T;
@@ -129,10 +120,7 @@ struct BoundedMapReduce<T, D, BoundCheckFreq, D, NextCheck> {
   static void run(const MapReduceFunctor &map_reduce, const BoundaryFunctor& check, const T *a, const T *b, ConstRef_T boundary, T &accumulator) {}
 };
 
-/**
- * \brief Base case specialization for the bounded map-reduce operation: \a i = \a D && NextCheck = \c 0.
- * End of arrays, solves ambiguity.
- */
+/// Base case specialization for the bounded map-reduce operation: \a i = \a D && NextCheck = \c 0. End of arrays, solves ambiguity.
 template <typename T, unsigned int D, unsigned int BoundCheckFreq>
 struct BoundedMapReduce<T, D, BoundCheckFreq, D, 0> {
   typedef typename RParam<T>::Type ConstRef_T;
@@ -141,10 +129,7 @@ struct BoundedMapReduce<T, D, BoundCheckFreq, D, 0> {
   static void run(const MapReduceFunctor &map_reduce, const BoundaryFunctor &check, const T *a, const T *b, ConstRef_T boundary, T &accumulator) {}
 };
 
-/**
- * \brief Base case specialization for the bounded map-reduce operation: \a BoundCheckFreq = \c 0.
- * Raise an assertion to avoid an infinite loop.
- */
+/// Base case specialization for the bounded map-reduce operation: \a BoundCheckFreq = \c 0. Raise an assertion to avoid an infinite loop.
 template <typename T, unsigned int D, unsigned int i, unsigned int nextCheck>
 struct BoundedMapReduce<T, D, 0, i, nextCheck> {
   typedef typename RParam<T>::Type ConstRef_T;

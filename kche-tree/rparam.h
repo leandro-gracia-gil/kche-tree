@@ -40,18 +40,14 @@ namespace kche_tree {
 template <bool Cond, typename A, typename B>
 struct TypeBranch;
 
-/**
- * \brief Type branching template specialization for the \c true case.
- */
+/// Type branching template specialization for the \c true case.
 template <typename A, typename B>
 struct TypeBranch<true, A, B> {
   /// Same as the template parameter \a A.
   typedef A Result;
 };
 
-/**
- * \brief Type branching template specialization for the \c false case.
- */
+/// Type branching template specialization for the \c false case.
 template <typename A, typename B>
 struct TypeBranch<false, A, B> {
   /// Same as the template parameter \a B.

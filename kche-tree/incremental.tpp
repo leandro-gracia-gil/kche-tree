@@ -130,13 +130,18 @@ void IncrementalBase<T, D, Metric>::restore() {
  * \param split_value Split value used to halve the hyperspace across the \a axis dimension.
  * \param axis_data Current nearest to the hyperrectangle and reference values for the \a axis dimension.
  * \param search_data KD-tree search data information. Currently not required by the Euclidean metric.
- * \return The updated distance to the hyperrectangle.
+ * \return The reference to the current distance to the hyperrectangle. Should have been updated.
  */
 template <typename T, const unsigned int D>
 T& EuclideanIncrementalFunctor<T, D, true>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const AxisType *axis_data, const KDSearchData<T, D, Metric> &search_data) const {
   return current_distance += (split_value - axis_data->nearest) * (axis_data->nearest + split_value - axis_data->p - axis_data->p);
 }
 
+/**
+ * \brief Incrementally update the distance from the implicit reference vector p to the current hyperrectangle.
+ *
+ * See the documentation for the template parameter \c isFundamental = \c true specialization for details.
+ */
 template <typename T, const unsigned int D>
 T& EuclideanIncrementalFunctor<T, D, false>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const AxisType *axis_data, const KDSearchData<T, D, Metric> &search_data) const {
   T acc1 = split_value;

@@ -83,8 +83,8 @@ public:
   T & operator [] (unsigned int index) { return data_[index]; } ///< Subscript operator.
 
   // Comparison operators.
-  bool operator == (const Vector &p) const; ///< Equality comparison operator. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
-  bool operator != (const Vector &p) const; ///< Non-equality comparison operator. May be optimized if \link kche_tree::has_trivial_equal has_trivial_equal::value\endlink is \c true.
+  bool operator == (const Vector &p) const; ///< Equality comparison operator. May be optimized if \link kche_tree::HasTrivialEqual HasTrivialEqual::value\endlink is \c true.
+  bool operator != (const Vector &p) const; ///< Non-equality comparison operator. May be optimized if \link kche_tree::HasTrivialEqual HasTrivialEqual::value\endlink is \c true.
 
   // Memory operators: used to allow memory-aligned specializations. For example, for SSE optimizations.
   void *operator new [] (size_t size); ///< Standard allocation for arrays of feature vectors.
@@ -99,12 +99,10 @@ private:
   T data_[D];
 };
 
-/**
- * \brief Vectors have trivial serialization if their contents do.
- */
+/// Vectors have trivial serialization if their contents do.
 template <typename T, const unsigned int D>
-struct has_trivial_serialization<Vector<T, D> > {
-  static const bool value = has_trivial_serialization<T>::value;
+struct HasTrivialSerialization<Vector<T, D> > {
+  static const bool value = HasTrivialSerialization<T>::value;
 };
 
 /**
@@ -118,8 +116,8 @@ struct has_trivial_serialization<Vector<T, D> > {
  * using raw memory comparisons if possible.
  */
 template <typename T, const unsigned int D>
-struct has_trivial_equal<Vector<T, D> > {
-  static const bool value = has_trivial_equal<T>::value;
+struct HasTrivialEqual<Vector<T, D> > {
+  static const bool value = HasTrivialEqual<T>::value;
 };
 
 /**

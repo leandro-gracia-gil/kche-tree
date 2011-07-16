@@ -89,7 +89,7 @@ namespace kche_tree {
   // With this, we're telling kche-tree that our custom type can be compared by just raw memcmp and enable some optimizations.
   // Your type should satisfy std::tr1::is_pod<T> before doing this.
   template <>
-  struct has_trivial_equal<Custom> {
+  struct HasTrivialEqual<Custom> {
     static const bool value = true;
   };
 
@@ -97,7 +97,7 @@ namespace kche_tree {
   // With this, we're telling kche-tree that our custom type can be serialized by just reading/writing its memory and enable some optimizations.
   // Your type should satisfy std::tr1::is_pod<T> before doing this.
   template <>
-  struct has_trivial_serialization<Custom> {
+  struct HasTrivialSerialization<Custom> {
     static const bool value = true;
   };
 }
