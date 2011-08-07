@@ -73,6 +73,20 @@ void DataSet<T, D>::reset_to_size(unsigned int size) {
 }
 
 /**
+ * Release any existing contents and generate a random dataset of the specified size using a provided generator.
+ *
+ * \param size Number of vectors to be contained in the set.
+ * \param generator Random number generator used to generate the dataset contents by means of its parenthesis operator.
+ */
+template <typename T, const unsigned int D> template <typename RandomGeneratorType>
+void DataSet<T, D>::reset_to_random(unsigned int size, RandomGeneratorType &generator) {
+  reset_to_size(size);
+  for (unsigned int i=0; i<size; ++i)
+    for (unsigned int d=0; d<D; ++d)
+      vectors_[i][d] = Traits<T>::random(generator);
+}
+
+/**
  * Access the vectors in the data set, but make a copy of them if they
  * are shared with anything else to ensure the integrity of the data.
  */

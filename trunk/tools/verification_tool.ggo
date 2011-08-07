@@ -20,7 +20,7 @@ option "test-save-random" - "Save the randomly generated test set to the specifi
 # Basic options for all modes.
 section "Test options"
 option "knn" k "Search for the K nearest neighbours. Set to 0 to disable." int default="10" no
-option "all-in-range" r "Search for all the points within a given distance. Set to 0 to disable." float default="50" no
+option "all-in-range" a "Search for all the points within a given distance. Set to 0 to disable." float default="50" no
 option "kdtree-io" - "Test the kd-tree I/O by saving and loading the tree to a file." flag on
 option "subscript" - "Test the kd-tree subscript operator, which makes use of the internal permutations." flag on
 
@@ -32,5 +32,6 @@ option "tolerance" l "Tolerance value used when comparing the distance values to
 option "test-from-train" x "Set the % probability of test entries to be random elements from the train set." float default="20" no
 option "ignore-existing" i "Ignore any existing instances in the tree of the vector being tested." flag off
 option "epsilon" e "Distance added to the intersection calculations to approximate the results by rejecting more candidates. May raise result errors." float default="0" no
-option "random-range" R "Set the range of the numbers to be randomly generated (from 0 to the specified value)." float default="100" no
+option "random-range-min" r "Set the minimum value of the random number generation range." float default="0" no
+option "random-range-max" R "Set the maximum value of the random number generation range." float default="100" no
 option "random-seed" s "Seed used to initialize random number generator. Allows repeatable tests." int no

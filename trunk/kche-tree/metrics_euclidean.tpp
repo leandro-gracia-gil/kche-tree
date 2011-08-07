@@ -19,8 +19,8 @@
  ***************************************************************************/
 
 /**
- * \file metrics.tpp
- * \brief Template implementations for metric functors.
+ * \file metrics_euclidean.tpp
+ * \brief Template implementations for the Euclidean metric.
  * \author Leandro Graciá Gil
  */
 
@@ -30,44 +30,51 @@
 
 namespace kche_tree {
 
+// Forward declare the specialized functor.
 template <typename T, bool isFundamental = IsFundamental<T>::value> struct DotFunctor;
 
-/// Dot product functor especialization for fundamental types.
+/// Dot product functor specialization for fundamental types.
 template <typename T>
 struct DotFunctor<T, true> {
+
+  /// Type used for accumulator variables.
+  typedef typename Traits<T>::AccumulatorType AccumT;
+
   /**
-   * \brief Functor to calculate the dot product from the difference in a given dimension between in 2 arrays.
+   * \brief Distance operator to calculate the dot product from the difference in a given dimension between in 2 arrays.
    *
-   * \tparam Type used for the accumulator.
    * \param acc Accumulator to be updated.
    * \param a First array.
    * \param b Second array.
    * \param i Index of the dimension being calculated.
+   * \return A reference to \a acc after being updated. Provided as syntactic sugar.
    */
-  template <typename TAcc>
-  T& operator () (TAcc &acc, const T *a, const T *b, unsigned int i) const {
+  AccumT& operator () (AccumT &acc, const T *a, const T *b, unsigned int i) const {
     return acc += (a[i] - b[i]) * (a[i] - b[i]);
   }
 };
 
 /**
- * \brief Dot product functor especialization for non-fundamental types.
+ * \brief Dot product functor specialization for non-fundamental types.
  *
  * Makes use of the =, -= and *= operators for the \a T type and the += operator for the accumulator type.
  */
 template <typename T>
 struct DotFunctor<T, false> {
+
+  /// Type used for accumulator variables.
+  typedef typename Traits<T>::AccumulatorType AccumT;
+
   /**
-   * \brief Functor to calculate the dot product from the difference in a given dimension between in 2 arrays.
+   * \brief Distance operator to calculate the dot product from the difference in a given dimension between in 2 arrays.
    *
-   * \tparam Type used for the accumulator.
    * \param acc Accumulator to be updated.
    * \param a First array.
    * \param b Second array.
    * \param i Index of the dimension being calculated.
+   * \return A reference to \a acc after being updated. Provided as syntactic sugar.
    */
-  template <typename TAcc>
-  T& operator () (TAcc &acc, const T *a, const T *b, unsigned int i) const {
+  AccumT& operator () (AccumT &acc, const T *a, const T *b, unsigned int i) const {
     T temp = a[i];
     temp -= b[i];
     temp *= temp;
@@ -76,7 +83,7 @@ struct DotFunctor<T, false> {
 };
 
 /**
- * Generic squared euclidean distance operator for two D-dimensional numeric feature vectors.
+ * \brief Generic squared euclidean distance operator for two D-dimensional feature vectors.
  * Redefinitions and specializations of this operator are welcome.
  *
  * \param v1 First feature vector.
@@ -87,13 +94,14 @@ template <typename T, const unsigned int D>
 T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2) const {
 
   // Standard squared distance between two D-dimensional vectors.
-  typename Traits<T>::AccumulatorType acc = Traits<T>::zero();
+  typedef typename Traits<T>::AccumulatorType AccumT;
+  AccumT acc = Traits<AccumT>::zero();
   MapReduce<T, D>::run(DotFunctor<T>(), v1.data(), v2.data(), acc);
   return acc;
 }
 
 /**
- * Generic squared euclidean distance operator for two D-dimensional numeric feature vectors.
+ * \brief Generic squared euclidean distance operator for two D-dimensional feature vectors.
  * Special version with early leaving in case an upper bound value is reached.
  *
  * \param v1 Frist feature vector.

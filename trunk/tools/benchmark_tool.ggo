@@ -22,10 +22,10 @@ option "test-save-random" - "Save the randomly generated test set to the specifi
 # Other options.
 section "Other options"
 option "use-k-heap" - "Use a k-heap container for the KNN operation instead of a k-vector (see doc for details)." flag off
-option "tolerance" l "Tolerance value used when comparing the distance values to the exhaustive search version." float default="1e-3" no
 option "bucket-size" b "Size of the buckets containing elements at the leaf nodes of the kd-tree." int default="32" no
 option "test-from-train" x "Set the % probability of test entries to be random elements from the train set." float default="20" no
 option "ignore-existing" i "Ignore any existing instances in the tree of the vector being tested." flag off
 option "epsilon" e "Distance added to the intersection calculations to approximate the results by rejecting more candidates. May raise result errors." float default="0" no
-option "random-range" R "Set the range of the numbers to be randomly generated (from 0 to the specified value)." float default="100" no
+option "random-range-min" r "Set the minimum value of the random number generation range." float default="0" no
+option "random-range-max" R "Set the maximum value of the random number generation range." float default="100" no
 option "random-seed" s "Seed used to initialize random number generator. Allows repeatable tests." int no

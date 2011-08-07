@@ -103,22 +103,37 @@ template <typename T, const unsigned int D> class Vector;
 /**
  * \brief Compile-time settings for the Kche-tree library.
  *
- * Defines the main types to be used by the different classes of the library
- * and enables some options. Override or specialize to change them.
+ * Defines various options to enhance the library functionality
+ * at compile time. Specialize the template to set new values for them.
  *
- * \tparam Type of the elements in the provided data.
- * \tparam D Number of dimensions of the provided data.
+ * \tparam Type of the elements used by the library to which the options apply.
+ */
+template <typename T>
+struct Settings {
+  /// Maximum number of dimensions to unroll when using map-reduce operations. If exceeded a loop will be used instead.
+  /// \warning Increasing this value may cause compile errors due to the compiler template recursion limit.
+  static const unsigned int max_map_reduce_unroll = 1024;
+
+  /// Check if the kd-tree structure should be verified when deserializing. Will not compile the verification code if disabled.
+  static const bool verify_kdtree_after_deserializing = true;
+};
+
+/**
+ * \brief Compile-time type settings for the Kche-tree library.
+ *
+ * Defines the main types vector and data set types to be used by the different
+ * classes of the library. Specialize the template to redefine.
+ *
+ * \tparam Type of the elements used by the library to which the options apply.
+ * \tparam D Number of dimensions used by the library to which the options apply.
  */
 template <typename T, const unsigned int D>
-struct Settings {
+struct TypeSettings {
   /// Type of the data set to use.
   typedef DataSet<T, D> DataSetType;
 
   /// Type of the vectors to be used.
   typedef Vector<T, D> VectorType;
-
-  /// Check if the kd-tree structure should be verified when deserializing. Will not compile the verification code if disabled.
-  static const bool verify_kdtree_after_deserializing = true;
 };
 
 } // namespace kche_tree

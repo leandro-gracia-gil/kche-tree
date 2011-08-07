@@ -97,10 +97,10 @@ public:
   typedef VectorDistance<T> NeighbourType;
 
   /// Use the global data set type by default.
-  typedef typename Settings<T, D>::DataSetType DataSetType;
+  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
 
   /// Use the global vector type by default.
-  typedef typename Settings<T, D>::VectorType VectorType;
+  typedef typename TypeSettings<T, D>::VectorType VectorType;
 
   /// Use optimized const reference types.
   typedef typename RParam<T>::Type ConstRef_T;
@@ -112,10 +112,10 @@ public:
   bool build(const DataSetType& train_set, unsigned int bucket_size = 32); ///< Build a kd-tree from a set of training vectors. Cost: O(n log² n).
 
   #ifdef KCHE_TREE_DISABLE_CPP0X
-  template <template <typename, typename Compare> class KContainer, typename M>
+  template <template <typename, typename> class KContainer, typename M>
   void knn(const VectorType &p, unsigned int K, std::vector<NeighbourType> &output, const M &metric = EuclideanMetric<T, D>(), ConstRef_T epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
   #else
-  template <template <typename, typename Compare> class KContainer = KVector, typename M = EuclideanMetric<T, D> >
+  template <template <typename, typename> class KContainer = KVector, typename M = EuclideanMetric<T, D> >
   void knn(const VectorType &p, unsigned int K, std::vector<NeighbourType> &output, const M &metric = M(), ConstRef_T epsilon = Traits<T>::zero(), bool ignore_p_in_tree = false) const; ///< Get the K nearest neighbours of a point. Estimated average cost: O(log K log n).
   #endif
 

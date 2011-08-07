@@ -110,7 +110,7 @@ void KDTree<T, D>::knn(const VectorType &p, unsigned int K, std::vector<Neighbou
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle intersection calculation.
-  KDSearchData<T, D, M> search_data(p, data, K, ignore_p_in_tree);
+  KDSearchData<T, D, M> search_data(p, data, metric, K, ignore_p_in_tree);
 
   // Convert epsilon to a squared distance and set it as initial hyperrectangle distance.
   search_data.hyperrect_distance = epsilon;
@@ -145,12 +145,13 @@ template <typename T, const unsigned int D> template <typename M>
 void KDTree<T, D>::all_in_range(const VectorType &p, ConstRef_T distance, std::vector<NeighbourType> &output, const M &metric, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
-  if (root == NULL || size() == 0 || distance <= Traits<T>::zero())
+  if (root == NULL || size() == 0 || !(distance > Traits<T>::zero()))
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle intersection calculation.
-  KDSearchData<T, D, M> search_data(p, data, 0, ignore_p_in_tree);
-  search_data.farthest_distance = distance * distance;
+  KDSearchData<T, D, M> search_data(p, data, metric, 0, ignore_p_in_tree);
+  search_data.farthest_distance = distance;
+  search_data.farthest_distance *= distance;
 
   // Build a STL vector to hold all the points in range.
   std::vector<NeighbourType> points_in_range;

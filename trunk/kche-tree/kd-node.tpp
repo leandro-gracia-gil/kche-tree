@@ -26,6 +26,7 @@
 
 // Include STL sort.
 #include <algorithm>
+#include <functional>
 
 namespace kche_tree {
 
@@ -142,14 +143,16 @@ KDNode<T, D>::~KDNode() {
  *
  * \param p Reference point being used in the search.
  * \param data Permutated training set stored by the tree.
+ * \param metric Metric functor used for the distance calculations.
  * \param K Number of neighbours to retrieve.
  * \param ignore_null_distances_arg Indicate that points with null distance should be ignored.
  */
 template <typename T, const unsigned int D, typename M>
-KDSearchData<T, D, M>::KDSearchData(const VectorType &p, const DataSetType &data, unsigned int K, bool ignore_null_distances_arg)
+KDSearchData<T, D, M>::KDSearchData(const VectorType &p, const DataSetType &data, const M &metric, unsigned int K, bool ignore_null_distances_arg)
   : M::IncrementalUpdaterType::SearchDataExtras(p, data),
     p(p),
     data(data),
+    metric(metric),
     K(K),
     hyperrect_distance(Traits<T>::zero()),
     farthest_distance(Traits<T>::zero()),
@@ -173,7 +176,7 @@ void KDNode<T, D>::explore(const KDNode *parent, KDSearchData<T, D, M> &search_d
   KDLeaf<T, D> *first_leaf = NULL, *second_leaf = NULL;
 
   // Left branch first or same point.
-  if (search_data.p[axis & axis_mask] <= split_value) {
+  if (!(search_data.p[axis & axis_mask] > split_value)) {
     if (is_leaf & left_bit)
       first_leaf = left_leaf;
     else
@@ -311,8 +314,8 @@ void KDLeaf<T, D>::intersect(KDSearchData<T, D, M> &search_data, C &candidates) 
     // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
     ConstRef_T new_distance = search_data.metric(search_data.p, search_data.data[i], search_data.farthest_distance);
 
-    // If less than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
-    if (new_distance <= search_data.farthest_distance) {
+    // If less or equal than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
+    if (!(new_distance > search_data.farthest_distance)) {
 
       // Push it in the nearest neighbour container (will reject the previous farthest one).
       candidates.push_back(VectorDistance<T>(i, new_distance));
@@ -341,8 +344,8 @@ void KDLeaf<T, D>::intersect_ignoring_same(KDSearchData<T, D, M> &search_data, C
     if (new_distance == Traits<T>::zero())
       continue;
 
-    // If less than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
-    if (new_distance <= search_data.farthest_distance) {
+    // If less or equal than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
+    if (!(new_distance > search_data.farthest_distance)) {
 
       // Push it in the nearest neighbour container (will reject the previous farthest one).
       candidates.push_back(VectorDistance<T>(i, new_distance));
@@ -356,15 +359,19 @@ void KDLeaf<T, D>::intersect_ignoring_same(KDSearchData<T, D, M> &search_data, C
 template <typename T, const unsigned int D>
 void KDNode<T, D>::verify_properties(const DataSetType &data, int axis) const {
 
+  // Alias to STL comparison functors.
+  typedef std::less<T> LessFunc; // Negated to get greater_equal without requiring additional operators.
+  typedef std::greater<T> GreaterFunc; // Negated to get less_equal without requiring additional operators.
+
   if (is_leaf & left_bit)
-    left_leaf->verify_properties(data, split_value, axis, std::less_equal<T>());
+    left_leaf->verify_properties(data, split_value, axis, std::binary_negate<GreaterFunc>(GreaterFunc()));
   else
-    left_branch->verify_properties(data, split_value, axis, std::less_equal<T>());
+    left_branch->verify_properties(data, split_value, axis, std::binary_negate<GreaterFunc>(GreaterFunc()));
 
   if (is_leaf & right_bit)
-    right_leaf->verify_properties(data, split_value, axis, std::greater_equal<T>());
+    right_leaf->verify_properties(data, split_value, axis, std::binary_negate<LessFunc>(LessFunc()));
   else
-    right_branch->verify_properties(data, split_value, axis, std::greater_equal<T>());
+    right_branch->verify_properties(data, split_value, axis, std::binary_negate<LessFunc>(LessFunc()));
 
   if (!(is_leaf & left_bit))
     left_branch->verify_properties(data, (axis + 1) % D);

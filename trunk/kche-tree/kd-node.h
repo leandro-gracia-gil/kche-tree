@@ -43,30 +43,29 @@ template <typename T, const unsigned int D, typename M>
 struct KDSearchData : M::IncrementalUpdaterType::SearchDataExtras {
 
   /// Use the global data set type by default.
-  typedef typename Settings<T, D>::DataSetType DataSetType;
+  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
 
   /// Use the global vector type by default.
-  typedef typename Settings<T, D>::VectorType VectorType;
+  typedef typename TypeSettings<T, D>::VectorType VectorType;
 
   const VectorType &p; ///< Reference input point.
   const DataSetType &data; ///< Permutated training set.
+  const M &metric; ///< Metric functor used to calculate distances between points.
   unsigned int K; ///< Number of neighbours to retrieve.
 
   T hyperrect_distance; ///< Distance to the current nearest point in the hyperrectangle.
   T farthest_distance; ///< Current distance from the farthest nearest neighbour to the reference point.
   bool ignore_null_distances;  ///< Used to exclude the source point if it's already in the tree.
 
-  M metric; ///< Metric functor used to calculate distances between points.
-
   /// Initialize data for a tree search with incremental intersection calculation.
-  KDSearchData(const VectorType &p, const DataSetType &data, unsigned int K, bool ignore_p_in_tree);
+  KDSearchData(const VectorType &p, const DataSetType &data, const M &metric, unsigned int K, bool ignore_p_in_tree);
 };
 
 /// Kd-tree leaf node.
 template <typename T, const unsigned int D>
 struct KDLeaf {
   /// Use the global data set type by default.
-  typedef typename Settings<T, D>::DataSetType DataSetType;
+  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
 
   /// Use optimized const reference types.
   typedef typename RParam<T>::Type ConstRef_T;
@@ -106,7 +105,7 @@ template <typename T, const unsigned int D>
 struct KDNode {
 
   /// Use the global data set type by default.
-  typedef typename Settings<T, D>::DataSetType DataSetType;
+  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
 
   /// Use optimized const reference types.
   typedef typename RParam<T>::Type ConstRef_T;
