@@ -19,13 +19,13 @@
  ***************************************************************************/
 
 /**
- * \file kche-tree_sse_24d.h
+ * \file euclidean_sse_24d.h
  * \brief Distance function specializations for single-precision floating point vectors of 24 dimensions using the SSE instruction set.
  * \author Leandro Graciá Gil
 */
 
-#ifndef _KCHE_TREE_KCHE_TREE_SSE_24D_H_
-#define _KCHE_TREE_KCHE_TREE_SSE_24D_H_
+#ifndef _EUCLIDEAN_SSE_24D_H_
+#define _EUCLIDEAN_SSE_24D_H_
 
 // Includes for the SSE instruction set and aligned memory allocation.
 #if !defined(__APPLE__)
@@ -33,7 +33,7 @@
 #endif
 #include <xmmintrin.h>
 
-// Include the kche-tree templates.
+// Include the kche-tree library.
 #include "kche-tree/kche-tree.h"
 
 namespace kche_tree {
@@ -42,12 +42,12 @@ namespace kche_tree {
 #if !defined(__APPLE__)
 
 /**
- * Memory-aligned version of the memory allocation operator for feature vectors.
+ * \brief Memory-aligned version of the memory allocation operator for feature vectors.
  * Ensures the 16-byte alignment required by the SSE instructions.
  *
  * \param size Total size in bytes of the objects to allocate.
  * \return Address to the new allocated memory.
-*/
+ */
 template <>
 void *Vector<float, 24U>::operator new [] (size_t size) {
 
@@ -66,13 +66,14 @@ void *Vector<float, 24U>::operator new [] (size_t size) {
 #endif // !defined(__APPLE__)
 
 /**
- * SSE-accelerated squared euclidean distance operator for two 24-dimensional single precision vectors.
+ * \brief SSE-accelerated squared euclidean distance operator for two 24-dimensional single precision vectors.
  *
  * \warning All feature vectors must be allocated aligned to 16 bytes.
  *
- * \param p Point being compared to.
- * \return Euclidean squared distance between the two kd_points.
-*/
+ * \param v1 First vector to compare.
+ * \param v2 Second vector to compare.
+ * \return Euclidean squared distance between the two vectors.
+ */
 template <>
 float EuclideanMetric<float, 24U>::operator () (const Vector<float, 24U> &v1, const Vector<float, 24U> &v2) const {
 
@@ -120,17 +121,18 @@ float EuclideanMetric<float, 24U>::operator () (const Vector<float, 24U> &v1, co
 }
 
 /**
- * SSE-accelerated squared euclidean distance operator for two 24-dimensional single precision vectors.
+ * \brief SSE-accelerated squared euclidean distance operator for two 24-dimensional single precision vectors.
  * Special version with early leaving in case an upper bound value is reached.
  *
  * \warning All feature vectors must be allocated aligned to 16 bytes.
  *
- * \param p Point being compared to.
- * \param upper Upper bound for the distance. Will return immediatly if reached.
- * \return Euclidean squared distance between the two kd_points or a partial result greater or equal than \a upper.
-*/
+ * \param v1 First vector to compare.
+ * \param v2 Second vector to compare.
+ * \param upper_bound Upper bound for the distance result. Will return immediatly if reached.
+ * \return Euclidean squared distance between the two vectors.
+ */
 template <>
-float EuclideanMetric<float, 24U>::operator () (const Vector<float, 24U> &v1, const Vector<float, 24U> &v2, ConstRef_T upper) const {
+float EuclideanMetric<float, 24U>::operator () (const Vector<float, 24U> &v1, const Vector<float, 24U> &v2, ConstRef_T upper_bound) const {
 
   // Check the accumulator type. Currently only float is supported.
   KCHE_TREE_COMPILE_ASSERT((kche_tree::is_same<typename Traits<float>::AccumulatorType, float>::value),
@@ -160,10 +162,10 @@ float EuclideanMetric<float, 24U>::operator () (const Vector<float, 24U> &v1, co
   // Accumulate acc1 += acc2 (acc1 contains A + B + C + D).
   acc1 = _mm_add_ps(acc1, acc2);
 
-  // Check upper bound.
+  // Check the upper bound.
   const float *f1 = reinterpret_cast<const float *>(&acc1);
   float partial_acc = f1[0] + f1[1] + f1[2] + f1[3];
-  if (partial_acc > upper)
+  if (partial_acc > upper_bound)
     return partial_acc;
 
   // Calculate acc2 = dist(E + F).

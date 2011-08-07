@@ -38,6 +38,7 @@
 #include "kche-tree.h"
 #include "kd-node.h"
 #include "incremental.h"
+#include "symmetric_matrix.h"
 #include "vector.h"
 
 namespace kche_tree {
@@ -48,7 +49,7 @@ namespace kche_tree {
  * Provides Euclidean distance metrics to any pair of same-length feature vectors.
  * It also specifies the type providing incremental hyperrectangle distance calculation for this metric.
  *
- * \tparam T Type of the elements the metric is applied to. The +, +=, -, * and > operators are required.
+ * \tparam T Type of the elements the metric is applied to. The +=, *=, -= and > operators are required.
  * \tparam D Number of dimensions of the vectors the metric is applied to.
  */
 template <typename T, const unsigned int D>
@@ -64,21 +65,78 @@ public:
   typedef EuclideanIncrementalUpdater<T, D> IncrementalUpdaterType;
 
   /// Use the global vector type by default.
-  typedef typename Settings<T, D>::VectorType VectorType;
+  typedef typename TypeSettings<T, D>::VectorType VectorType;
 
   /// Use optimized const reference types.
   typedef typename RParam<T>::Type ConstRef_T;
 
-  /// Squared distance to a feature vector.
+  // Squared distance to a feature vector.
   inline T operator () (const VectorType &v1, const VectorType &v2) const;
 
-  /// Squared distance to a feature vector with an upper bound.
-  inline T operator () (const VectorType &v1, const VectorType &v2, ConstRef_T upper_bound) const;
+  // Squared distance to a feature vector with an upper bound.
+  inline T operator () (const VectorType &v1, const VectorType &v2, ConstRef_T upper_boundary) const;
+};
+
+// Requires *= (float) plus requirements for symmetric matrix inversion.
+// \note This metric assumes \a T to be commutative under multiplication and distributive over addition..
+/**
+ * \brief Template providing the Mahalanobis metric.
+ *
+ * Provides Mahalanobis distance metrics to any pair of same-length feature vectors.
+ * It also specifies the type providing incremental hyperrectangle distance calculation for this metric.
+ *
+ * \tparam T Type of the elements the metric is applied to. The +=, -=, *= and > operators are required.
+ * \tparam D Number of dimensions of the vectors the metric is applied to.
+ */
+template <typename T, const unsigned int D>
+class MahalanobisMetric {
+public:
+  /// Type of the elements to which the metrics are applied.
+  typedef T ElementType;
+
+  /// Number of dimensions to which the metrics are applied.
+  static unsigned const int Dimensions = D;
+
+  /// Type for incremental hyperrectangle intersection calculations when using this metric.
+  typedef MahalanobisIncrementalUpdater<T, D> IncrementalUpdaterType;
+
+  /// Use the global dataset type by default.
+  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
+
+  /// Use the global vector type by default.
+  typedef typename TypeSettings<T, D>::VectorType VectorType;
+
+  /// Use optimized const reference types.
+  typedef typename RParam<T>::Type ConstRef_T;
+
+  // Constructors.
+  MahalanobisMetric();
+  MahalanobisMetric(const DataSetType &train_set);
+
+  // Inverse covariance matrix manipulation.
+  void set_inverse_covariance(const DataSetType &train_set);
+  void set_inverse_covariance(const T *inverse_covariance);
+  void set_diagonal_covariance(const T *diagonal);
+  void force_diagonal_covariance();
+
+  const SymmetricMatrix<T> &inverse_covariance() const { return inv_covariance_; } ///< Retrieve the inverse covariance matrix associated to the metric.
+  bool has_diagonal_covariance() const { return is_diagonal_; } ///< Check if the inverse covariance matrix is diagonal.
+
+  // Squared distance to a feature vector.
+  inline T operator () (const VectorType &v1, const VectorType &v2) const;
+
+  // Squared distance to a feature vector with an upper bound.
+  inline T operator () (const VectorType &v1, const VectorType &v2, ConstRef_T upper_boundary) const;
+
+private:
+  SymmetricMatrix<T> inv_covariance_; ///< Inverse covariance matrix associated with the metric instance.
+  bool is_diagonal_; ///< Flag indicating if the inverse covariance matrix is diagonal and hence enabling severe optimizations.
 };
 
 } // namespace kche_tree
 
-// Template implementation.
-#include "metrics.tpp"
+// Template implementation files.
+#include "metrics_euclidean.tpp"
+#include "metrics_mahalanobis.tpp"
 
 #endif

@@ -37,13 +37,13 @@ namespace kche_tree {
 // Forward declarations.
 template <typename T, const unsigned int D, typename M> class KDSearchData;
 template <typename T, const unsigned int D> class EuclideanMetric;
-template <typename T, const unsigned int D, bool isFundamental = IsFundamental<T>::value> struct EuclideanIncrementalFunctor;
+template <typename T, const unsigned int D> class MahalanobisMetric;
 
 /**
  * \brief Provide the basic operations for an axis-based incremental hyperrectangle distance calculation.
  *
- * This class takes care of all the details of incremental distance calculation with the exception of the actual value update,
- * which is left to the provided functor.
+ * This class takes care of all the details of axis-based incremental distance calculations
+ * with the exception of the actual value update, which is left to the corresponding functor.
  *
  * \tparam T Type of the elements used. The operators <, > and = are required for this type.
  * \tparam D Number of dimensions in the vectors.
@@ -53,10 +53,10 @@ template <typename T, const unsigned int D, typename Metric>
 class IncrementalBase {
 public:
   /// Use the global data set type by default.
-  typedef typename Settings<T, D>::DataSetType DataSetType;
+  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
 
   /// Use the global vector type by default.
-  typedef typename Settings<T, D>::VectorType VectorType;
+  typedef typename TypeSettings<T, D>::VectorType VectorType;
 
   /// Extra data required in the KDSearchData struct to be able to perform axis-based incremental hyperrectangle intersection calculations.
   struct SearchData {
@@ -105,62 +105,33 @@ public:
   /// Metric associated with this incremental calculation.
   typedef EuclideanMetric<T, D> Metric;
 
-  /// Functor providing the incremental calculation.
-  typedef EuclideanIncrementalFunctor<T, D> IncrementalFunctor;
-
-  /// Update the current incremental distance using a provided functor.
-  EuclideanIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D, Metric> &search_data)
-    : IncrementalBase<T, D, Metric>(search_data) { IncrementalBase<T, D, Metric>::update(node, parent, search_data, IncrementalFunctor()); }
-
-  /// Undo any incremental updates performed to the hyperrectangle distance.
-  ~EuclideanIncrementalUpdater() {
-    IncrementalBase<T, D, Metric>::restore();
-  }
+  EuclideanIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D, Metric> &search_data);
+  ~EuclideanIncrementalUpdater();
 };
 
 /**
- * \brief Functor for the Euclidean incremental distance update.
- * Especialization for fundamental types that makes use of operators that would require temporary copies in objects.
+ * \brief Perform an incremental hyperrectangle distance update based on the Mahalanobis metric.
+ * The cost of the update will be considerably reduced if the inverse covariance matrix associated with the metric object used is diagonal.
+ *
+ * \tparam T Type of the elements used. The operators +=, -= and *= are required for this type in addition to the ones required by IncrementalBase.
+ * \tparam D Number of dimensions in the vectors.
  */
 template <typename T, const unsigned int D>
-struct EuclideanIncrementalFunctor<T, D, true> {
-
+class MahalanobisIncrementalUpdater : public IncrementalBase<T, D, MahalanobisMetric<T, D> > {
+public:
   /// Metric associated with this incremental calculation.
-  typedef EuclideanMetric<T, D> Metric;
+  typedef MahalanobisMetric<T, D> Metric;
 
-  /// Use optimized const reference types.
-  typedef typename RParam<T>::Type ConstRef_T;
-
-  /// Type of the per-axis data provided to the functor.
-  typedef typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData AxisType;
-
-  T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
-      const AxisType *axis_data, const KDSearchData<T, D, Metric> &search_data) const;
+  MahalanobisIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D, Metric> &search_data);
+  ~MahalanobisIncrementalUpdater();
 };
 
-/**
- * \brief Functor for the Euclidean incremental distance update.
- * Especialization for non-fundamental types. Makes use only of the +=, -= and *= operators.
- */
-template <typename T, const unsigned int D>
-struct EuclideanIncrementalFunctor<T, D, false> {
-
-  /// Metric associated with this incremental calculation.
-  typedef EuclideanMetric<T, D> Metric;
-
-  /// Use optimized const reference types.
-  typedef typename RParam<T>::Type ConstRef_T;
-
-  /// Type of the per-axis data provided to the functor.
-  typedef typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData AxisType;
-
-  T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
-      const AxisType *axis_data, const KDSearchData<T, D, Metric> &search_data) const;
-};
 
 } // namespace kche_tree
 
-// Template implementation.
+// Template implementation files.
 #include "incremental.tpp"
+#include "incremental_euclidean.tpp"
+#include "incremental_mahalanobis.tpp"
 
 #endif

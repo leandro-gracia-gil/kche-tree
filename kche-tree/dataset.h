@@ -77,8 +77,14 @@ std::ostream & operator << (std::ostream &out, const DataSet<T, D> &dataset);
 template <typename T, const unsigned int D>
 class DataSet {
 public:
+  /// Type of the elements in the data set.
+  typedef T ElementType;
+
+  /// Number of dimensions of the vectors in the data set.
+  static const unsigned int Dimensions = D;
+
   /// Use the global vector type by default.
-  typedef typename Settings<T, D>::VectorType VectorType;
+  typedef typename TypeSettings<T, D>::VectorType VectorType;
 
   // Constructors and destructors;
   DataSet(); ///< Create an empty data set.
@@ -87,6 +93,9 @@ public:
 
   // Initialization methods.
   void reset_to_size(unsigned int size); ///< Reset the data set to an uninitialized version of the specified size.
+
+  template <typename RandomGeneratorType>
+  void reset_to_random(unsigned int size, RandomGeneratorType &generator); ///< Reset the data set to a randomly-initialized version of the specified size.
 
   // Attributes.
   unsigned int size() const { return size_; } ///< Returns the number of vectors in the data set.

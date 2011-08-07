@@ -19,58 +19,38 @@
  ***************************************************************************/
 
 /**
- * \file shared_ptr.h
- * \brief Define aliases for reference-counted shared pointers either from C++ TR1 or C++0x STL.
+ * \file tool_common.h
+ * \brief Define the appropriate tool type depending on the provided macro.
  * \author Leandro Graciá Gil
  */
 
-#ifndef _KCHE_TREE_SHARED_PTR_H_
-#define _KCHE_TREE_SHARED_PTR_H_
+#ifndef _TOOL_COMMON_H_
+#define _TOOL_COMMON_H_
 
-namespace kche_tree {
-
-/**
- * \brief Provide a basic interface to shared (reference-counted) pointers.
- *
- * \tparam T Type of the smart pointer.
- * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++0x STL.
- */
-template <typename T, typename Base =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::shared_ptr<T>
-#else
-  std::shared_ptr<T>
+// Include for custom types.
+#if defined(CUSTOM_INCLUDE)
+#include CUSTOM_INCLUDE
 #endif
-  >
-class SharedPtr : public Base {
-public:
-  typedef T ElementType; ///< Type of the pointer being handled.
-  explicit SharedPtr(T *ptr = 0) : Base(ptr) {}
-};
 
-/**
- * \brief Provide a basic interface to shared (reference-counted) arrays.
- *
- * \tparam T Type of the smart pointer.
- * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++0x STL.
- */
-template <typename T, typename Base =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::shared_ptr<T>
+// Define the tool parameters.
+typedef TYPE ElementType;
+static const unsigned int Dimensions = DIMENSIONS;
+
+// Include the kche-tree library.
+#include "kche-tree/kche-tree.h"
+
+// Use the kche_tree library namespace.
+using namespace kche_tree;
+
+// Define the appropriate tool type.
+#if defined(BENCHMARK)
+#include "benchmark_tool.h"
+typedef BenchmarkTool<ElementType, Dimensions> ToolType;
+#elif defined(VERIFY)
+#include "verification_tool.h"
+typedef VerificationTool<ElementType, Dimensions> ToolType;
 #else
-  std::shared_ptr<T>
+KCHE_TREE_COMPILE_ASSERT(false, "Error: tool type not defined.");
 #endif
-  >
-class SharedArray : public Base {
-public:
-  typedef T ElementType; ///< Type of the pointer being handled.
-  explicit SharedArray(T *ptr = 0) : Base(ptr, ArrayDeleter<T>()) {}
-  void reset(T *ptr = 0) { Base::reset(ptr, ArrayDeleter<T>()); }
-
-  const T &operator [](size_t index) const { return (this->get())[index]; }
-  T &operator [](size_t index) { return (this->get())[index]; }
-};
-
-} // namespace kche_tree
 
 #endif

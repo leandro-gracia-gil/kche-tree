@@ -19,58 +19,58 @@
  ***************************************************************************/
 
 /**
- * \file shared_ptr.h
- * \brief Define aliases for reference-counted shared pointers either from C++ TR1 or C++0x STL.
+ * \file symmetric_matrix.h
+ * \brief Template definition for symmetric matrices.
  * \author Leandro Graciá Gil
  */
 
-#ifndef _KCHE_TREE_SHARED_PTR_H_
-#define _KCHE_TREE_SHARED_PTR_H_
+#ifndef _KCHE_TREE_SYMMETRIC_MATRIX_H_
+#define _KCHE_TREE_SYMMETRIC_MATRIX_H_
+
+// Include smart pointers.
+#include "smart_ptr.h"
 
 namespace kche_tree {
 
 /**
- * \brief Provide a basic interface to shared (reference-counted) pointers.
+ * \brief Symmetric matrix container of the specified size. Stores (n² + n) / 2 elements.
  *
- * \tparam T Type of the smart pointer.
- * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++0x STL.
+ * \tparam T Data type of the elements in the matrix. Requires the -=, *=, /=, *= float scaling operators and the zero, one, negate and invert traits.
  */
-template <typename T, typename Base =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::shared_ptr<T>
-#else
-  std::shared_ptr<T>
-#endif
-  >
-class SharedPtr : public Base {
+template <typename T>
+class SymmetricMatrix {
 public:
-  typedef T ElementType; ///< Type of the pointer being handled.
-  explicit SharedPtr(T *ptr = 0) : Base(ptr) {}
-};
+  /// Type of the elements in the matrix.
+  typedef T ElementType;
 
-/**
- * \brief Provide a basic interface to shared (reference-counted) arrays.
- *
- * \tparam T Type of the smart pointer.
- * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++0x STL.
- */
-template <typename T, typename Base =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::shared_ptr<T>
-#else
-  std::shared_ptr<T>
-#endif
-  >
-class SharedArray : public Base {
-public:
-  typedef T ElementType; ///< Type of the pointer being handled.
-  explicit SharedArray(T *ptr = 0) : Base(ptr, ArrayDeleter<T>()) {}
-  void reset(T *ptr = 0) { Base::reset(ptr, ArrayDeleter<T>()); }
+  // Constructors and initialization methods.
+  SymmetricMatrix();
+  SymmetricMatrix(unsigned int size, bool initialize_to_identity = true);
+  void resetToSize(unsigned int size, bool initialize_to_identity = true);
 
-  const T &operator [](size_t index) const { return (this->get())[index]; }
-  T &operator [](size_t index) { return (this->get())[index]; }
+  // Operators to access the matrix contents.
+  T& operator () (unsigned int row, unsigned int column);
+  const T& operator () (unsigned int row, unsigned int column) const;
+
+  // Properties of the matrix.
+  unsigned int size() const { return size_; } ///< Return the size of the matrix.
+  const T *data() const;
+
+  // Matrix operations.
+  void invert();
+
+private:
+  /// Internal method to access the matrix contents.
+  T& m(unsigned int row, unsigned int column);
+
+  unsigned int size_; ///< Size of the matrix.
+  ScopedArray<T> base_; ///< Array with the matrix contents flattened in one dimension.
+  ScopedArray<T*> m_; ///< Array pointing to the beginning of each row in the matrix.
 };
 
 } // namespace kche_tree
+
+// Template implementation.
+#include "symmetric_matrix.tpp"
 
 #endif

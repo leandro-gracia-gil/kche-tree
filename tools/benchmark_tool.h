@@ -19,58 +19,46 @@
  ***************************************************************************/
 
 /**
- * \file shared_ptr.h
- * \brief Define aliases for reference-counted shared pointers either from C++ TR1 or C++0x STL.
+ * \file benchmark_tool.h
+ * \brief Generic benchmark tool template definition.
  * \author Leandro Graciá Gil
  */
 
-#ifndef _KCHE_TREE_SHARED_PTR_H_
-#define _KCHE_TREE_SHARED_PTR_H_
+#ifndef _BENCHMARK_TOOL_H_
+#define _BENCHMARK_TOOL_H_
 
-namespace kche_tree {
+// Include argument parsing results from gengetopt.
+#include "benchmark_tool_args.h"
 
-/**
- * \brief Provide a basic interface to shared (reference-counted) pointers.
- *
- * \tparam T Type of the smart pointer.
- * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++0x STL.
- */
-template <typename T, typename Base =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::shared_ptr<T>
-#else
-  std::shared_ptr<T>
-#endif
-  >
-class SharedPtr : public Base {
-public:
-  typedef T ElementType; ///< Type of the pointer being handled.
-  explicit SharedPtr(T *ptr = 0) : Base(ptr) {}
-};
+// Tool base class.
+#include "tool_base.h"
 
 /**
- * \brief Provide a basic interface to shared (reference-counted) arrays.
+ * \brief Provide result benchmark functionality for any given type and metric.
  *
- * \tparam T Type of the smart pointer.
- * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++0x STL.
+ * Build a kd-tree and search the K-nearest neighbours using the provided options.
+ * Build and search times are measured and displayed.
+ *
+ * \tparam T Type of the element being tested.
+ * \tparam D Number of dimensions being tested.
  */
-template <typename T, typename Base =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::shared_ptr<T>
-#else
-  std::shared_ptr<T>
-#endif
-  >
-class SharedArray : public Base {
+template <typename T, const unsigned int D>
+class BenchmarkTool : public ToolBase<T, D, BenchmarkOptions> {
 public:
-  typedef T ElementType; ///< Type of the pointer being handled.
-  explicit SharedArray(T *ptr = 0) : Base(ptr, ArrayDeleter<T>()) {}
-  void reset(T *ptr = 0) { Base::reset(ptr, ArrayDeleter<T>()); }
+  // Tool constructor.
+  template <typename RandomEngineType>
+  BenchmarkTool(int argc, char *argv[], RandomEngineType &random_engine);
 
-  const T &operator [](size_t index) const { return (this->get())[index]; }
-  T &operator [](size_t index) { return (this->get())[index]; }
+  // Tool running method.
+  template <typename MetricType>
+  bool run(const MetricType &metric);
+
+private:
+  // Command-line option validation.
+  bool validate_options() const;
 };
 
-} // namespace kche_tree
+// Template implementation.
+#include "benchmark_tool.tpp"
 
 #endif
