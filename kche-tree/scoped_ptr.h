@@ -71,10 +71,6 @@ protected:
   Del deleter_;
 };
 
-/// Swap the contents of two scoped pointers.
-template <typename T>
-void swap(ScopedPtr<T> &p1, ScopedPtr<T> &p2) { p1.swap(p2); }
-
 /**
  * \brief Implement a basic version of scoped arrays.
  *
@@ -92,9 +88,6 @@ public:
   T &operator [](size_t index) { return this->ptr_[index]; }
 };
 
-/// Swap the contents of two scoped arrays.
-template <typename T>
-void swap(ScopedArray<T> &p1, ScopedArray<T> &p2) { p1.swap(p2); }
 #else
 /**
  * \brief Extended version of STL unique_ptr for compatibility with the non-C++0x code.
@@ -122,7 +115,16 @@ public:
   typedef T ElementType; ///< Type of the pointer being handled.
   explicit ScopedArray(T *ptr = 0) : std::unique_ptr<T[]>(ptr) {}
 };
+
 #endif
+
+/// Swap the contents of two scoped pointers.
+template <typename T>
+void swap(ScopedPtr<T> &p1, ScopedPtr<T> &p2) { p1.swap(p2); }
+
+/// Swap the contents of two scoped arrays.
+template <typename T>
+void swap(ScopedArray<T> &p1, ScopedArray<T> &p2) { p1.swap(p2); }
 
 } // namespace kche_tree
 
