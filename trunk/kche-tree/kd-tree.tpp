@@ -106,7 +106,7 @@ template <typename T, const unsigned int D> template <template <typename, typena
 void KDTree<T, D>::knn(const VectorType &p, unsigned int K, std::vector<NeighbourType> &output, const M &metric, ConstRef_T epsilon, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
-  if (root == NULL || size() == 0 || K == 0)
+  if (!root || size() == 0 || K == 0)
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle intersection calculation.
@@ -145,7 +145,7 @@ template <typename T, const unsigned int D> template <typename M>
 void KDTree<T, D>::all_in_range(const VectorType &p, ConstRef_T distance, std::vector<NeighbourType> &output, const M &metric, bool ignore_p_in_tree) const {
 
   // Check if there is any data on the tree and K is valid.
-  if (root == NULL || size() == 0 || !(distance > Traits<T>::zero()))
+  if (!root || size() == 0 || !(distance > Traits<T>::zero()))
     return;
 
   // Create an object for tree traversal and incremental hyperrectangle intersection calculation.
