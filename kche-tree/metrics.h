@@ -35,10 +35,10 @@
 #ifndef _KCHE_TREE_METRICS_H_
 #define _KCHE_TREE_METRICS_H_
 
-#include "kche-tree.h"
-#include "kd-node.h"
 #include "incremental.h"
+#include "kd-node.h"
 #include "symmetric_matrix.h"
+#include "utils.h"
 #include "vector.h"
 
 namespace kche_tree {
@@ -77,13 +77,14 @@ public:
   inline T operator () (const VectorType &v1, const VectorType &v2, ConstRef_T upper_boundary) const;
 };
 
-// Requires *= (float) plus requirements for symmetric matrix inversion.
-// \note This metric assumes \a T to be commutative under multiplication and distributive over addition..
 /**
  * \brief Template providing the Mahalanobis metric.
  *
  * Provides Mahalanobis distance metrics to any pair of same-length feature vectors.
  * It also specifies the type providing incremental hyperrectangle distance calculation for this metric.
+ *
+ * Requires *= (float) plus requirements for symmetric matrix inversion.
+ * \note This metric assumes \a T to be commutative under multiplication and distributive over addition.
  *
  * \tparam T Type of the elements the metric is applied to. The +=, -=, *= and > operators are required.
  * \tparam D Number of dimensions of the vectors the metric is applied to.
@@ -109,18 +110,24 @@ public:
   /// Use optimized const reference types.
   typedef typename RParam<T>::Type ConstRef_T;
 
+  /// Type of the vector used to hold partial results for evaluating the metric.
+  typedef Vector<T, KCHE_TREE_SSE_COMPILE_ALIGN(T, D)> CacheVectorType;
+
   // Constructors.
   MahalanobisMetric();
   MahalanobisMetric(const DataSetType &train_set);
 
   // Inverse covariance matrix manipulation.
-  void set_inverse_covariance(const DataSetType &train_set);
-  void set_inverse_covariance(const T *inverse_covariance);
-  void set_diagonal_covariance(const T *diagonal);
+  // Matrix is assumed to have the properties of the inverse of a covariance matrix
+  // (symmetric positive-definite, as inverting will fail for non-invertible positive-semidefinite ones).
+  bool set_inverse_covariance(const DataSetType &train_set);
+  bool set_inverse_covariance(const T *inverse_covariance);
+  bool set_diagonal_covariance(const T *diagonal);
   void force_diagonal_covariance();
 
   const SymmetricMatrix<T> &inverse_covariance() const { return inv_covariance_; } ///< Retrieve the inverse covariance matrix associated to the metric.
   bool has_diagonal_covariance() const { return is_diagonal_; } ///< Check if the inverse covariance matrix is diagonal.
+  CacheVectorType &cache() const { return cache_; } ///< Get the cache vector for intermediate results. Used internally by functors.
 
   // Squared distance to a feature vector.
   inline T operator () (const VectorType &v1, const VectorType &v2) const;
@@ -131,6 +138,7 @@ public:
 private:
   SymmetricMatrix<T> inv_covariance_; ///< Inverse covariance matrix associated with the metric instance.
   bool is_diagonal_; ///< Flag indicating if the inverse covariance matrix is diagonal and hence enabling severe optimizations.
+  mutable CacheVectorType cache_; ///< Cache vector holding intermediate results for evaluating the metric.
 };
 
 } // namespace kche_tree

@@ -31,7 +31,7 @@
 #include <functional>
 
 // Include optimized params.
-#include "rparam.h"
+#include "utils.h"
 
 namespace kche_tree {
 

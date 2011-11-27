@@ -19,38 +19,37 @@
  ***************************************************************************/
 
 /**
- * \file smart_ptr.h
- * \brief Define aliases for smart pointers either from C++ TR1 or C++0x STL.
+ * \file deleter.h
+ * \brief Deletion functors for use in smart pointers and arrays.
  * \author Leandro Graciá Gil
  */
 
-#ifndef _KCHE_TREE_SMART_PTR_H_
-#define _KCHE_TREE_SMART_PTR_H_
-
-#ifdef KCHE_TREE_DISABLE_CPP0X
-#include <tr1/memory>
-#else
-#include <memory>
-#endif
+#ifndef _KCHE_TREE_DELETER_H_
+#define _KCHE_TREE_DELETER_H_
 
 namespace kche_tree {
 
 /// Default functor for deleting pointers.
 template <typename T>
 struct PointerDeleter {
+  /// Deletes the provided pointer.
   void operator () (T *p) const { delete p; }
 };
 
 /// Default functor for deleting arrays.
 template <typename T>
 struct ArrayDeleter {
+  /// Deletes the provided array.
   void operator () (T *p) const { delete []p; }
 };
 
-} // namespace kche_tree
+/// Default functor for deleting aligned arrays constructed with the AlignedArray template.
+template <typename T>
+struct AlignedDeleter {
+  // Implementation in aligned_array.h.
+  void operator () (T *p) const;
+};
 
-// Scoped and shared pointers.
-#include "scoped_ptr.h"
-#include "shared_ptr.h"
+} // namespace kche_tree
 
 #endif

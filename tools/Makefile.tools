@@ -19,18 +19,25 @@
 #=========================================================================#
 
 # Set here the type, dimensions and metric parameters associated with different testing cases.
-# Format: test_name = type dimensions metric_base_file [extra_include_file]
+# Format: test_name = type dimensions metric_base_file [extra_params]
 # Example: if euclidean is provided as metric_base_file it means it will use the tool_euclidean.cpp file as template for building tools.
+# The extra param -DCUSTOM_INCLUDE=include_file.h (no quotes) can be used to add an additional include file for custom types.
 euclidean = float 24 euclidean
 mahalanobis = float 24 mahalanobis
 mahalanobis_diagonal = float 24 mahalanobis_diagonal
-euclidean_high_dimensions = float 5000 euclidean
-custom_euclidean = Custom 24 euclidean custom_type.h
-custom_mahalanobis = Custom 24 mahalanobis custom_type.h
-euclidean_sse = float 24 euclidean euclidean_sse_24d.h -msse
+euclidean_no_unroll = float 24 euclidean -DKCHE_TREE_MAX_UNROLL=1
+mahalanobis_no_unroll = float 24 mahalanobis -DKCHE_TREE_MAX_UNROLL=1
+mahalanobis_diagonal_no_unroll = float 24 mahalanobis_diagonal -DKCHE_TREE_MAX_UNROLL=1
+custom_euclidean = Custom 24 euclidean -DCUSTOM_INCLUDE=custom_type.h
+custom_mahalanobis = Custom 24 mahalanobis -DCUSTOM_INCLUDE=custom_type.h
+euclidean_sse = float 24 euclidean -DKCHE_TREE_ENABLE_SSE=true -msse
+mahalanobis_sse = float 25 mahalanobis -DKCHE_TREE_ENABLE_SSE=true -msse
+mahalanobis_diagonal_sse = float 24 mahalanobis_diagonal -DKCHE_TREE_ENABLE_SSE=true -msse
+euclidean_no_unroll_sse = float 24 euclidean -DKCHE_TREE_MAX_UNROLL=1 -DKCHE_TREE_ENABLE_SSE=true -msse
+mahalanobis_no_unroll_sse = float 24 mahalanobis -DKCHE_TREE_MAX_UNROLL=1 -DKCHE_TREE_ENABLE_SSE=true -msse
 
 # Add different testing cases to be built as a specific type of tool (ie. for benchmark, for result verification).
 # Testing cases will only be built if added here to one or more tool types.
 # The resulting filename will have a prefix according with its tool type. For example, verify_euclidean or benchmark_mahalanobis.
-verification_tools = euclidean mahalanobis mahalanobis_diagonal euclidean_high_dimensions custom_euclidean custom_mahalanobis euclidean_sse
-benchmark_tools = euclidean mahalanobis mahalanobis_diagonal euclidean_high_dimensions custom_euclidean custom_mahalanobis euclidean_sse
+verification_tools = euclidean mahalanobis mahalanobis_diagonal euclidean_no_unroll mahalanobis_no_unroll mahalanobis_diagonal_no_unroll custom_euclidean custom_mahalanobis euclidean_sse mahalanobis_sse mahalanobis_diagonal_sse euclidean_no_unroll_sse mahalanobis_no_unroll_sse
+benchmark_tools = euclidean mahalanobis mahalanobis_diagonal euclidean_no_unroll custom_euclidean custom_mahalanobis euclidean_sse mahalanobis_sse mahalanobis_diagonal_sse

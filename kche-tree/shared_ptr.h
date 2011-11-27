@@ -27,6 +27,9 @@
 #ifndef _KCHE_TREE_SHARED_PTR_H_
 #define _KCHE_TREE_SHARED_PTR_H_
 
+#include "deleter.h"
+#include "aligned_array.h"
+
 namespace kche_tree {
 
 /**
@@ -44,8 +47,9 @@ template <typename T, typename Base =
   >
 class SharedPtr : public Base {
 public:
+  typedef PointerDeleter<T> DeleterType;
   typedef T ElementType; ///< Type of the pointer being handled.
-  explicit SharedPtr(T *ptr = 0) : Base(ptr) {}
+  explicit SharedPtr(T *ptr = 0) : Base(ptr, DeleterType()) {}
 };
 
 /**
@@ -64,11 +68,43 @@ template <typename T, typename Base =
 class SharedArray : public Base {
 public:
   typedef T ElementType; ///< Type of the pointer being handled.
-  explicit SharedArray(T *ptr = 0) : Base(ptr, ArrayDeleter<T>()) {}
-  void reset(T *ptr = 0) { Base::reset(ptr, ArrayDeleter<T>()); }
+  explicit SharedArray(T *ptr = 0) : Base(ptr, Deleter()) {}
+  void reset(T *ptr = 0) { Base::reset(ptr, Deleter()); }
 
   const T &operator [](size_t index) const { return (this->get())[index]; }
   T &operator [](size_t index) { return (this->get())[index]; }
+
+private:
+  typedef ArrayDeleter<T> Deleter;
+};
+
+/**
+ * \brief Provide a basic interface to memory-aligned shared (reference-counted) arrays.
+ *
+ * Handles and deletes memory-aligned arrays allocated using the AlignedArray template.
+ *
+ * \tparam T Type of the smart pointer.
+ * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++0x STL.
+ */
+template <typename T, typename Base =
+#ifdef KCHE_TREE_DISABLE_CPP0X
+  std::tr1::shared_ptr<T>
+#else
+  std::shared_ptr<T>
+#endif
+  >
+class SharedAlignedArray : public Base {
+public:
+  typedef T ElementType; ///< Type of the pointer being handled.
+
+  explicit SharedAlignedArray(AlignedArray<T> &ptr = AlignedArray<T>()) : Base(ptr.get(), Deleter()) {}
+  void reset(AlignedArray<T> &ptr = AlignedArray<T>()) { Base::reset(ptr, Deleter()); }
+
+  const T &operator [](size_t index) const { return (this->get())[index]; }
+  T &operator [](size_t index) { return (this->get())[index]; }
+
+private:
+  typedef AlignedArray<T> Deleter;
 };
 
 } // namespace kche_tree

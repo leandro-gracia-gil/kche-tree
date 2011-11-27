@@ -41,7 +41,22 @@ SymmetricMatrix<T>::SymmetricMatrix() : size_(0) {}
  */
 template <typename T>
 SymmetricMatrix<T>::SymmetricMatrix(unsigned int size, bool initialize_to_identity) {
-  resetToSize(size, initialize_to_identity);
+  reset_to_size(size, initialize_to_identity);
+}
+
+template <typename T>
+SymmetricMatrix<T>::SymmetricMatrix(const SymmetricMatrix &matrix) {
+  *this = matrix;
+}
+
+template <typename T>
+SymmetricMatrix<T>& SymmetricMatrix<T>::operator = (const SymmetricMatrix &matrix) {
+  reset_to_size(matrix.size(), false);
+  for (unsigned int j=0; j<size_; ++j)
+    for (unsigned int i=0; i<=j; ++i)
+      m(j, i) = matrix(j, i);
+
+  return *this;
 }
 
 /**
@@ -51,22 +66,25 @@ SymmetricMatrix<T>::SymmetricMatrix(unsigned int size, bool initialize_to_identi
  * \param initialize_to_identity Will initialize the contents to the identity matrix if \c true, or skip content initialization otherwise.
  */
 template <typename T>
-void SymmetricMatrix<T>::resetToSize(unsigned int size, bool initialize_to_identity) {
+void SymmetricMatrix<T>::reset_to_size(unsigned int size, bool initialize_to_identity) {
 
   // Check the empty matrix case.
   size_ = size;
   if (size == 0) {
-    base_.reset();
-    m_.reset();
+    column_.reset();
+    diagonal_.reset();
     return;
   }
 
   // Prepare the triangular structure encoding the matrix.
-  base_.reset(new T[size_ * (size_ + 1) / 2]);
-  m_.reset(new T*[size_]);
-  m_[0] = base_.get();
-  for (unsigned int i=1; i<size_; ++i)
-    m_[i] = m_[i-1] + i;
+  column_.reset(new ColumnArray[size_]);
+  diagonal_.reset(AlignedArray<T>(KCHE_TREE_SSE_RUNTIME_ALIGN(T, size_)));
+  initSSEAlignmentGap(diagonal_.get(), size_);
+
+  for (unsigned int i=1; i<size_; ++i) {
+    column_[i].reset(AlignedArray<T>(KCHE_TREE_SSE_RUNTIME_ALIGN(T, i)));
+    initSSEAlignmentGap(column_[i].get(), i);
+  }
 
   // Initialize contents to zero.
   if (initialize_to_identity) {
@@ -87,10 +105,12 @@ void SymmetricMatrix<T>::resetToSize(unsigned int size, bool initialize_to_ident
  */
 template <typename T>
 T &SymmetricMatrix<T>::m(unsigned int row, unsigned int column) {
-  if (column > row)
-    return m_[column][row];
+  if (row == column)
+    return diagonal_[row];
+  else if (row > column)
+    return column_[row][column];
   else
-    return m_[row][column];
+    return column_[column][row];
 }
 
 /**
@@ -112,34 +132,28 @@ T &SymmetricMatrix<T>::operator () (unsigned int row, unsigned int column) {
  */
 template <typename T>
 const T &SymmetricMatrix<T>::operator () (unsigned int row, unsigned int column) const {
-  if (column > row)
-    return m_[column][row];
+  if (row == column)
+    return diagonal_[row];
+  else if (row > column)
+    return column_[row][column];
   else
-    return m_[row][column];
-}
-
-/**
- * \brief Get a pointer to the matrix data.
- *
- * \return Pointer to the matrix data. Data order is row-based and in stored as a lower triangular matrix.
- */
-template <typename T>
-const T *SymmetricMatrix<T>::data() const {
-  return base_.get();
+    return column_[column][row];
 }
 
 /**
  * \brief Invert the matrix using LDL' decomposition optimized for symmetric matrices.
  *
- * Result is undefined if the matrix is not invertible.
  * This method doesn't require the matrix to be positive definite.
+ * \note Matrix contents won't be updated if the matrix is not invertible.
+ *
+ * \return \c true if successfully inverted, \c false if not invertible.
  */
 template <typename T>
-void SymmetricMatrix<T>::invert() {
+bool SymmetricMatrix<T>::invert() {
 
   // Check empty matrices.
   if (size_ == 0)
-    return;
+    return true;
 
   // Type used for accumulator variables.
   typedef typename Traits<T>::AccumulatorType AccumT;
@@ -163,6 +177,10 @@ void SymmetricMatrix<T>::invert() {
       ld(j, i) = m(j, i);
       ld(j, i) -= acc;
       ld(j, i) /= ld(i, i);
+
+      // Catch non-invertible matrices.
+      if (ld(i, i) == Traits<T>::zero())
+        return false;
     }
 
     // Calculate the diagonal value.
@@ -187,6 +205,11 @@ void SymmetricMatrix<T>::invert() {
       }
       Traits<T>::negate(ld(j, i));
     }
+
+    // Catch non-invertible matrices.
+    if (ld(j, j) == Traits<T>::zero())
+      return false;
+
     Traits<T>::invert(ld(j, j));
   }
 
@@ -204,6 +227,8 @@ void SymmetricMatrix<T>::invert() {
       m(j, i) = acc;
     }
   }
+
+  return true;
 }
 
 } // namespace kche_tree

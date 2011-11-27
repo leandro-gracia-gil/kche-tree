@@ -41,6 +41,10 @@ define tool_param
 $$(word $(3),$$($(call rprefix,$(1),$(2))))
 endef
 
+define tool_remaining_params
+$$(wordlist $(3),$$(words $$($(call rprefix,$(1),$(2)))),$$($(call rprefix,$(1),$(2))))
+endef
+
 define tool_element_type
 $(call tool_param,$(1),$(2),1)
 endef
@@ -53,17 +57,13 @@ define tool_metric_file
 tool_$(call tool_param,$(1),$(2),3).cpp
 endef
 
-define tool_extra_include
-$(call tool_param,$(1),$(2),4)
-endef
-
 define tool_extra_params
-$(call tool_param,$(1),$(2),5)
+$(call tool_remaining_params,$(1),$(2),4)
 endef
 
 define tool_settings
 $$(patsubst -DCUSTOM_INCLUDE=\"\"$$,,$(call tool_metric_file,$(1),$(2)) -DTYPE=$(call tool_element_type,$(1),$(2)) \
-    -DDIMENSIONS=$(call tool_dimensions,$(1),$(2)) -DCUSTOM_INCLUDE=\"$(call tool_extra_include,$(1),$(2))\" $(call tool_extra_params,$(1),$$@))
+    -DDIMENSIONS=$(call tool_dimensions,$(1),$(2)) $(call tool_extra_params,$(1),$$@))
 endef
 
 define build_tool_rule

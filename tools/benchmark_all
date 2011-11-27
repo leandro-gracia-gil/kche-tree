@@ -1,0 +1,3 @@
+#!/bin/bash
+benchmark_tools=`gawk '/benchmark_tools/ { $1 = ""; $2 = ""; print $0; }' Makefile.tools`
+for i in $benchmark_tools; do echo "$i:"; ./benchmark_$i -k 100 -T 100000 -t 100 -s 0; echo; done

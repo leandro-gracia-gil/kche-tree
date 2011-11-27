@@ -19,15 +19,43 @@
  ***************************************************************************/
 
 /**
- * \file rparam.h
- * \brief Define type optimization templates for const arguments.
+ * \file utils.h
+ * \brief Utility templates for template metaprogramming and others.
  * \author Leandro Graciá Gil
- */
+*/
 
-#ifndef _KCHE_TREE_RPARAM_H_
-#define _KCHE_TREE_RPARAM_H_
+#ifndef _KCHE_TREE_UTILS_H_
+#define _KCHE_TREE_UTILS_H_
 
 namespace kche_tree {
+
+// Macro definitions for concept checking.
+#define KCHE_TREE_NEEDS_TO_BE_IMPLEMENTED() KCHE_TREE_NOT_REACHED()
+
+#define KCHE_TREE_CHECK_CONCEPT(type, base) \
+    KCHE_TREE_COMPILE_ASSERT((is_base_of<base, type>::value), "Concept error. " # type " should implement " # base ".")
+
+// Utility classes.
+
+/**
+ * \brief Base class for non-copyable objects.
+ *
+ * Leaves undefined or deletes (if C++0x is enabled) the copy constructor and the asignment operator.
+ */
+class NonCopyable {
+#ifdef KCHE_TREE_DISABLE_CPP0X
+  NonCopyable(const NonCopyable &);
+  NonCopyable &operator = (const NonCopyable &);
+#else
+  NonCopyable(const NonCopyable &) = delete;
+  NonCopyable &operator = (const NonCopyable &) = delete;
+#endif
+
+protected:
+  NonCopyable() {}
+};
+
+// Utility templates and functions.
 
 /**
  * \brief Type branching template.
@@ -78,6 +106,57 @@ struct RParam {
 #endif
       sizeof(T) <= sizeof(const T&), T, const T&>::Result Type;
 };
+
+/**
+ * \brief Unsigned integer branching template.
+ * Defines its value Result depending on the evaluation of \a Cond.
+ *
+ * \tparam Condition to evaluate on compile time.
+ * \tparam A Value of \a Result if \a Cond is \c true.
+ * \tparam B Value of \a Result if \a Cond is \c false.
+ */
+template <bool Cond, unsigned int A, unsigned int B>
+struct UIntBranch;
+
+/// Value branching template specialization for the \c true case.
+template <unsigned int A, unsigned int B>
+struct UIntBranch<true, A, B> {
+  static const unsigned int value = A;
+};
+
+/// Value branching template specialization for the \c false case.
+template <unsigned int A, unsigned int B>
+struct UIntBranch<false, A, B> {
+  static const unsigned int value = B;
+};
+
+/// Auxiliary template to find the minimum of 2 unsigned integers.
+template <unsigned int a, unsigned int b>
+struct Min : UIntBranch<a <= b, a, b> {};
+
+/// Sets in \a value if the given value is a power of two.
+template <unsigned int N>
+struct IsPowerOfTwo {
+  enum { value = (N && !(N & (N - 1))) ? true : false };
+};
+
+/// Returns if a value is a power of two.
+bool is_power_of_two(unsigned int n) {
+  return (n && !(n & (n - 1))) ? true : false;
+}
+
+/// Sets in \a value the next multiple of \a M >= \a N. Will rise a compile error if \a M is not a power of two.
+template <unsigned int M, unsigned int N>
+struct NextMultipleOfPOT {
+  KCHE_TREE_COMPILE_ASSERT(IsPowerOfTwo<M>::value, "First parameter must be a power of two.");
+  enum { value = (N + (M - 1)) & ~(M - 1) };
+};
+
+/// Returns the next multiple of \a m >= \a n. Will raise an assertion failure if \a m is not a power of two.
+unsigned int next_multiple_of_pot(unsigned int m, unsigned int n) {
+  KCHE_TREE_DCHECK(is_power_of_two(m));
+  return (n + (m - 1)) & ~(m - 1);
+}
 
 } // namespace kche_tree
 

@@ -29,8 +29,8 @@
 
 #include "dataset.h"
 #include "kd-node.h"
-#include "rparam.h"
 #include "vector.h"
+#include "utils.h"
 
 namespace kche_tree {
 

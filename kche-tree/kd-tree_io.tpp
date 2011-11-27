@@ -143,7 +143,7 @@ std::istream & operator >> (std::istream &in, KDTree<T, D> &kdtree) {
     throw std::runtime_error("error reading kd-tree signature");
 
   // Verify kd-tree contents if enabled by the settings. Will throw std::runtime_error if not valid.
-  VerifyKDTreeContents<Settings<T>::verify_kdtree_after_deserializing>::verify(root.get(), dataset);
+  VerifyKDTreeContents<Settings::verify_kdtree_after_deserializing>::verify(root.get(), dataset);
 
   // Set the kd-tree contents. The dataset vectors are reference-counted.
   kdtree.data = dataset;

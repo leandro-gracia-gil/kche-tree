@@ -30,7 +30,7 @@
 // Include type traits, feature vectors and optimized params.
 #include "traits.h"
 #include "vector.h"
-#include "rparam.h"
+#include "utils.h"
 
 namespace kche_tree {
 
@@ -50,7 +50,7 @@ struct KDSearchData : M::IncrementalUpdaterType::SearchDataExtras {
 
   const VectorType &p; ///< Reference input point.
   const DataSetType &data; ///< Permutated training set.
-  const M &metric; ///< Metric functor used to calculate distances between points.
+  M metric; ///< Metric functor used to calculate distances between points.
   unsigned int K; ///< Number of neighbours to retrieve.
 
   T hyperrect_distance; ///< Distance to the current nearest point in the hyperrectangle.

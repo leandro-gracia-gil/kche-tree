@@ -8,7 +8,6 @@ PREFIX=/usr/include
 INSTALL_FOLDER=kche-tree
 
 CFLAGS=-O3 -Wall $(CPP0XFLAGS)
-SSE_FLAGS=-msse -DSSE
 
 COMPILE_NOTIFY="  [CC]\t$@"
 MAKEFILE_DEPS=Makefile.global Makefile
@@ -35,9 +34,12 @@ KCHE_TREE+= kd-node.h kd-node.tpp
 KCHE_TREE+= k-heap.h k-heap.tpp indirect_heap.h indirect_heap.tpp
 KCHE_TREE+= k-vector.h k-vector.tpp
 KCHE_TREE+= vector.h vector.tpp dataset.h dataset.tpp
-KCHE_TREE+= traits.h traits.tpp endianness.h compile_assert.h rparam.h
-KCHE_TREE+= noncopyable.h smart_ptr.h scoped_ptr.h shared_ptr.h
-KCHE_TREE+= metrics.h metrics_euclidean.tpp metrics_mahalanobis.tpp
+KCHE_TREE+= traits.h traits.tpp endianness.h compile_assert.h
+KCHE_TREE+= scoped_ptr.h shared_ptr.h deleter.h
+KCHE_TREE+= allocator.h aligned_array.h utils.h
+KCHE_TREE+= metrics.h metrics_euclidean.tpp metrics_euclidean_sse.tpp
+KCHE_TREE+= metrics_mahalanobis.tpp metrics_mahalanobis_sse.tpp
 KCHE_TREE+= incremental.h incremental.tpp incremental_euclidean.tpp
 KCHE_TREE+= incremental_mahalanobis.tpp
-KCHE_TREE+= map_reduce.h symmetric_matrix.h symmetric_matrix.tpp
+KCHE_TREE+= symmetric_matrix.h symmetric_matrix.tpp
+KCHE_TREE+= map_reduce.h map_reduce_functor.h sse.h

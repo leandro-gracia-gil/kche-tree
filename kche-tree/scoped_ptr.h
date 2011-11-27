@@ -27,13 +27,21 @@
 #ifndef _KCHE_TREE_SCOPED_PTR_H_
 #define _KCHE_TREE_SCOPED_PTR_H_
 
-#include "noncopyable.h"
+#ifdef KCHE_TREE_DISABLE_CPP0X
+#include <tr1/memory>
+#else
+#include <memory>
+#endif
+
+#include "aligned_array.h"
+#include "deleter.h"
+#include "utils.h"
 
 namespace kche_tree {
 
 #ifdef KCHE_TREE_DISABLE_CPP0X
 /**
- * \brief Implement a basic version of scoped pointers.
+ * \brief Basic version of scoped pointers.
  *
  * This doesn't intend to be a full implementation, but a basic version
  * to keep compatibility with the non-C++0x code.
@@ -46,7 +54,7 @@ class ScopedPtr : NonCopyable {
 public:
   typedef T ElementType; ///< Type of the pointer being handled.
 
-  explicit ScopedPtr(T *ptr = 0, const Del &deleter = Del()) : NonCopyable(), ptr_(ptr), deleter_(deleter) {}
+  explicit ScopedPtr(T *ptr = 0) : NonCopyable(), ptr_(ptr), deleter_(Del()) {}
   ~ScopedPtr() { deleter_(ptr_); }
 
   T *get() const { return ptr_; }
@@ -72,7 +80,7 @@ protected:
 };
 
 /**
- * \brief Implement a basic version of scoped arrays.
+ * \brief Basic version of scoped arrays.
  *
  * This doesn't intend to be a full implementation, but a basic version
  * to keep compatibility with the non-C++0x code.
@@ -82,10 +90,28 @@ protected:
 template <typename T>
 class ScopedArray : public ScopedPtr<T, ArrayDeleter<T> > {
 public:
-  explicit ScopedArray(T *ptr = 0) : ScopedPtr<T, ArrayDeleter<T> >(ptr, ArrayDeleter<T>()) {}
+  explicit ScopedArray(T *ptr = 0) : ScopedPtr<T, ArrayDeleter<T> >(ptr) {}
 
   const T &operator [](size_t index) const { return this->ptr_[index]; }
   T &operator [](size_t index) { return this->ptr_[index]; }
+};
+
+/**
+ * \brief Basic version of memory-aligned scoped arrays.
+ *
+ * Handles and deletes memory-aligned arrays allocated using the AlignedArray template.
+ */
+template <typename T>
+class ScopedAlignedArray : public ScopedPtr<T, AlignedDeleter<T> > {
+public:
+  explicit ScopedAlignedArray(const AlignedArray<T> &ptr = AlignedArray<T>()) : Base(static_cast<T *>(ptr)) {}
+  void reset(const AlignedArray<T> &ptr = AlignedArray<T>()) { Base::reset(static_cast<T *>(ptr)); }
+
+  const T &operator [](size_t index) const { return this->ptr_[index]; }
+  T &operator [](size_t index) { return this->ptr_[index]; }
+
+private:
+  typedef ScopedPtr<T, AlignedDeleter<T> > Base;
 };
 
 #else
@@ -95,10 +121,10 @@ public:
  * \tparam T Type of the smart pointer.
  */
 template <typename T>
-class ScopedPtr : public std::unique_ptr<T> {
+class ScopedPtr : public std::unique_ptr<T, PointerDeleter<T> > {
 public:
   typedef T ElementType; ///< Type of the pointer being handled.
-  explicit ScopedPtr(T *ptr = 0) : std::unique_ptr<T>(ptr) {}
+  explicit ScopedPtr(T *ptr = 0) : std::unique_ptr<T, PointerDeleter<T> >(ptr) {}
 };
 
 /**
@@ -110,10 +136,27 @@ public:
  * \tparam T Type of the smart pointer.
  */
 template <typename T>
-class ScopedArray : public std::unique_ptr<T[]> {
+class ScopedArray : public std::unique_ptr<T[], ArrayDeleter<T> > {
 public:
   typedef T ElementType; ///< Type of the pointer being handled.
-  explicit ScopedArray(T *ptr = 0) : std::unique_ptr<T[]>(ptr) {}
+  explicit ScopedArray(T *ptr = 0) : std::unique_ptr<T[], ArrayDeleter<T> >(ptr) {}
+};
+
+/**
+ * \brief Extended version of STL unique_ptr applied to memory-aligned arrays.
+ *
+ * Handles and deletes memory-aligned arrays allocated using the AlignedArray template.
+ */
+template <typename T>
+class ScopedAlignedArray : public std::unique_ptr<T[], AlignedDeleter<T> > {
+public:
+  typedef T ElementType; ///< Type of the pointer being handled.
+
+  explicit ScopedAlignedArray(const AlignedArray<T> &ptr = AlignedArray<T>()) : Base(static_cast<T *>(ptr)) {}
+  void reset(const AlignedArray<T> &ptr = AlignedArray<T>()) { Base::reset(static_cast<T *>(ptr)); }
+
+private:
+  typedef std::unique_ptr<T[], AlignedDeleter<T> > Base;
 };
 
 #endif
@@ -125,6 +168,10 @@ void swap(ScopedPtr<T> &p1, ScopedPtr<T> &p2) { p1.swap(p2); }
 /// Swap the contents of two scoped arrays.
 template <typename T>
 void swap(ScopedArray<T> &p1, ScopedArray<T> &p2) { p1.swap(p2); }
+
+/// Swap the contents of two scoped aligned arrays.
+template <typename T>
+void swap(ScopedAlignedArray<T> &p1, ScopedAlignedArray<T> &p2) { p1.swap(p2); }
 
 } // namespace kche_tree
 

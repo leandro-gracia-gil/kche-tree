@@ -24,47 +24,15 @@
  * \author Leandro Graciá Gil
  */
 
-// Includes from STL and the C standard library.
-#include <cstdlib>
-#include <functional>
-
-// Include the map-reduce metaprograming templates and traits.
-#include "map_reduce.h"
+#include "allocator.h"
 #include "traits.h"
 
 namespace kche_tree {
 
-/**
- * Generic memory allocator operator for feature vector arrays.
- * Defined so that memory-aligned specializations can be defined if required.
- *
- * \param size Total size in bytes of the objects to allocate.
- * \return Address to the new allocated memory.
- */
+/// Initialize an empty vector. Alignment gap elements may be initialized to zero.
 template <typename T, const unsigned int D>
-void *Vector<T, D>::operator new [] (size_t size) {
-
-  // Allocate plain memory for the requested vectors.
-  void *p = malloc(size);
-
-  // Throw an allocation exception in case of error.
-  if (!p)
-    throw std::bad_alloc();
-
-  return p;
-}
-
-/**
- * Generic memory deallocator operator for feature vector arrays.
- * Defined as complement of operator new [] so that memory-aligned specializations can be defined if required.
- *
- * \param p Pointer to the address to release.
- */
-template <typename T, const unsigned int D>
-void Vector<T, D>::operator delete [] (void *p) {
-
-  // Just release memory.
-  free(p);
+Vector<T, D>::Vector() {
+  initSSEAlignmentGap(data_, D);
 }
 
 /**
@@ -103,6 +71,31 @@ bool Vector<T, D>::operator != (const Vector &p) const {
 template <typename T, const unsigned int D>
 Vector<T, D>::Vector(std::istream &in, Endianness::Type endianness) {
   deserialize(data_, in, endianness);
+  initSSEAlignmentGap(data_, D);
+}
+
+/// Overloaded new operator to support memory alignment if required.
+template <typename T, const unsigned int D>
+void *Vector<T, D>::operator new (size_t nbytes) {
+  return Allocator<>::alloc(nbytes);
+}
+
+/// Overloaded new [] operator to support memory alignment if required.
+template <typename T, const unsigned int D>
+void *Vector<T, D>::operator new [] (size_t nbytes) {
+  return Allocator<>::alloc(nbytes);
+}
+
+/// Overloaded delete operator to properly delete aligned memory.
+template <typename T, const unsigned int D>
+void Vector<T, D>::operator delete (void *p) {
+  Allocator<>::dealloc(p);
+}
+
+/// Overloaded delete [] operator to properly delete aligned memory.
+template <typename T, const unsigned int D>
+void Vector<T, D>::operator delete [] (void *p) {
+  Allocator<>::dealloc(p);
 }
 
 /**
