@@ -27,10 +27,10 @@
 #ifndef _KCHE_TREE_VECTOR_H_
 #define _KCHE_TREE_VECTOR_H_
 
-// Include endianness and traits information and optimized params.
 #include "endianness.h"
+#include "sse.h"
 #include "traits.h"
-#include "rparam.h"
+#include "utils.h"
 
 namespace kche_tree {
 
@@ -70,13 +70,14 @@ public:
   static const unsigned int Dimensions = D;
 
   // Default constructor.
-  Vector() {}
+  Vector();
 
   // Read the vector from an input stream.
   Vector(std::istream &in, Endianness::Type endianness);
 
   // Direct access to the data array.
   const T *data() const { return data_; }
+  T *mutable_data() { return data_; }
 
   // Subscript operators.
   const T & operator [] (unsigned int index) const { return data_[index]; } ///< Const subscript operator.
@@ -86,18 +87,25 @@ public:
   bool operator == (const Vector &p) const; ///< Equality comparison operator. May be optimized if \link kche_tree::HasTrivialEqual HasTrivialEqual::value\endlink is \c true.
   bool operator != (const Vector &p) const; ///< Non-equality comparison operator. May be optimized if \link kche_tree::HasTrivialEqual HasTrivialEqual::value\endlink is \c true.
 
-  // Memory operators: used to allow memory-aligned specializations. For example, for SSE optimizations.
-  void *operator new [] (size_t size); ///< Standard allocation for arrays of feature vectors.
-  void  operator delete [] (void *p); ///< Standard deallocation for arrays of feature vectors.
-
   // Friends for endianness swapping and serialization.
   friend struct EndiannessTraits<Vector<T, D> >;
   friend std::ostream & operator << <>(std::ostream &out, const Vector &vector);
 
+  // Memory operators to handle automatic alignment in SSE.
+  void *operator new (size_t nbytes);
+  void *operator new [] (size_t nbytes);
+  void operator delete (void *p);
+  void operator delete [] (void *p);
+
 private:
-  /// Contiguous D-dimensional data array.
-  T data_[D];
-};
+  /// Contiguous D-dimensional data array extended to the next multiple of 4 when SSE is enabled.
+  /// Extra data is initialized to zero using the appropriate method in traits.
+  T data_[KCHE_TREE_SSE_COMPILE_ALIGN(T, D)];
+}
+#if KCHE_TREE_ENABLE_SSE
+KCHE_TREE_ALIGNED(16)
+#endif
+;
 
 /// Vectors have trivial serialization if their contents do.
 template <typename T, const unsigned int D>

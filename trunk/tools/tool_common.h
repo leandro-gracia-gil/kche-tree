@@ -29,17 +29,22 @@
 
 // Include for custom types.
 #if defined(CUSTOM_INCLUDE)
-#include CUSTOM_INCLUDE
+#define __ADD_QUOTES(s) __STRINGIFY(s)
+#define __STRINGIFY(s) #s
+#include __ADD_QUOTES(CUSTOM_INCLUDE)
 #endif
 
 // Define the tool parameters.
 typedef TYPE ElementType;
 static const unsigned int Dimensions = DIMENSIONS;
 
-// Include the kche-tree library.
-#include "kche-tree/kche-tree.h"
+// Enabled debug assertions in the verification tests.
+#if defined(VERIFY)
+#define KCHE_TREE_DEBUG
+#endif
 
-// Use the kche_tree library namespace.
+// Include and use the kche_tree library namespace.
+#include "kche-tree/kche-tree.h"
 using namespace kche_tree;
 
 // Define the appropriate tool type.

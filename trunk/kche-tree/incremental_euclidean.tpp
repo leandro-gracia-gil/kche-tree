@@ -42,7 +42,7 @@ struct EuclideanIncrementalFunctor<T, D, true> {
   /// Use optimized const reference types.
   typedef typename RParam<T>::Type ConstRef_T;
 
-  T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
+  inline T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
       const KDSearchData<T, D, Metric> &search_data) const;
 };
 
@@ -59,7 +59,7 @@ struct EuclideanIncrementalFunctor<T, D, false> {
   /// Use optimized const reference types.
   typedef typename RParam<T>::Type ConstRef_T;
 
-  T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
+  inline T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
       const KDSearchData<T, D, Metric> &search_data) const;
 };
 

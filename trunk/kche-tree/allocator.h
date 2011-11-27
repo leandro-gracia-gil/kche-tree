@@ -19,34 +19,56 @@
  ***************************************************************************/
 
 /**
- * \file noncopyable.h
- * \brief Base class for non-copyable objects and templates.
+ * \file allocator.h
+ * \brief Memory allocator with optional alignment used by the kche-tree library.
  * \author Leandro Graciá Gil
- */
+*/
 
-#ifndef _KCHE_TREE_NONCOPYABLE_H_
-#define _KCHE_TREE_NONCOPYABLE_H_
+#ifndef KCHE_TREE_ALLOCATOR_H_
+#define KCHE_TREE_ALLOCATOR_H_
+
+// Includes for the SSE instruction set and aligned memory allocation.
+#if !defined(__APPLE__)
+#include <malloc.h>
+#endif
 
 namespace kche_tree {
 
-/**
- * \brief Base class for non-copyable objects.
- *
- * Leaves undefined or deletes (if C++0x is enabled) the copy constructor and the asignment operator.
- */
-class NonCopyable {
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  NonCopyable(const NonCopyable &);
-  NonCopyable &operator = (const NonCopyable &);
-#else
-  NonCopyable(const NonCopyable &) = delete;
-  NonCopyable &operator = (const NonCopyable &) = delete;
-#endif
+/// Standard allocator. Performs no special operations.
+template <bool align = Settings::enable_sse>
+struct Allocator {
+  static void *alloc(size_t nbytes) {
+    void *p = malloc(nbytes);
+    if (!p)
+      throw std::bad_alloc();
+    return p;
+  }
 
-protected:
-  NonCopyable() {}
+  static void dealloc(void *p) {
+    free(p);
+  }
 };
 
-} // namespace kche_tree
+// Note: Mac OS X has already 16 byte memory alignment, so this specialization is not required.
+#if !defined(__APPLE__)
+
+/// Specialization to allocate memory aligned to 16 bytes. Required for SSE instructions.
+template <>
+struct Allocator<true> {
+  static void *alloc(size_t nbytes) {
+    void *p = memalign(16, nbytes);
+    if (!p)
+      throw std::bad_alloc();
+    return p;
+  }
+
+  static void dealloc(void *p) {
+    free(p);
+  }
+};
+
+#endif
+
+}
 
 #endif

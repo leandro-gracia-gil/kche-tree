@@ -50,8 +50,7 @@
 // Include compile-time assertions, endianness operations, smart pointers and optimized params.
 #include "compile_assert.h"
 #include "endianness.h"
-#include "smart_ptr.h"
-#include "rparam.h"
+#include "utils.h"
 
 namespace kche_tree {
 
@@ -60,10 +59,12 @@ namespace kche_tree {
 using std::tr1::is_fundamental;
 using std::tr1::is_same;
 using std::tr1::has_trivial_copy;
+using std::tr1::is_base_of;
 #else
 using std::is_fundamental;
 using std::is_same;
 using std::has_trivial_copy_constructor;
+using std::is_base_of;
 #endif
 
 /// Determine if a type is a fundamental one. This is basically an alias to the equivalent STL or TR1 type trait.

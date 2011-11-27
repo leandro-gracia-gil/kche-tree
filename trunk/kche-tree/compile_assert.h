@@ -39,13 +39,22 @@ template <> struct COMPILE_ASSERT_FAILURE<true> { enum { x = 1 }; };
 /// Auxiliary struct to provide compile-time assertions.
 template <size_t> struct CompileAssertTest {};
 
-/// Macro used to check assertions in compile time. Any error messages are dropped.
-#define KCHE_TREE_COMPILE_ASSERT(x, msg) \
-  typedef ::kche_tree::CompileAssertTest< \
-  sizeof(::kche_tree::COMPILE_ASSERT_FAILURE<(bool)(x)>)> _CompileAssertType
-
 } // namespace kche_tree
+
+#define KCHE_TREE_MACRO_CONCATENATE(x, y) x ## y
+#define KCHE_TREE_MACRO_JOIN(x, y) KCHE_TREE_MACRO_CONCATENATE(x, y)
+
+#define KCHE_TREE_COMPILE_ASSERT_INTERNAL(x, msg) \
+  typedef ::kche_tree::CompileAssertTest< \
+  sizeof(::kche_tree::COMPILE_ASSERT_FAILURE<(bool)(x)>)> _CompileAssertType_
+
+// Raises a compile-time assertion if x doesn't evaluate to true.
+// The message argument is discarded in the non-C++0x version.
+#define KCHE_TREE_COMPILE_ASSERT(x, msg) \
+  KCHE_TREE_MACRO_JOIN(KCHE_TREE_COMPILE_ASSERT_INTERNAL(x, msg), __COUNTER__)
+
 #else
+// Raises a compile-time assertion if x doesn't evaluate to true.
 #define KCHE_TREE_COMPILE_ASSERT(x, msg) static_assert((x), msg)
 #endif
 

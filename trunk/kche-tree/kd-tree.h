@@ -41,7 +41,7 @@
 #include "traits.h"
 #include "kd-node.h"
 #include "metrics.h"
-#include "rparam.h"
+#include "utils.h"
 
 namespace kche_tree {
 

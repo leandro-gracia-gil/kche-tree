@@ -33,7 +33,7 @@
 // Include indirect heaps, traits information and optimized params.
 #include "indirect_heap.h"
 #include "traits.h"
-#include "rparam.h"
+#include "utils.h"
 
 namespace kche_tree {
 

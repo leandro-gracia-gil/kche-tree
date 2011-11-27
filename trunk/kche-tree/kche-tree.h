@@ -96,6 +96,42 @@
 /// Namespace of the Kche-tree template library.
 namespace kche_tree {
 
+// Macros used to recognize SSE compiler settings.
+#if defined(__SSE__) || (defined(_M_IX86_FP) && (_M_IX86_FP >= 1))
+#define KCHE_TREE_SSE_SUPPORTED true
+#else
+#define KCHE_TREE_SSE_SUPPORTED false
+#endif
+
+// Default values for the settings.
+#if !defined(KCHE_TREE_MAX_UNROLL)
+#define KCHE_TREE_MAX_UNROLL 1024
+#endif
+
+#if !defined(KCHE_TREE_VERIFY_KDTREE_AFTER_DESERIALIZING)
+#define KCHE_TREE_VERIFY_KDTREE_AFTER_DESERIALIZING true
+#endif
+
+#if !defined(KCHE_TREE_ENABLE_SSE)
+#define KCHE_TREE_ENABLE_SSE false
+#endif
+
+// Disable the SSE enable macro if not supported
+#if (KCHE_TREE_ENABLE_SSE) && !(KCHE_TREE_SSE_SUPPORTED)
+#undef KCHE_TREE_ENABLE_SSE
+#define KCHE_TREE_ENABLE_SSE false
+#endif
+
+// Debug assertion macros.
+#if defined(KCHE_TREE_DEBUG)
+#define KCHE_TREE_DCHECK(cond) assert(cond)
+#else
+#define KCHE_TREE_DCHECK(cond)
+#endif
+
+// Code not reached macros.
+#define KCHE_TREE_NOT_REACHED() assert(false)
+
 // Forward-declare data sets and vectors.
 template <typename T, const unsigned int D> class DataSet;
 template <typename T, const unsigned int D> class Vector;
@@ -105,17 +141,18 @@ template <typename T, const unsigned int D> class Vector;
  *
  * Defines various options to enhance the library functionality
  * at compile time. Specialize the template to set new values for them.
- *
- * \tparam Type of the elements used by the library to which the options apply.
  */
-template <typename T>
 struct Settings {
   /// Maximum number of dimensions to unroll when using map-reduce operations. If exceeded a loop will be used instead.
   /// \warning Increasing this value may cause compile errors due to the compiler template recursion limit.
-  static const unsigned int max_map_reduce_unroll = 1024;
+  static const unsigned int max_map_reduce_unroll = KCHE_TREE_MAX_UNROLL;
 
   /// Check if the kd-tree structure should be verified when deserializing. Will not compile the verification code if disabled.
-  static const bool verify_kdtree_after_deserializing = true;
+  static const bool verify_kdtree_after_deserializing = KCHE_TREE_VERIFY_KDTREE_AFTER_DESERIALIZING;
+
+  /// Enable SSE optimizations. Any specific required flags are assumed to be passed to the compiler.
+  /// \warning This only works with some metrics, types (including accumulator types) and the number of dimensions should be a multiple of 4.
+  static const bool enable_sse = KCHE_TREE_ENABLE_SSE;
 };
 
 /**
@@ -138,7 +175,7 @@ struct TypeSettings {
 
 } // namespace kche_tree
 
-// Required library includes.
+// Include the kd-tree template.
 #include "kd-tree.h"
 
 #endif

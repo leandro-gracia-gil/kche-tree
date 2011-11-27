@@ -87,24 +87,36 @@ std::ostream& operator << (std::ostream& out, const Custom &object) {
 // Now provide some traits information to enable internal optimizations.
 namespace kche_tree {
 
-  // C++ type traits don't provide a way to find out if a type implements the equality operator or not.
-  // With this, we're telling kche-tree that our custom type can be compared by just raw memcmp and enable some optimizations.
-  // Your type should satisfy is_pod<T> before doing this.
+  /**
+   * \brief Example trivial equality comparison trait for a custom type.
+   *
+   * C++ type traits don't provide a way to find out if a type implements the equality operator or not.
+   * With this, we're telling kche-tree that our custom type can be compared by just raw memcmp and enable some optimizations.
+   * Your type should satisfy is_pod<T> before doing this.
+   */
   template <>
   struct HasTrivialEqual<Custom> {
     static const bool value = true;
   };
 
-  // C++ type traits don't provide either a way to find out if a type implements the stream operators or not.
-  // With this, we're telling kche-tree that our custom type can be serialized by just reading/writing its memory and enable some optimizations.
-  // Your type should satisfy is_pod<T> before doing this.
+  /**
+   * \brief Example trivial serialization trait for a custom type.
+   *
+   * C++ type traits don't provide either a way to find out if a type implements the stream operators or not.
+   * With this, we're telling kche-tree that our custom type can be serialized by just reading/writing its memory and enable some optimizations.
+   * Your type should satisfy is_pod<T> before doing this.
+   */
   template <>
   struct HasTrivialSerialization<Custom> {
     static const bool value = true;
   };
 
-  // Since we're implementing object serialization we need to provide a way to convert from little/big endian.
-  // This trait provides a way to swap the endianness of the elements in the object.
+  /**
+   * \brief Example endianness traits for a custom type.
+   *
+   * Since we're implementing object serialization we need to provide a way to convert from little/big endian.
+   * This trait provides a way to swap the endianness of the elements in the object.
+   */
   template <>
   struct EndiannessTraits<Custom> {
     static void swap_endianness(Custom &value) {
@@ -114,8 +126,12 @@ namespace kche_tree {
     }
   };
 
-  // Because of the nature of the kd-tree structure many scalar functionalities are expected from the type used.
-  // This trait defines these, being some of them used only in the Mahalanobis metric or by the verification tool.
+  /**
+   * \brief Example numeric traits for a custom type.
+   *
+   * Because of the nature of the kd-tree structure many scalar functionalities are expected from the type used.
+   * This trait defines these, being some of them used only in the Mahalanobis metric or by the verification tool.
+   */
   template <>
   struct NumericTraits<Custom> {
     static Custom max() { return Custom(Traits<float>::max()); } ///< Maximum finite representable value.

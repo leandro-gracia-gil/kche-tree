@@ -24,6 +24,9 @@
  * \author Leandro Graciá Gil
  */
 
+// Include scoped arrays.
+#include "scoped_ptr.h"
+
 namespace kche_tree {
 
 /**

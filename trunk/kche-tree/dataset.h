@@ -32,8 +32,8 @@
 #include <stdexcept>
 #include <typeinfo>
 
-// Include smart pointers, type traits and feature vectors.
-#include "smart_ptr.h"
+// Include shared arrays, type traits and feature vectors.
+#include "shared_ptr.h"
 #include "traits.h"
 #include "vector.h"
 
@@ -115,7 +115,7 @@ public:
   friend std::ostream & operator << <>(std::ostream &out, const DataSet &dataset);
 
 private:
-  SharedArray<VectorType> vectors_; ///< Array of the vectors in the data set.
+  SharedArray<VectorType> vectors_; ///< Array of the vectors in the data set. Optionally aligned to the 16-byte boundary for SSE optimizations.
   uint32_t size_; ///< Number of vectors in the data set.
   static const uint16_t version[2]; ///< Tuple of major and minor version of the current data set serialization format.
 };
