@@ -29,32 +29,13 @@
 
 namespace kche_tree {
 
-// Forward declarations.
-template <typename T, const unsigned int D, bool isFundamental = IsFundamental<T>::value> struct MahalanobisIncrementalFunctor;
-
 /**
  * \brief Functor for the Mahalanobis incremental distance update.
- * Especialization for fundamental types that makes use of operators that would require temporary copies in objects.
+ *
+ * Makes use of the +=, -= and *= operators.
  */
 template <typename T, const unsigned int D>
-struct MahalanobisIncrementalFunctor<T, D, true> {
-
-  /// Metric associated with this incremental calculation.
-  typedef MahalanobisMetric<T, D> Metric;
-
-  /// Use optimized const reference types.
-  typedef typename RParam<T>::Type ConstRef_T;
-
-  inline T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
-      const KDSearchData<T, D, Metric> &search_data) const;
-};
-
-/**
- * \brief Functor for the Mahalanobis incremental distance update.
- * Especialization for non-fundamental types. Makes use only of the +=, -= and *= operators.
- */
-template <typename T, const unsigned int D>
-struct MahalanobisIncrementalFunctor<T, D, false> {
+struct MahalanobisIncrementalFunctor {
 
   /// Metric associated with this incremental calculation.
   typedef MahalanobisMetric<T, D> Metric;
@@ -84,45 +65,18 @@ struct MahalanobisIncrementalFunctor<T, D, false> {
  * \return The reference to the current distance to the hyperrectangle. Should have been updated.
  */
 template <typename T, const unsigned int D>
-T& MahalanobisIncrementalFunctor<T, D, true>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearchData<T, D, Metric> &search_data) const {
+T& MahalanobisIncrementalFunctor<T, D>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearchData<T, D, Metric> &search_data) const {
 
-  const SymmetricMatrix<T> &S = search_data.metric.inverse_covariance();
-  T inc_axis = search_data.axis[axis].nearest - split_value;
-  T cur_axis = search_data.axis[axis].p - search_data.axis[axis].nearest;
-
-  typedef typename Traits<T>::AccumulatorType AccumT;
-  AccumT acc = S(axis, axis) * (inc_axis + cur_axis * 2.0);
-
-  if (!search_data.metric.has_diagonal_covariance()) {
-    for (unsigned int i=0; i<axis; ++i) {
-      T cur_i = search_data.axis[i].p - search_data.axis[i].nearest;
-      acc += cur_i * S(i, axis) * 2.0;
-    }
-
-    for (unsigned int i=axis+1; i<D; ++i) {
-      T cur_i = search_data.axis[i].p - search_data.axis[i].nearest;
-      acc += cur_i * S(axis, i) * 2.0;
-    }
-  }
-
-  return current_distance += acc * inc_axis;
-}
-
-/**
- * \brief Incrementally update the distance from the implicit reference vector p to the current hyperrectangle using the Mahalanobis metric.
- * Specialization for non-fundamental types that avoids unnecessary copies of objects.
- *
- * See the documentation for the template parameter \c isFundamental = \c true specialization for details.
- */
-template <typename T, const unsigned int D>
-T& MahalanobisIncrementalFunctor<T, D, false>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearchData<T, D, Metric> &search_data) const {
-
+  // Equivalent to:
+  //  T inc_axis = search_data.axis[axis].nearest - split_value;
+  //  T cur_axis = search_data.axis[axis].p - search_data.axis[axis].nearest;
   const SymmetricMatrix<T> &S = search_data.metric.inverse_covariance();
   T inc_axis = search_data.axis[axis].nearest;
   inc_axis -= split_value;
   T cur_axis = search_data.axis[axis].p;
   cur_axis -= search_data.axis[axis].nearest;
 
+  // Equivalent to: AccumT acc = S(axis, axis) * (inc_axis + cur_axis * 2.0);
   typedef typename Traits<T>::AccumulatorType AccumT;
   AccumT acc = cur_axis;
   acc += cur_axis;
@@ -131,6 +85,9 @@ T& MahalanobisIncrementalFunctor<T, D, false>::operator () (T &current_distance,
 
   if (!search_data.metric.has_diagonal_covariance()) {
     for (unsigned int i=0; i<axis; ++i) {
+      // Equivalent to:
+      //  T cur_i = search_data.axis[i].p - search_data.axis[i].nearest;
+      //  acc += cur_i * S(i, axis) * 2.0;
       T temp = search_data.axis[i].p;
       temp -= search_data.axis[i].nearest;
       temp += temp;
@@ -139,6 +96,7 @@ T& MahalanobisIncrementalFunctor<T, D, false>::operator () (T &current_distance,
     }
 
     for (unsigned int i=axis+1; i<D; ++i) {
+      // Same as the previous loop.
       T temp = search_data.axis[i].p;
       temp -= search_data.axis[i].nearest;
       temp += temp;
@@ -147,6 +105,7 @@ T& MahalanobisIncrementalFunctor<T, D, false>::operator () (T &current_distance,
     }
   }
 
+  // Equivalent to: return current_distance += acc * inc_axis;
   acc *= inc_axis;
   return current_distance += acc;
 }

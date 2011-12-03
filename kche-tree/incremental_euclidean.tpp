@@ -26,32 +26,13 @@
 
 namespace kche_tree {
 
-// Forward declarations.
-template <typename T, const unsigned int D, bool isFundamental = IsFundamental<T>::value> struct EuclideanIncrementalFunctor;
-
 /**
  * \brief Functor for the Euclidean incremental distance update.
- * Especialization for fundamental types that makes use of operators that would require temporary copies in objects.
+ *
+ * Makes use of the +=, -= and *= operators.
  */
 template <typename T, const unsigned int D>
-struct EuclideanIncrementalFunctor<T, D, true> {
-
-  /// Metric associated with this incremental calculation.
-  typedef EuclideanMetric<T, D> Metric;
-
-  /// Use optimized const reference types.
-  typedef typename RParam<T>::Type ConstRef_T;
-
-  inline T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
-      const KDSearchData<T, D, Metric> &search_data) const;
-};
-
-/**
- * \brief Functor for the Euclidean incremental distance update.
- * Especialization for non-fundamental types. Makes use only of the +=, -= and *= operators.
- */
-template <typename T, const unsigned int D>
-struct EuclideanIncrementalFunctor<T, D, false> {
+struct EuclideanIncrementalFunctor {
 
   /// Metric associated with this incremental calculation.
   typedef EuclideanMetric<T, D> Metric;
@@ -92,20 +73,9 @@ struct EuclideanIncrementalFunctor<T, D, false> {
  * \return The reference to the current distance to the hyperrectangle. Should have been updated.
  */
 template <typename T, const unsigned int D>
-T& EuclideanIncrementalFunctor<T, D, true>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearchData<T, D, Metric> &search_data) const {
+T& EuclideanIncrementalFunctor<T, D>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearchData<T, D, Metric> &search_data) const {
   const typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData &current_axis = search_data.axis[axis];
-  return current_distance += (split_value - current_axis.nearest) * (current_axis.nearest + split_value - current_axis.p * 2.0);
-}
-
-/**
- * \brief Incrementally update the distance from the implicit reference vector p to the current hyperrectangle using the Euclidean metric.
- * Specialization for non-fundamental types that avoids unnecessary copies of objects.
- *
- * See the documentation for the template parameter \c isFundamental = \c true specialization for details.
- */
-template <typename T, const unsigned int D>
-T& EuclideanIncrementalFunctor<T, D, false>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearchData<T, D, Metric> &search_data) const {
-  const typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData &current_axis = search_data.axis[axis];
+  // Equivalent to: return current_distance += (split_value - current_axis.nearest) * (current_axis.nearest + split_value - current_axis.p * 2.0);
   T acc1 = split_value;
   acc1 -= current_axis.nearest;
   T acc2 = split_value;

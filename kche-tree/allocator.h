@@ -52,7 +52,7 @@ struct Allocator {
 // Note: Mac OS X has already 16 byte memory alignment, so this specialization is not required.
 #if !defined(__APPLE__)
 
-/// Specialization to allocate memory aligned to 16 bytes. Required for SSE instructions.
+/// Specialization to allocate memory aligned to 16 bytes. Required to use SSE instructions.
 template <>
 struct Allocator<true> {
   static void *alloc(size_t nbytes) {
