@@ -255,4 +255,7 @@ void initSSEAlignmentGap(T *array, unsigned int size) {
 
 } // namespace kche_tree
 
+// Include SSE2 specifics.
+#include "sse2.h"
+
 #endif

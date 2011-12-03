@@ -106,10 +106,14 @@
 namespace kche_tree {
 
 // Macros used to recognize SSE compiler settings.
-#if defined(__SSE__) || (defined(_M_IX86_FP) && (_M_IX86_FP >= 1))
+#if defined(__SSE__) || defined(__SSE2__) || (defined(_M_IX86_FP) && (_M_IX86_FP >= 1))
 #define KCHE_TREE_SSE_SUPPORTED true
+#if defined(__SSE2__) || (defined(_M_IX86_FP) && (_M_IX86_FP >= 2))
+#define KCHE_TREE_SSE2_SUPPORTED true
+#endif
 #else
 #define KCHE_TREE_SSE_SUPPORTED false
+#define KCHE_TREE_SSE2_SUPPORTED false
 #endif
 
 // Default values for the settings.

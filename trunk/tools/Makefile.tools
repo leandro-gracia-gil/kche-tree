@@ -31,6 +31,7 @@ mahalanobis_diagonal_no_unroll = float 24 mahalanobis_diagonal -DKCHE_TREE_MAX_U
 custom_euclidean = Custom 24 euclidean -DCUSTOM_INCLUDE=custom_type.h
 custom_mahalanobis = Custom 24 mahalanobis -DCUSTOM_INCLUDE=custom_type.h
 euclidean_sse = float 24 euclidean -DKCHE_TREE_ENABLE_SSE=true -msse
+euclidean_double_sse = double 25 euclidean -DKCHE_TREE_ENABLE_SSE=true -msse2
 mahalanobis_sse = float 25 mahalanobis -DKCHE_TREE_ENABLE_SSE=true -msse
 mahalanobis_diagonal_sse = float 24 mahalanobis_diagonal -DKCHE_TREE_ENABLE_SSE=true -msse
 euclidean_no_unroll_sse = float 24 euclidean -DKCHE_TREE_MAX_UNROLL=1 -DKCHE_TREE_ENABLE_SSE=true -msse
@@ -39,5 +40,5 @@ mahalanobis_no_unroll_sse = float 24 mahalanobis -DKCHE_TREE_MAX_UNROLL=1 -DKCHE
 # Add different testing cases to be built as a specific type of tool (ie. for benchmark, for result verification).
 # Testing cases will only be built if added here to one or more tool types.
 # The resulting filename will have a prefix according with its tool type. For example, verify_euclidean or benchmark_mahalanobis.
-verification_tools = euclidean mahalanobis mahalanobis_diagonal euclidean_no_unroll mahalanobis_no_unroll mahalanobis_diagonal_no_unroll custom_euclidean custom_mahalanobis euclidean_sse mahalanobis_sse mahalanobis_diagonal_sse euclidean_no_unroll_sse mahalanobis_no_unroll_sse
-benchmark_tools = euclidean mahalanobis mahalanobis_diagonal euclidean_no_unroll custom_euclidean custom_mahalanobis euclidean_sse mahalanobis_sse mahalanobis_diagonal_sse
+verification_tools = euclidean mahalanobis mahalanobis_diagonal euclidean_no_unroll mahalanobis_no_unroll mahalanobis_diagonal_no_unroll custom_euclidean custom_mahalanobis euclidean_sse euclidean_double_sse mahalanobis_sse mahalanobis_diagonal_sse euclidean_no_unroll_sse mahalanobis_no_unroll_sse
+benchmark_tools = euclidean mahalanobis mahalanobis_diagonal euclidean_no_unroll custom_euclidean custom_mahalanobis euclidean_sse euclidean_double_sse mahalanobis_sse mahalanobis_diagonal_sse
