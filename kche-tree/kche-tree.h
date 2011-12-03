@@ -40,23 +40,23 @@
  * Here are some of its features:
  * - Incremental calculation of the hyperrectangle intersections.
  * - Can define the metrics to use when exploring the tree: Euclidean, Mahalanobis, Chebyshev, etc.
+ * - Automatic SSE code generation and unrolling optimized for the requested number of dimensions.
  * - Internal data permutation to increase cache hits.
  * - Contiguous bucket data to reduce the leaf node size.
  * - Preorder memory allocation during the build to increase cache hits when traversing.
  * - Exploration/intersection recursive scheme to reduce the number of calculations performed.
  * - Use of specific k-neighbours optimized containers: k-vectors and k-heaps.
  * - Distance calculations with upper bounds allowing early returns.
- * - Designed to easily enable SSE optimizations by template specialization. Example and benchmarks included.
  * - Binary file format and stream operators provide to easily save and load the kd-trees and data sets.
  *
  * The current version is not still thread-safe. This is expected to be solved in future releases
  * along with OpenMP optimizations.
  *
  * Additionally, the following tools and examples are provided:
- * - <b>Verify tool</b>: verifies the correction of the results provided by Kche-tree compared with a raw exhaustive search.
- *   Can be found in the file tools/verify.cpp. Comes with an extra SSE-optimized version.
- * - <b>Benchmark tool</b>: measures the time spent in building the kd-tree and finding the K nearest neighbours.
- *   Can be found in file speed_kdtree.cpp. Like the testing tool it also comes comes with an extra SSE-optimized version.
+ * - <b>Verifation tools</b>: set of tools to verify the correction of the results provided by Kche-tree compared with a raw exhaustive search.
+ *   Automatically generated for the metric, dimensions and type specified in tools/Makefile.tools.
+ * - <b>Benchmark tool</b>: set of tools to measure the time spent in building the kd-tree and finding the K nearest neighbours.
+ *   Automatically generated for the metric, dimensions and type specified in tools/Makefile.tools.
  * - <b>knn simple example</b>: shows a quite simple use of the template. Can be found in the file examples/knn_simple.cpp.
  * - <b>custom types example</b>: shows how to use a custom type with Kche-tree. Can be found in the file examples/custom_type.cpp.
  *
@@ -68,8 +68,17 @@
  * the \c kche-tree folder to be present in an include path. This can also be achieved by running \c make \c install,
  * will copy the template files to your /usr/include folder by default. To undo this run \c make \c uninstall.
  *
- * In case of using the floating point/24 dimension SSE specialization,
- * the file tools/kd-tree_sse_24d.h and the compilation flag \c -msse (in GCC) will be also required.
+ * \section settings Settings
+ * Kche-tree allows some extra settings to be set by defining macros before including the main header.
+ * Some of these options include:
+ * - \c KCHE_TREE_ENABLE_SSE: enables using SSE instructions to perform the distance calculations.
+ *   Will only have effect if SSE is supported and enabled by the compiler (remember to compile using any required flags!).
+ *   Defaults to \c false.
+ * - \c KCHE_TREE_MAX_UNROLL: the maximum number of dimensions for which loop unrolling is allowed.
+ *   Lower this value to disable loop unrolling or to avoid compiler errors due to the maximum template recursion limit.
+ *   Defaults to 1024.
+ * - \c KCHE_TREE_VERIFY_KDTREE_AFTER_DESERIALIZING: if enabled, the structural properties of the kd-tree are verified after loading it from a file.
+ *   This can be disabled for performance reasons if set to \c false. Defaults to \c true.
  *
  * \section CPP0x About C++0x
  * Kche-trees use by default C++0x features available in the most modern compilers to enhance its use and operations.
