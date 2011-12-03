@@ -127,7 +127,6 @@ public:
 
   const SymmetricMatrix<T> &inverse_covariance() const { return inv_covariance_; } ///< Retrieve the inverse covariance matrix associated to the metric.
   bool has_diagonal_covariance() const { return is_diagonal_; } ///< Check if the inverse covariance matrix is diagonal.
-  CacheVectorType &cache() const { return cache_; } ///< Get the cache vector for intermediate results. Used internally by functors.
 
   // Squared distance to a feature vector.
   inline T operator () (const VectorType &v1, const VectorType &v2) const;
@@ -138,7 +137,6 @@ public:
 private:
   SymmetricMatrix<T> inv_covariance_; ///< Inverse covariance matrix associated with the metric instance.
   bool is_diagonal_; ///< Flag indicating if the inverse covariance matrix is diagonal and hence enabling severe optimizations.
-  mutable CacheVectorType cache_; ///< Cache vector holding intermediate results for evaluating the metric.
 };
 
 } // namespace kche_tree

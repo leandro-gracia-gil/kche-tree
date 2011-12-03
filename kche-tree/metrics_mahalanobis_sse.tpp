@@ -43,8 +43,8 @@ struct DifferenceFunctorSSE : public SSEFunctor<SSERegisterType> {
   /// Loop-based version of the operation.
   template <unsigned int D>
   inline SSERegisterType *& operator () (unsigned int index, unsigned int block_size, SSERegisterType *&acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
-    for (unsigned int k=0, i=index; k<block_size; ++k, ++i)
-      op(acc[i], a[i], b[i]);
+    KCHE_TREE_DCHECK(block_size == 1);
+    op(acc[index], a[index], b[index]);
     return acc;
   }
 
@@ -53,8 +53,7 @@ struct DifferenceFunctorSSE : public SSEFunctor<SSERegisterType> {
   inline SSERegisterType *& operator () (SSERegisterType *&acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
     // Since this operation is purely SIMD parallel there is no benefit in processing multiple blocks together.
     KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "Expecting BlockSize == 1");
-    op(acc[Index], a[Index], b[Index]);
-    return acc;
+    return operator () <D>(Index, BlockSize, acc, a, b, extra);
   }
 };
 
@@ -83,26 +82,18 @@ struct DotFunctorSSE : public SSEFunctor<SSERegisterType> {
   /// Loop-based version of the operation.
   template <unsigned int D>
   inline SSERegisterType & operator () (unsigned int index, unsigned int block_size, SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
-
-    // Process as many pairs of blocks in groups of 2 as possible.
-    unsigned int k = block_size;
-    unsigned int i = index;
-    for (; k > 1; k -= 2, i += 2)
-      op2(acc, a, b, i);
-
-    // Process the last pair if block_size was odd.
-    if (k == 1)
-      return op1(acc, a, b, i);
-    return acc;
+    KCHE_TREE_DCHECK(block_size == 1 || block_size == 2);
+    if (block_size == 2)
+      return op2(acc, a, b, index);
+    else
+      return op1(acc, a, b, index);
   }
 
   /// Unrolled compile-time version of the operation.
   template <unsigned int Index, unsigned int BlockSize, unsigned int D>
   inline SSERegisterType & operator () (SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
-    KCHE_TREE_COMPILE_ASSERT(BlockSize == 1 || BlockSize == 2, "Expecting BlockSize = 1 or 2");
-    if (BlockSize == 2)
-      return op2(acc, a, b, Index);
-    return op1(acc, a, b, Index);
+    KCHE_TREE_COMPILE_ASSERT(BlockSize == 1 || BlockSize == 2, "Expecting BlockSize == 1 or 2");
+    return operator () <D>(Index, BlockSize, acc, a, b, extra);
   }
 };
 
@@ -134,26 +125,64 @@ struct SquaredFirstDotFunctorSSE : public SSEFunctor<SSERegisterType> {
   /// Loop-based version of the operation.
   template <unsigned int D>
   inline SSERegisterType& operator () (unsigned int index, unsigned int block_size, SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
-
-    // Process as many pairs of blocks in groups of 2 as possible.
-    unsigned int k = block_size;
-    unsigned int i = index;
-    for (; k > 1; k -= 2, i += 2)
-      op2(acc, a, b, i);
-
-    // Process the last pair if block_size was odd.
-    if (k == 1)
-      return op1(acc, a, b, i);
-    return acc;
+    KCHE_TREE_DCHECK(block_size == 1 || block_size == 2);
+    if (block_size == 2)
+      return op2(acc, a, b, index);
+    else
+      return op1(acc, a, b, index);
   }
 
   /// Unrolled compile-time version of the operation.
   template <unsigned int Index, unsigned int BlockSize, unsigned int D>
   inline SSERegisterType & operator () (SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
     KCHE_TREE_COMPILE_ASSERT(BlockSize == 1 || BlockSize == 2, "Expecting BlockSize = 1 or 2");
-    if (BlockSize == 2)
-      return op2(acc, a, b, Index);
-    return op1(acc, a, b, Index);
+    return operator () <D>(Index, BlockSize, acc, a, b, extra);
+  }
+};
+
+/// Map-reduce functor combining together the difference and squared first dot product operations for SSE.
+template <typename SSERegisterType>
+struct MahalanobisDiagonalFunctorSSE : public SSEFunctor<SSERegisterType> {
+
+  /// Accumulate (a-b)^2 * c for a pair of values a, b and the diagonal value c stored in pairs of 2 consecutive SSE registers.
+  inline SSERegisterType & op2(SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const SSERegisterType *c, unsigned int i) const {
+    SSERegisterType temp1, temp2;
+    temp1.set_sub(a[i], b[i]);
+    temp2.set_sub(a[i+1], b[i+1]);
+    temp1.set_mult(temp1, temp1);
+    temp2.set_mult(temp2, temp2);
+    temp1.set_mult(temp1, c[i]);
+    temp2.set_mult(temp2, c[i+1]);
+    acc.set_add(acc, temp1);
+    acc.set_add(acc, temp2);
+    return acc;
+  }
+
+  /// Accumulate (a-b)^2 * c for a pair of values a, b and the diagonal value c stored in SSE registers.
+  inline SSERegisterType & op1(SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const SSERegisterType *c, unsigned int i) const {
+    SSERegisterType temp;
+    temp.set_sub(a[i], b[i]);
+    temp.set_mult(temp, temp);
+    temp.set_mult(temp, c[i]);
+    acc.set_add(acc, temp);
+    return acc;
+  }
+
+  /// Loop-based version of the operation. The \a extra param holds the matrix diagonal values.
+  template <unsigned int D>
+  inline SSERegisterType& operator () (unsigned int index, unsigned int block_size, SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
+    KCHE_TREE_DCHECK(block_size == 1 || block_size == 2);
+    if (block_size == 2)
+      return op2(acc, a, b, reinterpret_cast<const SSERegisterType *>(extra), index);
+    else
+      return op1(acc, a, b, reinterpret_cast<const SSERegisterType *>(extra), index);
+  }
+
+  /// Unrolled compile-time version of the operation. The \a extra param holds the matrix diagonal values.
+  template <unsigned int Index, unsigned int BlockSize, unsigned int D>
+  inline SSERegisterType & operator () (SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
+    KCHE_TREE_COMPILE_ASSERT(BlockSize == 1 || BlockSize == 2, "Expecting BlockSize == 1 or 2");
+    return operator () <D>(Index, BlockSize, acc, a, b, extra);
   }
 };
 
@@ -163,7 +192,7 @@ struct SquaredFirstDotFunctorSSE : public SSEFunctor<SSERegisterType> {
  * Since this method should be applied per column (therefore, per dimension) it operates as a scalar functor despite using SSE operations.
  */
 template <typename T>
-struct MahalanobisFullFunctorSSE : public SSEFunctor<T> {
+struct MahalanobisColumnFunctorSSE : public SSEFunctor<T> {
 
   /**
    * \brief Loop-based version of the operation.
@@ -216,7 +245,7 @@ struct MahalanobisFullFunctorSSE : public SSEFunctor<T> {
   template <unsigned int Index, unsigned int BlockSize, unsigned int D>
   inline SSERegister<T> & operator () (SSERegister<T> &acc, const T *cache, const T *not_used, const void *extra) const {
 
-    KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "");
+    KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "Expecting BlockSize == 1");
     KCHE_TREE_DCHECK(not_used == NULL);
 
     const unsigned int num_blocks_index = NumSSEBlocks<T, Index - 1>::value;
@@ -247,27 +276,38 @@ struct MahalanobisFullFunctorSSE : public SSEFunctor<T> {
 template <typename T, const unsigned int D>
 T MahalanobisDistanceCalculatorSSE<T, D>::distance(const typename MahalanobisMetric<T, D>::VectorType &v1, const typename MahalanobisMetric<T, D>::VectorType &v2, const MahalanobisMetric<T, D> &metric) {
 
-  // Map the difference into a separate vector. No reduction operation is performed.
+  // Access the input data as SSE registers. The required alignment should be automatically provided.
   const unsigned int num_blocks = NumSSEBlocks<T, D>::value;
   const SSERegister<T> *v1_sse = reinterpret_cast<const SSERegister<T> *>(v1.data());
   const SSERegister<T> *v2_sse = reinterpret_cast<const SSERegister<T> *>(v2.data());
+  const SSERegister<T> *diagonal_sse = reinterpret_cast<const SSERegister<T> *>(metric.inverse_covariance().diagonal());
 
+  // Prefetch the input data.
   v1_sse->prefetch();
   v2_sse->prefetch();
 
-  T *cache = metric.cache().mutable_data();
-  SSERegister<T> *cache_sse = reinterpret_cast<SSERegister<T> *>(cache);
+  // Initialize the accumulator.
+  SSERegister<T> acc = SSERegister<T>::zero();
+
+  // Don't precalculate the cache if the covariance matrix is diagonal.
+  if (metric.has_diagonal_covariance()) {
+    diagonal_sse->prefetch();
+    MapReduce<SSERegister<T>, num_blocks>::run(MahalanobisDiagonalFunctorSSE<SSERegister<T> >(), acc, v1_sse, v2_sse, diagonal_sse);
+    return acc.sum();
+  }
+
+  // Map the difference into a separate vector. No reduction operation is performed.
+  typename MahalanobisMetric<T, D>::CacheVectorType cache;
+  initSSEAlignmentGap(cache.mutable_data(), D);
+  SSERegister<T> *cache_sse = reinterpret_cast<SSERegister<T> *>(cache.mutable_data());
   MapReduce<SSERegister<T>, num_blocks>::run(DifferenceFunctorSSE<SSERegister<T> >(), cache_sse, v1_sse, v2_sse);
 
-  SSERegister<T> acc = SSERegister<T>::zero();
-  const T *diagonal = metric.inverse_covariance().diagonal();
-  const SSERegister<T> *diagonal_sse = reinterpret_cast<const SSERegister<T> *>(diagonal);
-
+  // Operate over the inverse covariance matrix diagonal.
   diagonal_sse->prefetch();
   MapReduce<SSERegister<T>, num_blocks>::run(SquaredFirstDotFunctorSSE<SSERegister<T> >(), acc, cache_sse, diagonal_sse);
 
-  if (!metric.has_diagonal_covariance())
-    MapReduce<T, D, 1>::run(MahalanobisFullFunctorSSE<T>(), acc, metric.cache().data(), NULL, &metric.inverse_covariance());
+  // Operate over the rest of the matrix.
+  MapReduce<T, D, 1>::run(MahalanobisColumnFunctorSSE<T>(), acc, cache.data(), NULL, &metric.inverse_covariance());
 
   return acc.sum();
 }
@@ -287,27 +327,39 @@ T MahalanobisDistanceCalculatorSSE<T, D>::distance(const typename MahalanobisMet
   // Constant calculated empirically.
   const unsigned int D_acc = (unsigned int) (0.4f * D);
 
-  // Map the difference into a separate vector. No reduction operation is performed.
+  // Access the input data as SSE registers. The required alignment should be automatically provided.
   const unsigned int num_blocks = NumSSEBlocks<T, D>::value;
+  const unsigned int num_blocks_acc = NumSSEBlocks<T, D_acc>::value;
   const SSERegister<T> *v1_sse = reinterpret_cast<const SSERegister<T> *>(v1.data());
   const SSERegister<T> *v2_sse = reinterpret_cast<const SSERegister<T> *>(v2.data());
+  const SSERegister<T> *diagonal_sse = reinterpret_cast<const SSERegister<T> *>(metric.inverse_covariance().diagonal());
 
+  // Prefetch the input data.
   v1_sse->prefetch();
   v2_sse->prefetch();
 
-  T *cache = metric.cache().mutable_data();
-  SSERegister<T> *cache_sse = reinterpret_cast<SSERegister<T> *>(cache);
-  MapReduce<SSERegister<T>, num_blocks>::run(DifferenceFunctorSSE<SSERegister<T> >(), cache_sse, v1_sse, v2_sse);
-
+  // Initialize the accumulator.
   SSERegister<T> acc = SSERegister<T>::zero();
 
-  // Operate on the non-diagonal values of the matrix.
-  if (!metric.has_diagonal_covariance()) {
-    // Unfortunately this part of the calculation is not monotonically increasing and no early outs based on
-    // incremental calculations are possible with this approach. BoundedMapReduce should not be used here.
-    // For further mathematical details check the comment below.
-    MapReduce<T, D, 1>::run(MahalanobisFullFunctorSSE<T>(), acc, metric.cache().data(), NULL, &metric.inverse_covariance());
+  // Don't precalculate the cache if the covariance matrix is diagonal.
+  if (metric.has_diagonal_covariance()) {
+    // Check the details below to see why this operation is mathematically safe.
+    diagonal_sse->prefetch();
+    MapReduce<SSERegister<T>, num_blocks, 0, num_blocks_acc>::run(MahalanobisDiagonalFunctorSSE<SSERegister<T> >(), acc, v1_sse, v2_sse, diagonal_sse);
+    BoundedMapReduce<3, SSERegister<T>, num_blocks, num_blocks_acc, num_blocks>::run(MahalanobisDiagonalFunctorSSE<SSERegister<T> >(), acc, GreaterThanBoundaryFunctorSSE<T>(), upper_bound, v1_sse, v2_sse, diagonal_sse);
+    return acc.sum();
   }
+
+  // Map the difference into a separate vector. No reduction operation is performed.
+  typename MahalanobisMetric<T, D>::CacheVectorType cache;
+  initSSEAlignmentGap(cache.mutable_data(), D);
+  SSERegister<T> *cache_sse = reinterpret_cast<SSERegister<T> *>(cache.mutable_data());
+  MapReduce<SSERegister<T>, num_blocks>::run(DifferenceFunctorSSE<SSERegister<T> >(), cache_sse, v1_sse, v2_sse);
+
+  // Unfortunately this part of the calculation is not monotonically increasing and no early outs based on
+  // incremental calculations are possible with this approach. BoundedMapReduce should not be used here.
+  // For further mathematical details check the comment below.
+  MapReduce<T, D, 1>::run(MahalanobisColumnFunctorSSE<T>(), acc, cache.data(), NULL, &metric.inverse_covariance());
 
   // The matrix is symmetric and assumed to be positive-definite. This comes from the assumption that it's the inverse of a covariance matrix,
   // which enforces the original covariance matrix to be symmetric positive-semidefinite, and the fact that its invert method fails
@@ -315,9 +367,6 @@ T MahalanobisDistanceCalculatorSSE<T, D>::distance(const typename MahalanobisMet
   // since it's the inverse of another positive-definite matrix and therefore, as a positive-definite Hermian matrix, all the elements
   // in its main diagonal will always be positive. This allows BoundedMapReduce to be safely used, as the distance function becames
   // monotonically increasing: a sum of squared differences and positive diagonal values.
-  const T *diagonal = metric.inverse_covariance().diagonal();
-  const SSERegister<T> *diagonal_sse = reinterpret_cast<const SSERegister<T> *>(diagonal);
-  const unsigned int num_blocks_acc = NumSSEBlocks<T, D_acc>::value;
   MapReduce<SSERegister<T>, num_blocks, 0, num_blocks_acc>::run(SquaredFirstDotFunctorSSE<SSERegister<T> >(), acc, cache_sse, diagonal_sse);
   BoundedMapReduce<3, SSERegister<T>, num_blocks, num_blocks_acc, num_blocks>::run(SquaredFirstDotFunctorSSE<SSERegister<T> >(), acc, GreaterThanBoundaryFunctorSSE<T>(), upper_bound, cache_sse, diagonal_sse);
 
