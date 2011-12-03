@@ -98,7 +98,10 @@ struct MapReduceFunctorConcept {
  */
 template <typename T>
 struct BoundaryCheckFunctorConcept : public std::binary_function<T, T, bool> {
-  inline bool operator () (const T &a, const T &b) const {
+  /// Auxiliary type for optimized const references.
+  typedef typename RParam<T>::Type ConstRef_T;
+
+  inline bool operator () (ConstRef_T a, ConstRef_T b) const {
     KCHE_TREE_NEEDS_TO_BE_IMPLEMENTED();
     return false;
   }

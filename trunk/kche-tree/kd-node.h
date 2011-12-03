@@ -50,7 +50,7 @@ struct KDSearchData : M::IncrementalUpdaterType::SearchDataExtras {
 
   const VectorType &p; ///< Reference input point.
   const DataSetType &data; ///< Permutated training set.
-  M metric; ///< Metric functor used to calculate distances between points.
+  const M &metric; ///< Metric functor used to calculate distances between points.
   unsigned int K; ///< Number of neighbours to retrieve.
 
   T hyperrect_distance; ///< Distance to the current nearest point in the hyperrectangle.

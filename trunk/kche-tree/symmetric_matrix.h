@@ -70,8 +70,8 @@ public:
   SymmetricMatrix& operator = (const SymmetricMatrix &matrix);
 
   // Operators to access the matrix contents.
-  T& operator () (unsigned int row, unsigned int column);
-  const T& operator () (unsigned int row, unsigned int column) const;
+  T & operator () (unsigned int row, unsigned int column);
+  const T & operator () (unsigned int row, unsigned int column) const;
 
   // Properties of the matrix.
   unsigned int size() const { return size_; } ///< Return the size of the matrix.

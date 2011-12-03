@@ -33,6 +33,7 @@
 #endif
 
 #include "map_reduce.h"
+#include "utils.h"
 
 namespace kche_tree {
 
@@ -64,6 +65,9 @@ struct SSETraits {
   /// Type of the SSE register to use.
   typedef void RegisterType;
 
+  /// Auxiliary type for optimized const references.
+  typedef typename RParam<T>::Type ConstRef_T;
+
   /// Number of elements contained in the SSE register.
   static const unsigned int NumElements = 0;
 
@@ -71,7 +75,7 @@ struct SSETraits {
   static inline RegisterType zero() {}
 
   /// Return a register initialized to the provided value.
-  static inline RegisterType value(const T &value) {}
+  static inline RegisterType value(ConstRef_T value) {}
 };
 
 /// SSE information for the float type.
@@ -128,6 +132,9 @@ union SSERegister {
   /// SSE register to be used in the calculations.
   typename SSETraits<T>::RegisterType reg;
 
+  /// Auxiliary type for optimized const references.
+  typedef typename RParam<T>::Type ConstRef_T;
+
   /// Array of elements of type \a T to access the contents of the SSE register.
   T data[SSETraits<T>::NumElements];
 
@@ -151,7 +158,7 @@ union SSERegister {
   }
 
   /// Return a register with one element initialized to the provided value.
-  static inline SSERegister value(const T &value) {
+  static inline SSERegister value(ConstRef_T value) {
     SSERegister v = { SSETraits<T>::value(value) };
     return v;
   }
@@ -202,8 +209,10 @@ struct SSEFunctor : public MapReduceFunctorConcept<T> {
 /// Generic SSE 'greater than' comparison functor for use with BoundedMapReduce.
 template <typename T>
 struct GreaterThanBoundaryFunctorSSE : public BoundaryCheckFunctorConcept<T> {
+  /// Auxiliary type for optimized const references.
+  typedef typename RParam<T>::Type ConstRef_T;
 
-  bool operator () (const SSERegister<T> &acc, const T &boundary) const {
+  bool operator () (const SSERegister<T> &acc, ConstRef_T boundary) const {
     return acc.sum() > boundary;
   }
 };

@@ -34,36 +34,42 @@ namespace kche_tree {
 template <typename SSERegisterType>
 struct DifferenceDotFunctorSSE : public MapReduceFunctorConcept<SSERegisterType> {
 
-  // Compile-time based version of the operation.
-  template <unsigned int Index, unsigned int BlockSize, unsigned int D>
-  inline SSERegisterType & operator () (SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
-    return operator () <D>(Index, BlockSize, acc, a, b, extra);
+  /// Accumulate the dot product of the difference of 2 consecutive pairs of SSE blocks. This allows to hide latencies caused by data dependencies.
+  inline SSERegisterType & op2(SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, unsigned int i) const {
+    SSERegisterType temp1, temp2;
+    temp1.set_sub(a[i], b[i]);
+    temp2.set_sub(a[i+1], b[i+1]);
+    temp1.set_mult(temp1, temp1);
+    temp2.set_mult(temp2, temp2);
+    acc.set_add(acc, temp1);
+    acc.set_add(acc, temp2);
+    return acc;
+  }
+
+  /// Accumulate the dot product of the difference of 1 pair of SSE blocks.
+  inline SSERegisterType & op1(SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, unsigned int i) const {
+    SSERegisterType temp;
+    temp.set_sub(a[i], b[i]);
+    temp.set_mult(temp, temp);
+    acc.set_add(acc, temp);
+    return acc;
   }
 
   /// Runtime-based version of the operation.
   template <unsigned int D>
   inline SSERegisterType & operator () (unsigned int index, unsigned int block_size, SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
-    unsigned int i = index;
+    KCHE_TREE_DCHECK(block_size == 1 || block_size == 2);
+    if (block_size == 2)
+      return op2(acc, a, b, index);
+    else
+      return op1(acc, a, b, index);
+  }
 
-    // Process two blocks in parallel (reduces result waiting times).
-    if (block_size == 2) {
-      SSERegisterType temp1, temp2;
-      temp1.set_sub(a[i], b[i]);
-      temp2.set_sub(a[i+1], b[i+1]);
-      temp1.set_mult(temp1, temp1);
-      temp2.set_mult(temp2, temp2);
-      acc.set_add(acc, temp1);
-      acc.set_add(acc, temp2);
-    }
-    // Process one block in parallel.
-    else {
-      SSERegisterType temp;
-      temp.set_sub(a[i], b[i]);
-      temp.set_mult(temp, temp);
-      acc.set_add(acc, temp);
-    }
-
-    return acc;
+  // Compile-time based version of the operation.
+  template <unsigned int Index, unsigned int BlockSize, unsigned int D>
+  inline SSERegisterType & operator () (SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
+    KCHE_TREE_COMPILE_ASSERT(BlockSize == 1 || BlockSize == 2, "Expecting BlockSize == 1 or 2");
+    return operator () <D>(Index, BlockSize, acc, a, b, extra);
   }
 };
 
@@ -76,8 +82,6 @@ struct DifferenceDotFunctorSSE : public MapReduceFunctorConcept<SSERegisterType>
  */
 template <typename T, const unsigned int D>
 T EuclideanDistanceCalculatorSSE<T, D>::distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2) {
-  KCHE_TREE_COMPILE_ASSERT(IsPowerOfTwo<SSETraits<T>::NumElements>::value, "The number of elements in a SSE register must be a power of two.");
-
   const unsigned int num_blocks = NumSSEBlocks<T, D>::value;
   const SSERegister<T> *v1_sse = reinterpret_cast<const SSERegister<T> *>(v1.data());
   const SSERegister<T> *v2_sse = reinterpret_cast<const SSERegister<T> *>(v2.data());

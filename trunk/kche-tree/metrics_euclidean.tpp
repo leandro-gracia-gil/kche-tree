@@ -27,12 +27,44 @@
 // Include the map-reduce metaprograming templates and traits.
 #include "map_reduce.h"
 #include "traits.h"
+#include "utils.h"
 
 namespace kche_tree {
 
-// Forward declarations.
-template <typename T, bool isFundamental = IsFundamental<T>::value>
-struct DifferenceDotFunctor;
+/**
+ * \brief Map-reduce functor to calculate the dot functor of the difference between 2 values.
+ *
+ * Makes use of the =, -= and *= operators for the \a T type and the += operator for the accumulator type.
+ */
+template <typename T>
+struct DifferenceDotFunctor : public MapReduceFunctorConcept<T> {
+
+  /// Auxiliary type for optimized const references.
+  typedef typename RParam<T>::Type ConstRef_T;
+
+  /// Calculate the dot product of the difference of 2 values.
+  template <typename AccumulatorType>
+  inline AccumulatorType &op(AccumulatorType &acc, ConstRef_T a, ConstRef_T b) const {
+    T temp = a;
+    temp -= b;
+    temp *= temp;
+    return acc += temp;
+  }
+
+  /// Loop-based version of the operation.
+  template <unsigned int D, typename AccumulatorType>
+  inline AccumulatorType& operator () (unsigned int index, unsigned int block_size, AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+    KCHE_TREE_DCHECK(block_size == 1);
+    return op(acc, a[index], b[index]);
+  }
+
+  /// 'Unrolled' compile-time version of the operation.
+  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename AccumulatorType>
+  inline AccumulatorType& operator () (AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+    KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "Expecting BlockSize == 1");
+    return op(acc, a[Index], b[Index]);
+  }
+};
 
 /// Provides functions to calculate the Euclidean distance of two \a D dimensional vectors of type \a T.
 template <typename T, const unsigned int D>
@@ -49,53 +81,6 @@ template <typename T, const unsigned int D>
 struct EuclideanDistanceCalculatorSSE : EuclideanDistanceCalculator<T, D> {
   static inline T distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2);
   static inline T distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2, typename EuclideanMetric<T, D>::ConstRef_T upper_bound);
-};
-
-/// Map-reduce functor to calculate the dot functor of the difference between 2 fundamental values.
-template <typename T>
-struct DifferenceDotFunctor<T, true> : public MapReduceFunctorConcept<T> {
-
-  /// Loop-based version of the operation.
-  template <unsigned int D, typename AccumulatorType>
-  inline AccumulatorType& operator () (unsigned int index, unsigned int block_size, AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
-    for (unsigned int k=0, i=index; k<block_size; ++k, ++i)
-      acc += (a[i] - b[i]) * (a[i] - b[i]);
-    return acc;
-  }
-
-  /// 'Unrolled' compile-time version of the operation.
-  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename AccumulatorType>
-  inline AccumulatorType& operator () (AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
-    KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "Expecting BlockSize = 1");
-    return operator () <D>(Index, BlockSize, acc, a, b, extra);
-  }
-};
-
-/**
- * \brief Map-reduce functor to calculate the dot functor of the difference between 2 non-fundamental values.
- *
- * Makes use of the =, -= and *= operators for the \a T type and the += operator for the accumulator type.
- */
-template <typename T>
-struct DifferenceDotFunctor<T, false> : public MapReduceFunctorConcept<T> {
-
-  /// Loop-based version of the operation.
-  template <unsigned int D, typename AccumulatorType>
-  inline AccumulatorType& operator () (unsigned int index, unsigned int block_size, AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
-    for (unsigned int k=0, i=index; k<block_size; ++k, ++i) {
-      T temp = a[i];
-      temp -= b[i];
-      temp *= temp;
-      acc += temp;
-    }
-    return acc;
-  }
-
-  /// 'Unrolled' compile-time version of the operation.
-  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename AccumulatorType>
-  inline AccumulatorType& operator () (AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
-    return operator () <D>(Index, BlockSize, acc, a, b, extra);
-  }
 };
 
 /**
