@@ -42,4 +42,4 @@ KCHE_TREE+= metrics_mahalanobis.tpp metrics_mahalanobis_sse.tpp
 KCHE_TREE+= incremental.h incremental.tpp incremental_euclidean.tpp
 KCHE_TREE+= incremental_mahalanobis.tpp
 KCHE_TREE+= symmetric_matrix.h symmetric_matrix.tpp
-KCHE_TREE+= map_reduce.h map_reduce_functor.h sse.h
+KCHE_TREE+= map_reduce.h map_reduce_functor.h sse.h sse2.h
