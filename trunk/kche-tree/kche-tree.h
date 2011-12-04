@@ -97,10 +97,14 @@
  * \file kche-tree.h
  * \brief Main kche-tree library header.
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_KCHE_TREE_H_
 #define _KCHE_TREE_KCHE_TREE_H_
+
+#if defined(KCHE_TREE_DEBUG)
+#include <cassert>
+#endif
 
 /// Namespace of the Kche-tree template library.
 namespace kche_tree {

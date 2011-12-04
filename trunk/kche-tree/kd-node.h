@@ -22,7 +22,7 @@
  * \file kd-node.h
  * \brief Templates for kd-tree nodes and auxiliary structures.
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_KD_NODE_H_
 #define _KCHE_TREE_KD_NODE_H_

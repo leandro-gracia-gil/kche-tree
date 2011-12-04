@@ -22,10 +22,9 @@
  * \file dataset.tpp
  * \brief Template implementation for data sets containing an array of feature vectors.
  * \author Leandro Graciá Gil
-*/
+ */
 
-// Include smart pointers and STL strings.
-#include <memory>
+// Include STL strings.
 #include <string>
 
 namespace kche_tree {
@@ -92,6 +91,7 @@ void DataSet<T, D>::reset_to_random(unsigned int size, RandomGeneratorType &gene
  */
 template <typename T, const unsigned int D>
 typename DataSet<T, D>::VectorType &DataSet<T, D>::operator [] (unsigned int index) {
+  KCHE_TREE_DCHECK(vectors_);
 
   if (!vectors_.unique()) {
     SharedArray<VectorType> new_vectors(new VectorType[size_]);

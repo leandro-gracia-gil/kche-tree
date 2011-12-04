@@ -22,7 +22,7 @@
  * \file kd-tree.h
  * \brief Template for generic kd-trees.
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_KD_TREE_H_
 #define _KCHE_TREE_KD_TREE_H_
@@ -35,18 +35,19 @@
 #include "k-heap.h"
 #include "k-vector.h"
 
-// Include data sets, vectors, type traits, kd-tree nodes, metrics and optimized parameters.
+// Other includes from the library.
 #include "dataset.h"
-#include "vector.h"
-#include "traits.h"
 #include "kd-node.h"
 #include "metrics.h"
+#include "traits.h"
 #include "utils.h"
+#include "vector.h"
 
 namespace kche_tree {
 
 // Forward-declare the class.
-template <typename T, const unsigned int D> class KDTree;
+template <typename T, const unsigned int D>
+class KDTree;
 
 /**
  * \brief Standard input stream operator. Loads the kd-tree from a stream in binary format.
@@ -81,7 +82,7 @@ std::ostream & operator << (std::ostream &out, const KDTree<T, D> &kdtree);
  * Element insertions and deletions are not currently supported in behalf of a design based on cache efficiency.
  * \warning This class is currently not thread-safe. This feature will be added in future releases.
  *
- * \tparam T Data type of the elements in the kd-tree. Requires copy construction, asignment and the < <= > >= == operators. Further operators may be required by the metrics used. Check the documentation for EuclideanMetric if using the default metric values. For serialization the << operator is required, as well as the T(std::ifstream &, Endianness::Type) constructor for reading custom objects with the correct byte endianness. See the \c custom_type example for details.
+ * \tparam T Data type of the elements in the kd-tree. Requires copy construction, assignment and the < <= > >= == operators. Further operators may be required by the metrics used. Check the documentation for EuclideanMetric if using the default metric values. For serialization the << operator is required, as well as the T(std::ifstream &, Endianness::Type) constructor for reading custom objects with the correct byte endianness. See the \c custom_type example for details.
  * \tparam D Number of dimensions in the input data.
  */
 template <typename T, const unsigned int D>

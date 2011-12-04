@@ -65,7 +65,7 @@ public:
   SymmetricMatrix(unsigned int size, bool initialize_to_identity = true);
   void reset_to_size(unsigned int size, bool initialize_to_identity = true);
 
-  // Copy constructor and asignment operator.
+  // Copy constructor and assignment operator.
   SymmetricMatrix(const SymmetricMatrix &matrix);
   SymmetricMatrix& operator = (const SymmetricMatrix &matrix);
 

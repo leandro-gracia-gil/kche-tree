@@ -22,7 +22,7 @@
  * \file compile_assert.h
  * \brief Provide compile-time assertions in non-C++0x environments to check invalid template instantiations and conditions.
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_COMPILE_ASSERT_H_
 #define _KCHE_TREE_COMPILE_ASSERT_H_

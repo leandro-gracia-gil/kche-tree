@@ -22,7 +22,7 @@
  * \file dataset.h
  * \brief Template for data sets containing an array of feature vectors.
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_DATASET_H_
 #define _KCHE_TREE_DATASET_H_

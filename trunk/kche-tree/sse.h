@@ -22,7 +22,7 @@
  * \file sse.h
  * \brief Utility templates and types for SSE operations.
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_SSE_H_
 #define _KCHE_TREE_SSE_H_

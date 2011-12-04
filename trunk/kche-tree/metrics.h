@@ -30,7 +30,7 @@
  * 3. d(x, y) = d(y, x)  (symmetry). \n
  * 4. d(x, z) <= d(x, y) + d(y, z)  (triangle inequality). \n\n
  * Please make sure this is true for any metric not provided by the library.
-*/
+ */
 
 #ifndef _KCHE_TREE_METRICS_H_
 #define _KCHE_TREE_METRICS_H_

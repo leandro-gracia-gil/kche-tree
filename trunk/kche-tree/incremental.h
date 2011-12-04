@@ -22,15 +22,15 @@
  * \file incremental.h
  * \brief Template definitions for incremental hyperrectangle distance operators.
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_INCREMENTAL_H_
 #define _KCHE_TREE_INCREMENTAL_H_
 
 #include "dataset.h"
 #include "kd-node.h"
-#include "vector.h"
 #include "utils.h"
+#include "vector.h"
 
 namespace kche_tree {
 

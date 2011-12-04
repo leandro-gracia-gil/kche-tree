@@ -71,8 +71,8 @@ public:
   explicit SharedArray(T *ptr = 0) : Base(ptr, Deleter()) {}
   void reset(T *ptr = 0) { Base::reset(ptr, Deleter()); }
 
-  const T &operator [](size_t index) const { return (this->get())[index]; }
-  T &operator [](size_t index) { return (this->get())[index]; }
+  const T & operator [](size_t index) const { return (this->get())[index]; }
+  T & operator [](size_t index) { return (this->get())[index]; }
 
 private:
   typedef ArrayDeleter<T> Deleter;
@@ -100,8 +100,8 @@ public:
   explicit SharedAlignedArray(AlignedArray<T> &ptr = AlignedArray<T>()) : Base(ptr.get(), Deleter()) {}
   void reset(AlignedArray<T> &ptr = AlignedArray<T>()) { Base::reset(ptr, Deleter()); }
 
-  const T &operator [](size_t index) const { return (this->get())[index]; }
-  T &operator [](size_t index) { return (this->get())[index]; }
+  const T & operator [](size_t index) const { return (this->get())[index]; }
+  T & operator [](size_t index) { return (this->get())[index]; }
 
 private:
   typedef AlignedArray<T> Deleter;

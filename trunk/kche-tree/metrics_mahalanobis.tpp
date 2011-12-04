@@ -44,7 +44,8 @@ MahalanobisMetric<T, D>::MahalanobisMetric()
  */
 template <typename T, const unsigned int D>
 MahalanobisMetric<T, D>::MahalanobisMetric(const DataSetType &data_set)
-    : inv_covariance_(D, false) {
+    : inv_covariance_(D, true),
+      is_diagonal_(true) {
   set_inverse_covariance(data_set);
 }
 
@@ -112,7 +113,9 @@ bool MahalanobisMetric<T, D>::set_inverse_covariance(const DataSetType &data_set
   inv_covariance_ = new_inv_covariance;
 
   // Assume that the resulting matrix is not a diagonal one.
+  // The method force_diagonal_covariance should be used if the result is expected to be diagonal.
   is_diagonal_ = false;
+
   return true;
 }
 

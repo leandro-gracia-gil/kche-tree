@@ -22,7 +22,7 @@
  * \file k-vector.tpp
  * \brief Template implementations for k-vectors holding the best k elements (linear, but simpler).
  * \author Leandro Graciá Gil
-*/
+ */
 
 namespace kche_tree {
 
@@ -34,15 +34,43 @@ namespace kche_tree {
  */
 template <typename T, typename Compare>
 KVector<T, Compare>::KVector(unsigned int K, const Compare &c)
-  : data(new T[K]),
-    K(K),
-    stored(0),
-    compare(c) {}
+    : data_(new T[K]),
+      K_(K),
+      stored_(0),
+      compare_(c) {}
 
-/** Default destructor */
+/// Copy constructor for k-vector objects.
 template <typename T, typename Compare>
-KVector<T, Compare>::~KVector() {
-  delete []data;
+KVector<T, Compare>::KVector(const KVector &vector)
+    : data_(vector.K_ ? new T[vector.K_] : NULL),
+      K_(vector.K_),
+      stored_(vector.stored_),
+      compare_(vector.compare_) {
+
+  if (data_)
+    Traits<T>::copy_array(data_.get(), vector.data_.get(), K_);
+}
+
+/// Assignment operator for k-vector objects.
+template <typename T, typename Compare>
+KVector<T, Compare> & KVector<T, Compare>::operator = (const KVector &vector) {
+
+  // Check self assignment.
+  if (this == &vector)
+    return *this;
+
+  if (K_ != vector.K_)
+      data_.reset(vector.K_ ? new T[vector.K_] : NULL);
+
+  K_ = vector.K_;
+  stored_ = vector.stored_;
+  compare_ = vector.compare_;
+
+  // Copy data.
+  if (data_)
+    Traits<T>::copy_array(data_.get(), vector.data_.get(), K_);
+
+  return *this;
 }
 
 /**
@@ -52,7 +80,7 @@ KVector<T, Compare>::~KVector() {
  */
 template <typename T, typename Compare>
 bool KVector<T, Compare>::empty() const {
-  return stored == 0;
+  return stored_ == 0;
 }
 
 /**
@@ -62,7 +90,7 @@ bool KVector<T, Compare>::empty() const {
  */
 template <typename T, typename Compare>
 bool KVector<T, Compare>::full() const {
-  return stored == K;
+  return stored_ == K_;
 }
 
 /**
@@ -72,7 +100,7 @@ bool KVector<T, Compare>::full() const {
  */
 template <typename T, typename Compare>
 unsigned int KVector<T, Compare>::size() const {
-  return stored;
+  return stored_;
 }
 
 /**
@@ -82,7 +110,7 @@ unsigned int KVector<T, Compare>::size() const {
  */
 template <typename T, typename Compare>
 typename KVector<T, Compare>::ConstRef_T  KVector<T, Compare>::front() const {
-  return data[0];
+  return data_[0];
 }
 
 /**
@@ -92,7 +120,7 @@ typename KVector<T, Compare>::ConstRef_T  KVector<T, Compare>::front() const {
  */
 template <typename T, typename Compare>
 typename KVector<T, Compare>::ConstRef_T  KVector<T, Compare>::back() const {
-  return data[stored - 1];
+  return data_[stored_ - 1];
 }
 
 /**
@@ -100,8 +128,8 @@ typename KVector<T, Compare>::ConstRef_T  KVector<T, Compare>::back() const {
  */
 template <typename T, typename Compare>
 void KVector<T, Compare>::pop_back() {
-  if (stored > 0)
-    --stored;
+  if (stored_ > 0)
+    --stored_;
 }
 
 /**
@@ -111,7 +139,7 @@ void KVector<T, Compare>::pop_back() {
  */
 template <typename T, typename Compare>
 void KVector<T, Compare>::push_back(ConstRef_T elem) {
-  if (stored < K)
+  if (stored_ < K_)
     push_not_full(elem);
   else
     push_full(elem);
@@ -131,13 +159,13 @@ void KVector<T, Compare>::push_not_full(ConstRef_T elem) {
 
   // Look where the new candidate should be placed.
   unsigned int index;
-  for (index=0; index < stored && compare(elem, data[index]); ++index);
+  for (index=0; index < stored_ && compare_(elem, data_[index]); ++index);
 
   // Move later candidates and store the new one in its place.
-  for (unsigned int i=stored; i>index; --i)
-    data[i] = data[i-1];
-  data[index] = elem;
-  ++stored;
+  for (unsigned int i=stored_; i>index; --i)
+    data_[i] = data_[i-1];
+  data_[index] = elem;
+  ++stored_;
 }
 
 /**
@@ -153,18 +181,18 @@ template <typename T, typename Compare>
 void KVector<T, Compare>::push_full(ConstRef_T elem) {
 
   // Avoid further calculations if candidate is worst than the current worst one.
-  if (!compare(elem, data[0]))
+  if (!compare_(elem, data_[0]))
     return;
 
   // Look where the new candidate should be placed.
   unsigned int index;
-  for (index=1; index < stored && compare(elem, data[index]); ++index);
+  for (index=1; index < stored_ && compare_(elem, data_[index]); ++index);
 
   // Move previous candidates and store the new one in its place.
   --index;
   for (unsigned int i=0; i<index; ++i)
-    data[i] = data[i+1];
-  data[index] = elem;
+    data_[i] = data_[i+1];
+  data_[index] = elem;
 }
 
 } // namespace kche_tree
