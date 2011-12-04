@@ -189,12 +189,12 @@ void KDNode<T, D>::explore(const KDNode *parent, KDSearchData<T, D, M> &search_d
   }
   // Right branch first.
   else {
-    if (is_leaf & left_bit)
+    if (is_leaf & right_bit)
       first_leaf = right_leaf;
     else
       first_branch = right_branch;
 
-    if (is_leaf & right_bit)
+    if (is_leaf & left_bit)
       second_leaf = left_leaf;
     else
       second_branch = left_branch;
