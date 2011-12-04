@@ -24,7 +24,7 @@
  * \author Leandro Graciá Gil
  */
 
-// Include STL sort.
+// Include STL sort and comparison functors.
 #include <algorithm>
 #include <functional>
 

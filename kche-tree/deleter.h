@@ -43,6 +43,16 @@ struct ArrayDeleter {
   void operator () (T *p) const { delete []p; }
 };
 
+/// Functor for deleting shifted arrays. Useful for 1-indexed arrays like heaps.
+template <typename T, unsigned int Shift>
+struct ShiftedArrayDeleter {
+  /// Deletes the provided shifted array.
+  void operator () (T *p) const {
+    if (p)
+      delete [](p + Shift);
+  }
+};
+
 /// Default functor for deleting aligned arrays constructed with the AlignedArray template.
 template <typename T>
 struct AlignedDeleter {

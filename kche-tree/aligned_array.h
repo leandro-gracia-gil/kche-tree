@@ -29,6 +29,7 @@
 
 #include "allocator.h"
 #include "deleter.h"
+#include "utils.h"
 
 namespace kche_tree {
 

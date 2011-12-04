@@ -22,7 +22,7 @@
  * \file k-heap.h
  * \brief Template for k-heaps holding the best k elements (logarithmic).
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_K_HEAP_H_
 #define _KCHE_TREE_K_HEAP_H_
@@ -32,6 +32,7 @@
 
 // Include indirect heaps, traits information and optimized params.
 #include "indirect_heap.h"
+#include "scoped_ptr.h"
 #include "traits.h"
 #include "utils.h"
 
@@ -52,15 +53,14 @@ public:
   typedef typename RParam<T>::Type ConstRef_T;
 
   // Constructors and destructors.
-  KHeap(unsigned int k); ///< K-heap constructor.
+  KHeap(unsigned int K, const Compare& compare = Compare()); ///< K-heap constructor.
   KHeap(const KHeap &heap); ///< Copy constructor.
-  ~KHeap(); ///< Default destructor.
 
   // Assignment operator.
-  KHeap &operator =(const KHeap &heap); ///< Assignment operator.
+  KHeap & operator = (const KHeap &heap); ///< Assignment operator.
 
   // Comparison operator.
-  bool operator ==(const KHeap &heap) const; ///< Comparison operator.
+  bool operator == (const KHeap &heap) const; ///< Comparison operator.
 
   // Heap operations.
   bool push(ConstRef_T elem); ///< Push an element into the K-heap. Worst element will be replaced when heap is full. Cost: O(log K).
@@ -75,7 +75,7 @@ public:
   ConstRef_T best() const; ///< Retrieve the best element from the heap, or the first data object if empty. Cost: O(1).
   ConstRef_T worst() const; ///< Retrieve the worst element from the heap, or the first data object if empty. Cost: O(1).
 
-  unsigned int get_K() const; ///< Get the maximum number of elements stored in the heap (also the maximum heap size). Cost: O(1).
+  unsigned int K() const; ///< Get the maximum number of elements stored in the heap (also the maximum heap size). Cost: O(1).
   unsigned int count() const; ///< Get the number of elements currently in the heap. Cost: O(1).
 
 
@@ -84,20 +84,18 @@ public:
   bool push_back (ConstRef_T elem) { return push(elem); } ///< Same as \link KHeap::push push\endlink.
 
   void pop_front() { pop_worst(); } ///< Same as \link KHeap::pop_worst\endlink.
-  void pop_back()  { pop_best(); } ///< Same as \link KHeap::pop_best\endlink.
+  void pop_back() { pop_best(); } ///< Same as \link KHeap::pop_best\endlink.
 
   ConstRef_T front() const { return worst();  } ///< Same as \link KHeap::worst\endlink.
-  ConstRef_T back()  const { return best(); } ///< Same as \link KHeap::best\endlink.
+  ConstRef_T back() const { return best(); } ///< Same as \link KHeap::best\endlink.
 
 private:
-  unsigned int K; ///< Maximum number of best elements stored (also maximum heap size).
-  T *data; ///< Array of stored elements (0-indexed).
+  unsigned int K_; ///< Maximum number of best elements stored (also maximum heap size).
+  ScopedArray<T> data_; ///< Array of stored elements (0-indexed).
 
-  const Compare &compare; ///< Comparison object used by internal heaps.
-  static const unsigned int root = 1; ///< Root index of the heap.
-
-  IndirectHeap<T, Compare, unsigned int> bestHeap; ///< Heap storing best data indices.
-  IndirectHeap<T, std::binary_negate<Compare>, unsigned int> worstHeap; ///< Heap storing worst data indices.
+  Compare compare_; ///< Comparison object used by internal heaps.
+  IndirectHeap<T, Compare, unsigned int> best_heap_; ///< Heap storing best data indices.
+  IndirectHeap<T, std::binary_negate<Compare>, unsigned int> worst_heap_; ///< Heap storing worst data indices.
 };
 
 } // namespace kche_tree

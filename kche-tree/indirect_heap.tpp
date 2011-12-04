@@ -22,7 +22,7 @@
  * \file indirect_heap.tpp
  * \brief Template implementations for index-based indirect heaps.
  * \author Leandro Graciá Gil
-*/
+ */
 
 // Include required C Standard Library STL files.
 #include <algorithm>
@@ -36,122 +36,112 @@ namespace kche_tree {
  *
  * \param data Array with data.
  * \param size Number of elements in \a data.
- * \param maxSize Maximum heap size (should fit in \a data).
- * \param c Reference to a comparison object used to define an order.
-*/
-template <typename T, typename C, typename idx>
-IndirectHeap<T, C, idx>::IndirectHeap(const T *data, unsigned int size, unsigned int maxSize, const C &c)
-  : compare(c) {
+ * \param max_size Maximum heap size (should fit in \a data).
+ * \param compare Comparison object used to define an order.
+ */
+template <typename T, typename C, typename Index>
+IndirectHeap<T, C, Index>::IndirectHeap(T *data, unsigned int size, unsigned int max_size, const C &compare)
+  : compare_(compare) {
 
   // Check for input data.
   if (data == NULL) {
-    this->size = 0;
-    this->used = 0;
-    this->last = 0;
-    this->heap = NULL;
-    this->inverse = NULL;
+    data_ = NULL;
+    size_ = 0;
+    used_ = 0;
+    last_ = 0;
     return;
   }
 
   // Initialize size and used counters.
-  this->size = std::max<unsigned int>(size, maxSize);
-  this->used = size;
-  this->last = this->used;
+  size_ = std::max<unsigned int>(size, max_size);
+  used_ = size;
+  last_ = used_;
 
-  // Allocate auxiliar arrays.
-  assert(heap = new idx[this->size]);
-  assert(inverse = new idx[this->size]);
+  // Allocate auxiliar arrays. Shifted to make them 1-indexed.
+  Index *array = new Index[size_];
+  KCHE_TREE_DCHECK(array);
+  heap_.reset(array - 1);
 
-  // Shift arrays to make them 1-indexed.
-  --heap;
-  --inverse;
+  array = new Index[size_];
+  KCHE_TREE_DCHECK(array);
+  inverse_.reset(array - 1);
 
-  // Set data array (shifted).
-  this->data = data - 1;
+  // Set data array (not owned, shifted).
+  data_ = data - 1;
 
   // Initialize indices.
-  for (unsigned int i=1; i<=this->size; ++i)
-    inverse[i] = heap[i] = i;
+  for (unsigned int i=1; i<=size_; ++i)
+    inverse_[i] = heap_[i] = i;
 
   // Build heap.
-  for (unsigned int i=(used >> 1); i>=root; --i)
+  for (unsigned int i=(used_ >> 1); i>=kRoot; --i)
     heapify_downwards(i);
 }
 
-/** Default destructor */
-template <typename T, typename C, typename idx>
-IndirectHeap<T, C, idx>::~IndirectHeap() {
+/// Copy constructor. Heap structure and data pointer are copied from the input object.
+template <typename T, typename C, typename Index>
+IndirectHeap<T, C, Index>::IndirectHeap(const IndirectHeap &heap)
+  : data_(NULL),
+    size_(0),
+    used_(0),
+    last_(0),
+    compare_(heap.compare) {
 
-  // Release auxiliar arrays.
-  delete []++heap;
-  delete []++inverse;
-}
-
-/** Copy constructor. Heap structure and data pointer are copied from the input object. */
-template <typename T, typename C, typename idx>
-IndirectHeap<T, C, idx>::IndirectHeap(const IndirectHeap &heap)
-  : heap(NULL),
-    inverse(NULL),
-    size(0),
-    compare(C(heap.compare)) {
-
-  // Use asignment operator internally.
+  // Use assignment operator internally.
   *this = heap;
 
   // Use the data pointer of the input object.
-  data = heap.data;
+  data_ = heap.data_;
 }
 
-/** Assignment operator. Only heap structure is copied, not the data pointer. */
-template <typename T, typename C, typename idx>
-IndirectHeap<T, C, idx> &IndirectHeap<T, C, idx>::operator = (const IndirectHeap &heap) {
+/// Assignment operator. Only heap structure is copied, not the data pointer.
+template <typename T, typename C, typename Index>
+IndirectHeap<T, C, Index> &IndirectHeap<T, C, Index>::operator = (const IndirectHeap &heap) {
 
   // Check self assignment.
   if (this == &heap)
     return *this;
 
   // Reallocate any previous arrays if sizes are different.
-  if (size != heap.size) {
+  if (size_ != heap.size_) {
 
     // Set size.
-    size = heap.size;
+    size_ = heap.size_;
 
     // Reallocate arrays.
-    if (this->heap)
-      delete [](++this->heap);
-    assert(this->heap = new idx[size]);
-    --this->heap;
+    Index *array = new Index[size_];
+    KCHE_TREE_DCHECK(array);
+    heap_.reset(array - 1);
 
-    if (inverse)
-      delete [](++inverse);
-    assert(inverse = new idx[size]);
-    --inverse;
+    array = new Index[size_];
+    KCHE_TREE_DCHECK(array);
+    inverse_.reset(array - 1);
   }
 
   // Set heap attributes.
-  used = heap.used;
-  last = heap.last;
+  used_ = heap.used_;
+  last_ = heap.last_;
 
   // Copy array contents.
-  memcpy(this->heap + 1, heap.heap + 1, size * sizeof(idx));
-  memcpy(inverse + 1, heap.inverse + 1, size * sizeof(idx));
+  memcpy(heap_.get() + 1, heap.heap_.get() + 1, size_ * sizeof(Index));
+  memcpy(inverse_.get() + 1, heap.inverse_.get() + 1, size_ * sizeof(Index));
 
   // Return a reference to itself.
   return *this;
 }
 
-/** Comparison operator */
-template <typename T, typename C, typename idx>
-bool IndirectHeap<T, C, idx>::operator == (const IndirectHeap &heap) const {
+/// Comparison operator.
+template <typename T, typename C, typename Index>
+bool IndirectHeap<T, C, Index>::operator == (const IndirectHeap &heap) const {
 
   // Compare sizes, number of used elements.
-  if (size != heap.size || used != heap.used)
+  if (size_ != heap.size_ || used_ != heap.used_)
     return false;
 
   // Compare heap and inverse index arrays.
-  if (memcmp(this->heap + 1, heap.heap + 1, size * sizeof(idx)) != 0)
+  if (memcmp(heap_.get() + 1, heap.heap_.get() + 1, size_ * sizeof(Index)) != 0)
     return false;
-  if (memcmp(inverse + 1, heap.inverse + 1, size * sizeof(idx)) != 0)
+  if (memcmp(inverse_.get() + 1, heap.inverse_.get() + 1, size_ * sizeof(Index)) != 0)
     return false;
 
   return true;
@@ -162,24 +152,24 @@ bool IndirectHeap<T, C, idx>::operator == (const IndirectHeap &heap) const {
  *
  * \param i1 Index of the first element to swap (1-indexed).
  * \param i2 Index of the second element to swap (1-indexed).
-*/
-template <typename T, typename C, typename idx>
-void IndirectHeap<T, C, idx>::swap_elements(idx i1, idx i2) {
+ */
+template <typename T, typename C, typename Index>
+void IndirectHeap<T, C, Index>::swap_elements(Index i1, Index i2) {
 
   // Swap inverse indices.
-  std::swap<idx>(inverse[heap[i1]], inverse[heap[i2]]);
+  std::swap<Index>(inverse_[heap_[i1]], inverse_[heap_[i2]]);
 
   // Swap heap indices.
-  std::swap<idx>(heap[i1], heap[i2]);
+  std::swap<Index>(heap_[i1], heap_[i2]);
 }
 
 /**
  * Adjust an element position in the heap.
  *
  * \param index Index in the heap of the element to move (1-indexed).
-*/
-template <typename T, typename C, typename idx>
-void IndirectHeap<T, C, idx>::heapify_element(idx index) {
+ */
+template <typename T, typename C, typename Index>
+void IndirectHeap<T, C, Index>::heapify_element(Index index) {
 
   // Try upwards first (less comparisons) and if not modified (comparison pruning), try downwards.
   if (!heapify_upwards(index))
@@ -191,19 +181,19 @@ void IndirectHeap<T, C, idx>::heapify_element(idx index) {
  *
  * \param index Index in the heap of the element to move (1-indexed).
  * \return \c true if heap was modified, \c false otherwise.
-*/
-template <typename T, typename C, typename idx>
-bool IndirectHeap<T, C, idx>::heapify_upwards(idx index) {
+ */
+template <typename T, typename C, typename Index>
+bool IndirectHeap<T, C, Index>::heapify_upwards(Index index) {
 
   // Keep swapping until heap condition is true or root node is reached.
   bool modified = false;
-  while (index > root) {
+  while (index > kRoot) {
 
     // Get parent index.
-    idx parent = parent_idx(index);
+    Index parent = parent_index(index);
 
     // Break if heap condition already true.
-    if (compare(data[heap[parent]], data[heap[index]]))
+    if (compare_(data_[heap_[parent]], data_[heap_[index]]))
       break;
 
     // Swap elements in heap.
@@ -221,32 +211,32 @@ bool IndirectHeap<T, C, idx>::heapify_upwards(idx index) {
  * Move an element downwards the heap.
  *
  * \param index Index in the heap of the element to move (1-indexed).
-*/
-template <typename T, typename C, typename idx>
-void IndirectHeap<T, C, idx>::heapify_downwards(idx index) {
+ */
+template <typename T, typename C, typename Index>
+void IndirectHeap<T, C, Index>::heapify_downwards(Index index) {
 
   // Keep swapping until heap condition is true or a leaf node is reached.
-  while (index <= used) {
+  while (index <= used_) {
 
     // Look for maximum element in parent and child nodes.
-    idx maxIndex = index;
-    idx left = left_idx(index);
-    if (left <= used) {
-      maxIndex = compare(data[heap[left]], data[heap[index]]) ? left : maxIndex;
-      idx right = right_idx(index);
-      if (right <= used)
-        maxIndex = compare(data[heap[right]], data[heap[maxIndex]]) ? right : maxIndex;
+    Index max_index = index;
+    Index left = left_index(index);
+    if (left <= used_) {
+      max_index = compare_(data_[heap_[left]], data_[heap_[index]]) ? left : max_index;
+      Index right = right_index(index);
+      if (right <= used_)
+        max_index = compare_(data_[heap_[right]], data_[heap_[max_index]]) ? right : max_index;
     }
 
     // Break if heap condition already true.
-    if (maxIndex == index)
+    if (max_index == index)
       break;
 
     // Swap elements.
-    swap_elements(index, maxIndex);
+    swap_elements(index, max_index);
 
     // Move to child node.
-    index = maxIndex;
+    index = max_index;
   }
 }
 
@@ -255,13 +245,13 @@ void IndirectHeap<T, C, idx>::heapify_downwards(idx index) {
  * \c NULL pointers are ignored.
  *
  * \param data New pointer to data.
-*/
-template <typename T, typename C, typename idx>
-void IndirectHeap<T, C, idx>::setData(const T *data) {
+ */
+template <typename T, typename C, typename Index>
+void IndirectHeap<T, C, Index>::set_data(T *data) {
 
   // Shift data to make it 1-indexed.
   if (data)
-    this->data = data - 1;
+    data_ = data - 1;
 }
 
 /**
@@ -272,33 +262,33 @@ void IndirectHeap<T, C, idx>::setData(const T *data) {
  *
  * \param index Data array index of the element to push into the heap (0-indexed).
  * \return \c true if successful, \c false if heap is full or the element is already on the heap.
-*/
-template <typename T, typename C, typename idx>
-bool IndirectHeap<T, C, idx>::push(idx index) {
+ */
+template <typename T, typename C, typename Index>
+bool IndirectHeap<T, C, Index>::push(Index index) {
 
   // Make index 1-indexed.
   ++index;
 
   // Check if index is in the array boundaries.
-  if (index > size || size < root)
+  if (index > size_ || size_ < kRoot)
     return false;
 
   // Get the index of the requested element in the heap.
-  idx heap_index = inverse[index];
+  Index heap_index = inverse_[index];
 
   // Check if item is already in the heap.
-  if (heap_index <= used)
+  if (heap_index <= used_)
     return false;
 
   // Increase number of elements in use.
-  ++used;
+  ++used_;
 
   // Move requested item into the new heap boundaries.
-  if (used != heap_index)
-    swap_elements(used, heap_index);
+  if (used_ != heap_index)
+    swap_elements(used_, heap_index);
 
   // Move to its position in the heap.
-  heapify_upwards(used);
+  heapify_upwards(used_);
 
   return true;
 }
@@ -307,26 +297,26 @@ bool IndirectHeap<T, C, idx>::push(idx index) {
  * Extract topmost element from the heap.
  *
  * \return Topmost element being extracted, or first element if heap is already \link IndirectHeap::empty empty\endlink.
-*/
-template <typename T, typename C, typename idx>
-T &IndirectHeap<T, C, idx>::pop() {
+ */
+template <typename T, typename C, typename Index>
+T &IndirectHeap<T, C, Index>::pop() {
 
   // Check size.
   if (empty())
-    return const_cast<T *>(data)[root];
+    return data_[kRoot];
 
   // Get a reference to the current top.
-  T &topmost = const_cast<T *>(data)[heap[root]];
+  T &topmost = data_[heap_[kRoot]];
 
   // Swap top and last elements.
-  if (root != used)
-    swap_elements(root, used);
+  if (kRoot != used_)
+    swap_elements(kRoot, used_);
 
   // Decrease the number of elements in the heap.
-  --used;
+  --used_;
 
   // Adjust heap downwards from the root.
-  heapify_downwards(root);
+  heapify_downwards(kRoot);
 
   // Return stored reference.
   return topmost;
@@ -337,15 +327,15 @@ T &IndirectHeap<T, C, idx>::pop() {
  *
  * \param index Index of the element to check (0-indexed).
  * \return \c true if still in the heap, \c false otherwise.
-*/
-template <typename T, typename C, typename idx>
-bool IndirectHeap<T, C, idx>::inHeap(idx index) const {
+ */
+template <typename T, typename C, typename Index>
+bool IndirectHeap<T, C, Index>::in_heap(Index index) const {
 
   // Shift the index to make it 1-indexed.
   ++index;
 
   // Check boundaries and heap data.
-  return index >= root && index <= size && inverse[index] <= used;
+  return index >= kRoot && index <= size_ && inverse_[index] <= used_;
 }
 
 /**
@@ -354,17 +344,17 @@ bool IndirectHeap<T, C, idx>::inHeap(idx index) const {
  *
  * \param index Index of the element to get (0-indexed).
  * \return A reference to the requested element, or to the last one in case of out-of-bounds request.
-*/
-template <typename T, typename C, typename idx>
-T &IndirectHeap<T, C, idx>::operator [] (idx index) {
+ */
+template <typename T, typename C, typename Index>
+T &IndirectHeap<T, C, Index>::operator [] (Index index) {
 
   // Shift the index to make it 1-indexed.
   ++index;
 
   // Get the corresponding element.
-  if (index > size)
-    index = size;
-  return const_cast<T *>(data)[index];
+  if (index > size_)
+    index = size_;
+  return data_[index];
 }
 
 /**
@@ -372,17 +362,17 @@ T &IndirectHeap<T, C, idx>::operator [] (idx index) {
  *
  * \param index Index of the element to get (0-indexed).
  * \return A non-mutable reference to the requested element, or to the last one in case of out-of-bounds request.
-*/
-template <typename T, typename C, typename idx>
-const T &IndirectHeap<T, C, idx>::operator [] (idx index) const {
+ */
+template <typename T, typename C, typename Index>
+const T &IndirectHeap<T, C, Index>::operator [] (Index index) const {
 
   // Shift the index to make it 1-indexed.
   ++index;
 
   // Get the corresponding element.
-  if (index > size)
-    index = size;
-  return data[index];
+  if (index > size_)
+    index = size_;
+  return data_[index];
 }
 
 /**
@@ -390,21 +380,21 @@ const T &IndirectHeap<T, C, idx>::operator [] (idx index) const {
  *
  * \param index Index of the element in data array being removed from the heap (0-indexed).
  * \return \c true if successful, \c false if \a index is not in array.
-*/
-template <typename T, typename C, typename idx>
-bool IndirectHeap<T, C, idx>::remove(idx index) {
+ */
+template <typename T, typename C, typename Index>
+bool IndirectHeap<T, C, Index>::remove(Index index) {
 
   // Check if the given index is inside the array (and shift it to make it 1-indexed).
-  if (!inHeap(index++))
+  if (!in_heap(index++))
     return false;
 
   // Swap last and requested elements.
-  idx heap_index = inverse[index];
-  if (heap_index != used)
-    swap_elements(heap_index, used);
+  Index heap_index = inverse_[index];
+  if (heap_index != used_)
+    swap_elements(heap_index, used_);
 
   // Decrease number of used elements.
-  --used;
+  --used_;
 
   // Try to heapify in both directions (last element could come from a completely different branch).
   heapify_element(heap_index);
@@ -417,16 +407,16 @@ bool IndirectHeap<T, C, idx>::remove(idx index) {
  *
  * \param index Index of the item in the array that was modified (0-indexed).
  * \return \c true if successful, \c false if \a index is not in array.
-*/
-template <typename T, typename C, typename idx>
-bool IndirectHeap<T, C, idx>::update(idx index) {
+ */
+template <typename T, typename C, typename Index>
+bool IndirectHeap<T, C, Index>::update(Index index) {
 
   // Check if the given index is inside the array (and shift it to make it 1-indexed).
-  if (!inHeap(index++))
+  if (!in_heap(index++))
     return false;
 
   // Try to heapify in both directions (only one will).
-  heapify_element(inverse[index]);
+  heapify_element(inverse_[index]);
 
   return true;
 }
@@ -434,16 +424,16 @@ bool IndirectHeap<T, C, idx>::update(idx index) {
 /**
  * Rebuild the heap structure completely. Designed to be used when many elements have been modified.
  * Cost: O(n), better than O(n log n) from n individual updates.
-*/
-template <typename T, typename C, typename idx>
-void IndirectHeap<T, C, idx>::updateAll() {
+ */
+template <typename T, typename C, typename Index>
+void IndirectHeap<T, C, Index>::update_all() {
 
   // Reset indices.
-  for (unsigned int i=1; i<=size; ++i)
-    inverse[i] = heap[i] = i;
+  for (unsigned int i=1; i<=size_; ++i)
+    inverse_[i] = heap_[i] = i;
 
   // Rebuild heap.
-  for (unsigned int i=(used >> 1); i>=root; --i)
+  for (unsigned int i=(used_ >> 1); i>=kRoot; --i)
     heapify_downwards(i);
 }
 
@@ -453,19 +443,19 @@ void IndirectHeap<T, C, idx>::updateAll() {
  * \param index1 Index of the first element in the data array (0-indexed).
  * \param index2 Index of the second element in the data array (0-indexed).
  * \return \c true if successful, \c false if any of the indices is not valid or not in the heap.
-*/
-template <typename T, typename C, typename idx>
-bool IndirectHeap<T, C, idx>::swap(idx index1, idx index2) {
+ */
+template <typename T, typename C, typename Index>
+bool IndirectHeap<T, C, Index>::swap(Index index1, Index index2) {
 
   // Check if both indices are in the heap.
-  if (!inHeap(index1++))
+  if (!in_heap(index1++))
     return false;
-  if (!inHeap(index2++))
+  if (!in_heap(index2++))
     return false;
 
   // Swap elements (works inverse to swap_elements internal method).
-  std::swap<idx>(heap[inverse[index1]], heap[inverse[index2]]);
-  std::swap<idx>(inverse[index1], inverse[index2]);
+  std::swap<Index>(heap_[inverse_[index1]], heap_[inverse_[index2]]);
+  std::swap<Index>(inverse_[index1], inverse_[index2]);
 
   return true;
 }
@@ -474,54 +464,54 @@ bool IndirectHeap<T, C, idx>::swap(idx index1, idx index2) {
  * Get the data array index of the element being currently in the top of the heap.
  *
  * \return 0-based index of the topmost element in the heap, or first one if the heap is \link IndirectHeap::empty empty\endlink.
-*/
-template <typename T, typename C, typename idx>
-idx IndirectHeap<T, C, idx>::topIndex() const {
+ */
+template <typename T, typename C, typename Index>
+Index IndirectHeap<T, C, Index>::top_index() const {
   if (empty())
     return 0;
-  return heap[root] - 1;
+  return heap_[kRoot] - 1;
 }
 
 /**
  * Get the element in the top of the heap.
  *
  * \return Reference to the element in the top of the heap, or to the first one if the heap is \link IndirectHeap::empty empty\endlink.
-*/
-template <typename T, typename C, typename idx>
-T &IndirectHeap<T, C, idx>::top() const {
+ */
+template <typename T, typename C, typename Index>
+T &IndirectHeap<T, C, Index>::top() const {
   if (empty())
-    return const_cast<T *>(data)[root];
-  return const_cast<T *>(data)[heap[root]];
+    return data_[kRoot];
+  return data_[heap_[kRoot]];
 }
 
 /**
  * Check if the heap is empty.
  *
  * \return \c true if empty, \c false if not.
-*/
-template <typename T, typename C, typename idx>
-bool IndirectHeap<T, C, idx>::empty() const {
-  return used == 0;
+ */
+template <typename T, typename C, typename Index>
+bool IndirectHeap<T, C, Index>::empty() const {
+  return used_ == 0;
 }
 
 /**
  * Get maximum heap size.
  *
  * \return Maximum heap size.
-*/
-template <typename T, typename C, typename idx>
-unsigned int IndirectHeap<T, C, idx>::maxSize() const {
-  return size;
+ */
+template <typename T, typename C, typename Index>
+unsigned int IndirectHeap<T, C, Index>::max_size() const {
+  return size_;
 }
 
 /**
- * Get the current number of elements in the data array (may be increased up to \link IndirectHeap::maxSize maxSize\endlink when \link IndirectHeap::push pushing\endlink data).
+ * Get the current number of elements in the data array (may be increased up to \link IndirectHeap::max_size max_size\endlink when \link IndirectHeap::push pushing\endlink data).
  *
  * \return Current number of elements in the data array.
-*/
-template <typename T, typename C, typename idx>
-unsigned int IndirectHeap<T, C, idx>::dataSize() const {
-  return last;
+ */
+template <typename T, typename C, typename Index>
+unsigned int IndirectHeap<T, C, Index>::data_size() const {
+  return last_;
 }
 
 
@@ -529,10 +519,10 @@ unsigned int IndirectHeap<T, C, idx>::dataSize() const {
  * Get the number of elements in the heap.
  *
  * \return Current number of elements in the heap.
-*/
-template <typename T, typename C, typename idx>
-unsigned int IndirectHeap<T, C, idx>::count() const {
-  return used;
+ */
+template <typename T, typename C, typename Index>
+unsigned int IndirectHeap<T, C, Index>::count() const {
+  return used_;
 }
 
 } // namespace kche_tree

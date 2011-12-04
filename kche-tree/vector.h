@@ -22,7 +22,7 @@
  * \file vector.h
  * \brief Template for generic D-dimensional feature vectors.
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_VECTOR_H_
 #define _KCHE_TREE_VECTOR_H_

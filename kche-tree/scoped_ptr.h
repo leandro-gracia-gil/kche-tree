@@ -58,8 +58,8 @@ public:
   ~ScopedPtr() { deleter_(ptr_); }
 
   T *get() const { return ptr_; }
-  T &operator *() const { assert(ptr_); return *ptr_; }
-  T *operator ->() const { assert(ptr_); return ptr_; }
+  T & operator *() const { assert(ptr_); return *ptr_; }
+  T * operator ->() const { assert(ptr_); return ptr_; }
 
   typedef T *(ScopedPtr::*UnspecifiedBoolType);
   operator UnspecifiedBoolType() const { return ptr_ ? &ScopedPtr::ptr_ : 0; }
@@ -92,8 +92,26 @@ class ScopedArray : public ScopedPtr<T, ArrayDeleter<T> > {
 public:
   explicit ScopedArray(T *ptr = 0) : ScopedPtr<T, ArrayDeleter<T> >(ptr) {}
 
-  const T &operator [](size_t index) const { return this->ptr_[index]; }
-  T &operator [](size_t index) { return this->ptr_[index]; }
+  const T & operator [](size_t index) const { return this->ptr_[index]; }
+  T & operator [](size_t index) { return this->ptr_[index]; }
+};
+
+/**
+ * \brief Basic version of scoped arrays shifted by a given value.
+ *
+ * This doesn't intend to be a full implementation, but a basic version
+ * to keep compatibility with the non-C++0x code.
+ *
+ * \tparam T Type of the smart pointer.
+ * \tparam Shift Shift value used when deleting the array. For example, use 1 for 1-indexed arrays (0 is out of bounds).
+ */
+template <typename T, unsigned int Shift>
+class ShiftedScopedArray : public ScopedPtr<T, ShiftedArrayDeleter<T, Shift> > {
+public:
+  explicit ShiftedScopedArray(T *ptr = 0) : ScopedPtr<T, ShiftedArrayDeleter<T, Shift> >(ptr) {}
+
+  const T & operator [](size_t index) const { return this->ptr_[index]; }
+  T & operator [](size_t index) { return this->ptr_[index]; }
 };
 
 /**
@@ -107,8 +125,8 @@ public:
   explicit ScopedAlignedArray(const AlignedArray<T> &ptr = AlignedArray<T>()) : Base(static_cast<T *>(ptr)) {}
   void reset(const AlignedArray<T> &ptr = AlignedArray<T>()) { Base::reset(static_cast<T *>(ptr)); }
 
-  const T &operator [](size_t index) const { return this->ptr_[index]; }
-  T &operator [](size_t index) { return this->ptr_[index]; }
+  const T & operator [](size_t index) const { return this->ptr_[index]; }
+  T & operator [](size_t index) { return this->ptr_[index]; }
 
 private:
   typedef ScopedPtr<T, AlignedDeleter<T> > Base;
@@ -140,6 +158,22 @@ class ScopedArray : public std::unique_ptr<T[], ArrayDeleter<T> > {
 public:
   typedef T ElementType; ///< Type of the pointer being handled.
   explicit ScopedArray(T *ptr = 0) : std::unique_ptr<T[], ArrayDeleter<T> >(ptr) {}
+};
+
+/**
+ * \brief Extended version of STL unique_ptr applied to arrays shifted by a given value. Defined for compatibility with the non-C++0x code.
+ *
+ * STL unique_ptr has support for arrays via the partial specification of T[].
+ * Likely to be replaced by a C++0x template alias when available.
+ *
+ * \tparam T Type of the smart pointer.
+ * \tparam Shift Shift value used when deleting the array. For example, use 1 for 1-indexed arrays (0 is out of bounds).
+ */
+template <typename T, unsigned int Shift>
+class ShiftedScopedArray : public std::unique_ptr<T[], ShiftedArrayDeleter<T, Shift> > {
+public:
+  typedef T ElementType; ///< Type of the pointer being handled.
+  explicit ShiftedScopedArray(T *ptr = 0) : std::unique_ptr<T[], ShiftedArrayDeleter<T, Shift> >(ptr) {}
 };
 
 /**

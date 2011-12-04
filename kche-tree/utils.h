@@ -22,10 +22,12 @@
  * \file utils.h
  * \brief Utility templates for template metaprogramming and others.
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_UTILS_H_
 #define _KCHE_TREE_UTILS_H_
+
+#include "compile_assert.h"
 
 namespace kche_tree {
 
@@ -40,7 +42,7 @@ namespace kche_tree {
 /**
  * \brief Base class for non-copyable objects.
  *
- * Leaves undefined or deletes (if C++0x is enabled) the copy constructor and the asignment operator.
+ * Leaves undefined or deletes (if C++0x is enabled) the copy constructor and the assignment operator.
  */
 class NonCopyable {
 #ifdef KCHE_TREE_DISABLE_CPP0X

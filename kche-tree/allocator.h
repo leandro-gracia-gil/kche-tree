@@ -22,7 +22,7 @@
  * \file allocator.h
  * \brief Memory allocator with optional alignment used by the kche-tree library.
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef KCHE_TREE_ALLOCATOR_H_
 #define KCHE_TREE_ALLOCATOR_H_

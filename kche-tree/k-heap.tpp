@@ -22,7 +22,7 @@
  * \file k-heap.tpp
  * \brief Template implementations for k-heaps holding the best k elements.
  * \author Leandro Graciá Gil
-*/
+ */
 
 // Include required C Standard Library STL files.
 #include <algorithm>
@@ -35,14 +35,15 @@ namespace kche_tree {
  * Build a k-heap of the given \a K size.
  *
  * \param K Maximum number of best elements to store in the heap.
+ * \param compare Comparison object used to define an order.
 */
 template <typename T, typename C>
-KHeap<T, C>::KHeap(unsigned int K)
-  : K(K),
-    data(new T[K]),
-    compare(C()),
-    bestHeap(data, 0, K, compare),
-    worstHeap(data, 0, K, std::binary_negate<C>(compare)) {}
+KHeap<T, C>::KHeap(unsigned int K, const C &compare)
+  : K_(K),
+    data_(new T[K]),
+    compare_(compare),
+    best_heap_(data_.get(), 0, K, compare),
+    worst_heap_(data_.get(), 0, K, std::binary_negate<C>(compare)) {}
 
 /**
  * \brief Copy constructor.
@@ -53,21 +54,15 @@ KHeap<T, C>::KHeap(unsigned int K)
  */
 template <typename T, typename C>
 KHeap<T, C>::KHeap(const KHeap &heap)
-  : data(NULL),
-    compare(heap.compare),
-    bestHeap(NULL, 0),
-    worstHeap(NULL, 0, 0, std::binary_negate<C>(compare)) {
+  : K_(heap.K_),
+    data_(heap.K_ ? new T[heap.K_] : NULL),
+    compare_(heap.compare_),
+    best_heap_(heap.best_heap_),
+    worst_heap_(heap.worst_heap_) {
 
-  // Use assignment operator.
-  *this = heap;
-}
-
-/// Default destructor.
-template <typename T, typename C>
-KHeap<T, C>::~KHeap() {
-
-  // Release data.
-  delete []data;
+  // Copy the data.
+  if (data_)
+    Traits<T>::copy_array(data_.get(), heap.data_.get(), K_);
 }
 
 /**
@@ -84,23 +79,27 @@ KHeap<T, C> &KHeap<T, C>::operator = (const KHeap &heap) {
   if (this == &heap)
     return *this;
 
-  // Set size.
-  K = heap.K;
+  // Reallocate data if required.
+  if (K_ != heap.K_)
+    data_.reset(heap.K_ ? new T[heap.K_] : NULL);
 
-  // Reallocate data.
-  if (data)
-    delete []data;
-  assert(data = new T[K]);
+  // Set the size.
+  K_ = heap.K;
+
+  // Set the comparison object.
+  compare_ = heap.compare_;
 
   // Copy data.
-  Traits<T>::copy_array(data, heap.data, K);
-
-  bestHeap.setData(data);
-  worstHeap.setData(data);
+  if (data_)
+    Traits<T>::copy_array(data_.get(), heap.data_.get(), K_);
 
   // Copy heap structure.
-  bestHeap = heap.bestHeap;
-  worstHeap = heap.worstHeap;
+  best_heap_ = heap.best_heap;
+  worst_heap_ = heap.worst_heap;
+
+  // Make them refer to our data.
+  best_heap_.setData(data_.get());
+  worst_heap_.setData(data_.get());
 
   // Return a reference to itself.
   return *this;
@@ -117,18 +116,18 @@ template <typename T, typename C>
 bool KHeap<T, C>::operator == (const KHeap &heap) const {
 
   // Compare K value.
-  if (K != heap.K)
+  if (K_ != heap.K_)
     return false;
 
   // Compare data.
-  for (unsigned int i=0; i<K; ++i)
-    if (!(data[i] == heap.data[i]))
+  for (unsigned int i=0; i<K_; ++i)
+    if (!(data_[i] == heap.data_[i]))
       return false;
 
   // Compare internal heaps.
-  if (!(bestHeap == heap.bestHeap))
+  if (!(best_heap_ == heap.best_heap_))
     return false;
-  if (!(worstHeap == heap.worstHeap))
+  if (!(worst_heap_ == heap.worst_heap_))
     return false;
 
   return true;
@@ -144,30 +143,30 @@ template <typename T, typename C>
 bool KHeap<T, C>::push(ConstRef_T elem) {
 
   // Check if heaps are not yet full.
-  if (bestHeap.count() < K) {
+  if (best_heap_.count() < K_) {
 
     // Insert element into data vector.
-    unsigned int next = bestHeap.count();
-    data[next] = elem;
+    unsigned int next = best_heap_.count();
+    data_[next] = elem;
 
     // Insert element in both heaps.
-    bestHeap.push(next);
-    worstHeap.push(next);
+    best_heap_.push(next);
+    worst_heap_.push(next);
 
     return true;
   }
   // Heaps are full: should try to replace worst element.
   else {
     // Check if new element is better than the actual worst one.
-    if (compare(elem, worst())) {
+    if (compare_(elem, worst())) {
 
       // Replace worst element in the array.
-      unsigned int worstIndex = worstHeap.topIndex();
-      data[worstIndex] = elem;
+      unsigned int worst_index = worst_heap_.top_index();
+      data_[worst_index] = elem;
 
       // Update heaps.
-      bestHeap.update(worstIndex);
-      worstHeap.update(worstIndex);
+      best_heap_.update(worst_index);
+      worst_heap_.update(worst_index);
 
       return true;
     }
@@ -184,26 +183,26 @@ template <typename T, typename C>
 void KHeap<T, C>::pop_best() {
 
   // Check size.
-  if (bestHeap.empty())
+  if (best_heap_.empty())
     return;
 
   // Get the index of the best and the last elements.
-  unsigned int bestIndex = bestHeap.topIndex();
-  unsigned int lastIndex = bestHeap.count() - 1;
+  unsigned int best_index = best_heap_.top_index();
+  unsigned int last_index = best_heap_.count() - 1;
 
   // Swap extracted element to the end in the data array and update heaps.
-  if (bestIndex != lastIndex) {
-    std::swap(data[bestIndex], data[lastIndex]);
-    bestHeap.swap(bestIndex, lastIndex);
-    worstHeap.swap(bestIndex, lastIndex);
-    std::swap(bestIndex, lastIndex);
+  if (best_index != last_index) {
+    std::swap(data_[best_index], data_[last_index]);
+    best_heap_.swap(best_index, last_index);
+    worst_heap_.swap(best_index, last_index);
+    std::swap(best_index, last_index);
   }
 
   // Remove the element from the worst elements heap.
-  worstHeap.remove(bestIndex);
+  worst_heap_.remove(best_index);
 
   // Extract the topmost object from the best elements heap.
-  bestHeap.pop();
+  best_heap_.pop();
 }
 
 /**
@@ -214,26 +213,26 @@ template <typename T, typename C>
 void KHeap<T, C>::pop_worst() {
 
   // Check size.
-  if (worstHeap.empty())
+  if (worst_heap_.empty())
     return;
 
   // Get the index of the worst element.
-  unsigned int worstIndex = worstHeap.topIndex();
-  unsigned int lastIndex = worstHeap.count() - 1;
+  unsigned int worst_index = worst_heap_.top_index();
+  unsigned int last_index = worst_heap_.count() - 1;
 
   // Swap extracted element to the end in the data array and update heaps.
-  if (worstIndex != lastIndex) {
-    std::swap(data[worstIndex], data[lastIndex]);
-    bestHeap.swap(worstIndex, lastIndex);
-    worstHeap.swap(worstIndex, lastIndex);
-    std::swap(worstIndex, lastIndex);
+  if (worst_index != last_index) {
+    std::swap(data_[worst_index], data_[last_index]);
+    best_heap_.swap(worst_index, last_index);
+    worst_heap_.swap(worst_index, last_index);
+    std::swap(worst_index, last_index);
   }
 
   // Remove the element from the best elements heap.
-  bestHeap.remove(worstIndex);
+  best_heap_.remove(worst_index);
 
   // Extract the topmost object from the worst elements heap.
-  worstHeap.pop();
+  worst_heap_.pop();
 }
 
 /**
@@ -243,7 +242,7 @@ void KHeap<T, C>::pop_worst() {
 */
 template <typename T, typename C>
 bool KHeap<T, C>::full() const {
-  return bestHeap.count() == K;
+  return best_heap_.count() == K_;
 }
 
 /**
@@ -253,7 +252,7 @@ bool KHeap<T, C>::full() const {
 */
 template <typename T, typename C>
 bool KHeap<T, C>::empty() const {
-  return bestHeap.empty();
+  return best_heap_.empty();
 }
 
 /**
@@ -263,7 +262,7 @@ bool KHeap<T, C>::empty() const {
 */
 template <typename T, typename C>
 unsigned int KHeap<T, C>::size() const {
-  return bestHeap.count();
+  return best_heap_.count();
 }
 
 /**
@@ -274,8 +273,8 @@ unsigned int KHeap<T, C>::size() const {
 template <typename T, typename C>
 typename KHeap<T, C>::ConstRef_T KHeap<T, C>::best() const {
   if (empty())
-    return data[0];
-  return bestHeap.top();
+    return data_[0];
+  return best_heap_.top();
 }
 
 /**
@@ -286,8 +285,8 @@ typename KHeap<T, C>::ConstRef_T KHeap<T, C>::best() const {
 template <typename T, typename C>
 typename KHeap<T, C>::ConstRef_T KHeap<T, C>::worst() const {
   if (empty())
-    return data[0];
-  return worstHeap.top();
+    return data_[0];
+  return worst_heap_.top();
 }
 
 /**
@@ -296,8 +295,8 @@ typename KHeap<T, C>::ConstRef_T KHeap<T, C>::worst() const {
  * \return The K value used to build the heap.
 */
 template <typename T, typename C>
-unsigned int KHeap<T, C>::get_K() const {
-  return K;
+unsigned int KHeap<T, C>::K() const {
+  return K_;
 }
 
 /**
@@ -307,7 +306,7 @@ unsigned int KHeap<T, C>::get_K() const {
 */
 template <typename T, typename C>
 unsigned int KHeap<T, C>::count() const {
-  return bestHeap.count();
+  return best_heap_.count();
 }
 
 } // namespace kche_tree

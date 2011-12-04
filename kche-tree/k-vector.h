@@ -22,7 +22,7 @@
  * \file k-vector.h
  * \brief Template for k-vectors holding the best k elements (linear).
  * \author Leandro Graciá Gil
-*/
+ */
 
 #ifndef _KCHE_TREE_K_VECTOR_H_
 #define _KCHE_TREE_K_VECTOR_H_
@@ -30,7 +30,7 @@
 // Include STL less comparison template (used by default).
 #include <functional>
 
-// Include optimized params.
+#include "scoped_ptr.h"
 #include "utils.h"
 
 namespace kche_tree {
@@ -51,9 +51,10 @@ public:
 
   /// K-vector constructor.
   KVector(unsigned int K, const Compare &c = Compare());
+  KVector(const KVector &vector);
 
-  /// Default destructor.
-  ~KVector();
+  // Assignment operator.
+  KVector & operator = (const KVector &vector);
 
   // K-vector properties.
   bool empty() const; ///< Check if the k-vector is empty. Cost: O(1).
@@ -68,10 +69,10 @@ public:
   void push_back(ConstRef_T elem); ///< Push a new element into the k-vector. Cost: O(K).
 
 protected:
-  T *data; ///< Array of stored elements (sorted with worst one on the first position).
-  unsigned int K; ///< Maximum number of best elements stored (also maximum heap size).
-  unsigned int stored; ///< Number of elements currently in the k-vector.
-  const Compare &compare; ///< Comparison object.
+  ScopedArray<T> data_; ///< Array of stored elements (sorted with worst one on the first position).
+  unsigned int K_; ///< Maximum number of best elements stored (also maximum heap size).
+  unsigned int stored_; ///< Number of elements currently in the k-vector.
+  Compare compare_; ///< Comparison object.
 
   void push_not_full(ConstRef_T elem); ///< Push a new element into the k-vector when the vector is still not full. Cost: O(K).
   void push_full(ConstRef_T elem); ///< Push a new element into the k-vector when the vector is already full. Cost: O(K).
