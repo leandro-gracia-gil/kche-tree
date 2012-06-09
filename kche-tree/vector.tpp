@@ -29,7 +29,11 @@
 
 namespace kche_tree {
 
-/// Initialize an empty vector. Alignment gap elements may be initialized to zero.
+/**
+ * \brief Initialize an empty vector.
+ *
+ * If SSE is enabled, there may be some additional elements initialized to zero at the end of the array.
+ */
 template <typename T, const unsigned int D>
 Vector<T, D>::Vector() {
   initSSEAlignmentGap(data_, D);
@@ -57,23 +61,6 @@ bool Vector<T, D>::operator != (const Vector &p) const {
   return !Traits<T>::equal_arrays(data_, p.data_, D);
 }
 
-/**
- * \brief Stream deserialization constructor.
- * Any required endianness correction is performed when reading the data.
- *
- * \note This method does not perform any type checking and it's used internally when
- * serializing data sets. For proper vector serialization, use DataSet objects.
- *
- * \param in Input stream.
- * \param endianness Endianness of the serialized data.
- * \exception std::runtime_error Thrown in case of read or validation error.
- */
-template <typename T, const unsigned int D>
-Vector<T, D>::Vector(std::istream &in, Endianness::Type endianness) {
-  deserialize(data_, in, endianness);
-  initSSEAlignmentGap(data_, D);
-}
-
 /// Overloaded new operator to support memory alignment if required.
 template <typename T, const unsigned int D>
 void *Vector<T, D>::operator new (size_t nbytes) {
@@ -99,19 +86,44 @@ void Vector<T, D>::operator delete [] (void *p) {
 }
 
 /**
- * \brief Stream serialization operator.
+ * \brief Stream deserialization constructor.
+ * Any required endianness correction is performed when reading the data.
  *
  * \note This method does not perform any type checking and it's used internally when
  * serializing data sets. For proper vector serialization, use DataSet objects.
  *
+ * \param in Input stream.
+ * \param endianness Endianness of the serialized data.
+ * \exception std::runtime_error Thrown in case of read or validation error.
+ */
+template <typename T, const unsigned int D>
+Vector<T, D>::Vector(std::istream &in, Endianness::Type endianness) {
+  kche_tree::deserialize(data_, in, endianness);
+  initSSEAlignmentGap(data_, D);
+}
+
+
+/**
+ * \brief Stream serialization operator.
+ *
  * \param out Output stream.
- * \param vector Vector to be serialized.
  * \exception std::runtime_error Thrown in case of write error.
  */
 template <typename T, const unsigned int D>
-std::ostream& operator << (std::ostream& out, const Vector<T, D> &vector) {
-  serialize(vector.data_, out);
-  return out;
+void Vector<T, D>::serialize(std::ostream &out) const {
+  kche_tree::serialize(data_, out);
+}
+
+/**
+ * \brief Swap the contents of the vector with some other.
+ *
+ * Used as part of the deserialization process.
+ *
+ * \param vector Vector to swap contents with.
+ */
+template <typename T, unsigned int D>
+void Vector<T, D>::swap(Vector &vector) {
+  std::swap(data_, vector.data_);
 }
 
 /**

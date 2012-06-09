@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,12 +31,12 @@
 namespace kche_tree {
 
 /// Map-reduce functor to calculate the dot product of the difference between 2 SSE register vectors.
-template <typename SSERegisterType>
-struct DifferenceDotFunctorSSE : public MapReduceFunctorConcept<SSERegisterType> {
+template <typename SSERegister>
+struct DifferenceDotFunctorSSE : public MapReduceFunctorConcept<SSERegister> {
 
   /// Accumulate the dot product of the difference of 2 consecutive pairs of SSE blocks. This allows to hide latencies caused by data dependencies.
-  inline SSERegisterType & op2(SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, unsigned int i) const {
-    SSERegisterType temp1, temp2;
+  inline SSERegister& op2(SSERegister &acc, const SSERegister *a, const SSERegister *b, unsigned int i) const {
+    SSERegister temp1, temp2;
     temp1.set_sub(a[i], b[i]);
     temp2.set_sub(a[i+1], b[i+1]);
     temp1.set_mult(temp1, temp1);
@@ -47,8 +47,8 @@ struct DifferenceDotFunctorSSE : public MapReduceFunctorConcept<SSERegisterType>
   }
 
   /// Accumulate the dot product of the difference of 1 pair of SSE blocks.
-  inline SSERegisterType & op1(SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, unsigned int i) const {
-    SSERegisterType temp;
+  inline SSERegister& op1(SSERegister &acc, const SSERegister *a, const SSERegister *b, unsigned int i) const {
+    SSERegister temp;
     temp.set_sub(a[i], b[i]);
     temp.set_mult(temp, temp);
     acc.set_add(acc, temp);
@@ -57,7 +57,7 @@ struct DifferenceDotFunctorSSE : public MapReduceFunctorConcept<SSERegisterType>
 
   /// Runtime-based version of the operation.
   template <unsigned int D>
-  inline SSERegisterType & operator () (unsigned int index, unsigned int block_size, SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
+  inline SSERegister& operator () (unsigned int index, unsigned int block_size, SSERegister &acc, const SSERegister *a, const SSERegister *b, const void *extra) const {
     KCHE_TREE_DCHECK(block_size == 1 || block_size == 2);
     if (block_size == 2)
       return op2(acc, a, b, index);
@@ -67,7 +67,7 @@ struct DifferenceDotFunctorSSE : public MapReduceFunctorConcept<SSERegisterType>
 
   // Compile-time based version of the operation.
   template <unsigned int Index, unsigned int BlockSize, unsigned int D>
-  inline SSERegisterType & operator () (SSERegisterType &acc, const SSERegisterType *a, const SSERegisterType *b, const void *extra) const {
+  inline SSERegister& operator () (SSERegister &acc, const SSERegister *a, const SSERegister *b, const void *extra) const {
     KCHE_TREE_COMPILE_ASSERT(BlockSize == 1 || BlockSize == 2, "Expecting BlockSize == 1 or 2");
     return operator () <D>(Index, BlockSize, acc, a, b, extra);
   }
@@ -81,7 +81,7 @@ struct DifferenceDotFunctorSSE : public MapReduceFunctorConcept<SSERegisterType>
  * \return Squared Euclidean distance between the two vectors.
  */
 template <typename T, const unsigned int D>
-T EuclideanDistanceCalculatorSSE<T, D>::distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2) {
+typename EuclideanDistanceCalculatorSSE<T, D>::Distance EuclideanDistanceCalculatorSSE<T, D>::distance(const Vector &v1, const Vector &v2) {
   const unsigned int num_blocks = NumSSEBlocks<T, D>::value;
   const SSERegister<T> *v1_sse = reinterpret_cast<const SSERegister<T> *>(v1.data());
   const SSERegister<T> *v2_sse = reinterpret_cast<const SSERegister<T> *>(v2.data());
@@ -103,7 +103,7 @@ T EuclideanDistanceCalculatorSSE<T, D>::distance(const typename EuclideanMetric<
  * \return Squared Euclidean distance between the two vectors or the partial result if greater than \a upper_bound.
  */
 template <typename T, const unsigned int D>
-T EuclideanDistanceCalculatorSSE<T, D>::distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2, const typename EuclideanMetric<T, D>::ConstRef_T upper_bound) {
+typename EuclideanDistanceCalculatorSSE<T, D>::Distance EuclideanDistanceCalculatorSSE<T, D>::distance(const Vector &v1, const Vector &v2, ConstRef_Distance upper_bound) {
 
   const unsigned int num_blocks = NumSSEBlocks<T, D>::value;
   const SSERegister<T> *v1_sse = reinterpret_cast<const SSERegister<T> *>(v1.data());
@@ -118,7 +118,7 @@ T EuclideanDistanceCalculatorSSE<T, D>::distance(const typename EuclideanMetric<
   const unsigned int D_acc = (unsigned int) (0.2f * D);
   const unsigned int num_blocks_acc = NumSSEBlocks<T, D_acc>::value;
   MapReduce<SSERegister<T>, num_blocks_acc, 0, num_blocks_acc, 2>::run(DifferenceDotFunctorSSE<SSERegister<T> >(), acc, v1_sse, v2_sse);
-  BoundedMapReduce<2, SSERegister<T>, num_blocks, num_blocks_acc, num_blocks, 2>::run(DifferenceDotFunctorSSE<SSERegister<T> >(), acc, GreaterThanBoundaryFunctorSSE<T>(), upper_bound, v1_sse, v2_sse);
+  BoundedMapReduce<2, SSERegister<T>, num_blocks, num_blocks_acc, num_blocks, 2>::run(DifferenceDotFunctorSSE<SSERegister<T> >(), acc, GreaterThanBoundaryFunctorSSE<Distance>(), upper_bound, v1_sse, v2_sse);
 
   return acc.sum();
 }

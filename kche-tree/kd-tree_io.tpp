@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010, 2011 by Leandro Graciá Gil                        *
+ *   Copyright (C) 2010, 2011, 2012 by Leandro Graciá Gil                  *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -33,8 +33,8 @@
 namespace kche_tree {
 
 // KD-Tree serialization settings.
-template <typename T, const unsigned int D> const uint16_t KDTree<T, D>::version[2] = { 2, 0 };
-template <typename T, const unsigned int D> const uint16_t KDTree<T, D>::signature = 0xCAFE;
+template <typename T, unsigned int D, typename L> const uint16_t KDTree<T, D, L>::version[2] = { 2, 0 };
+template <typename T, unsigned int D, typename L> const uint16_t KDTree<T, D, L>::signature = 0xCAFE;
 
 // KD-Tree content verification
 template <bool enabled> struct VerifyKDTreeContents;
@@ -42,9 +42,9 @@ template <bool enabled> struct VerifyKDTreeContents;
 /// Verify the loaded kd-tree structural properties. Specialization to enable the operation.
 template <>
 struct VerifyKDTreeContents<true> {
-  template <typename T, const unsigned int D>
+  template <typename T, unsigned int D>
   static void verify(const KDNode<T, D> *root, const DataSet<T, D> &data) {
-    assert(root);
+    KCHE_TREE_DCHECK(root);
     root->verify_properties(data, 0);
   }
 };
@@ -52,58 +52,69 @@ struct VerifyKDTreeContents<true> {
 /// Verify the loaded kd-tree structural properties. Specialization to disable the operation.
 template <>
 struct VerifyKDTreeContents<false> {
-  template <typename T, const unsigned int D>
+  template <typename T, unsigned int D>
   static void verify(const KDNode<T, D> *root, const DataSet<T, D> &data) {}
 };
 
 /**
- * \brief Standard input stream operator. Loads the kd-tree from a stream in binary format.
+ * \brief Serialize a kd-tree object into an output stream.
  *
- * The original contents of the \a kdtree object are not modified in case of error.
+ * The permuted train set stored in the kd-tree is also serialized, including any possible label information.
  *
- * \param in Input stream.
- * \param kdtree Kd-tree where results will be saved.
- * \return Input stream after reading the data.
- * \exception std::runtime_error Thrown in case of error reading or processing the kd-tree.
+ * \param out The output stream where the kd-tree should be serialized.
+ * \exception std::runtime_error Thrown in case of error.
  */
-template <typename T, const unsigned int D>
-std::istream & operator >> (std::istream &in, KDTree<T, D> &kdtree) {
+template <typename T, unsigned int D, typename L>
+void KDTree<T, D, L>::serialize(std::ostream &out) const {
 
-  // Type aliases.
-  typedef KDTree<T, D> KDTreeType;
-  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
+  // Write file version.
+  kche_tree::serialize(KDTree::version, out);
+  if (!out.good())
+    throw std::runtime_error("error writing kd-tree format version");
 
-  // Check the state of the input stream.
-  if (!in.good())
-    throw std::runtime_error("input stream not ready");
+  KCHE_TREE_DCHECK(data_);
+  if (!data_->size())
+    return;
 
-  // Read format endianness.
-  uint8_t endianness_raw;
-  deserialize(endianness_raw, in);
-  if (!in.good())
-    throw std::runtime_error("error reading endianness type");
+  // Write the tree data set. Will throw std::runtime_error on failure.
+  out << *data_;
 
-  // Validate endianness.
-  Endianness::Type endianness = static_cast<Endianness::Type>(endianness_raw);
-  if (endianness != Endianness::LittleEndian && endianness != Endianness::BigEndian)
-    throw std::runtime_error("invalid endianness value");
+  if (!root_)
+    throw std::runtime_error("invalid kd-tree structure: data but no nodes");
 
-  // Read file version.
+  // Write the kd-tree structure recursively. Will throw std::runtime_error on failure.
+  root_->serialize(out);
+
+  // Write a 2-byte signature at the end.
+  kche_tree::serialize(signature, out);
+  if (!out.good())
+    throw std::runtime_error("error writing the file signature");
+}
+
+/**
+ * \brief Deserializes a kd-tree object from an output stream.
+ *
+ * The permuted train set stored in the kd-tree is also deserialized, including any possible label information.
+ *
+ * \param in The input stream where the kd-tree should be deserialized from.
+ * \param endianness Endianness of the input data.
+ * \exception std::runtime_error Thrown in case of error.
+ */
+template <typename T, unsigned int D, typename L>
+KDTree<T, D, L>::KDTree(std::istream &in, Endianness::Type endianness) {
+
+  // Read format version.
   uint16_t version[2];
   deserialize(version, in, endianness);
   if (!in.good())
     throw std::runtime_error("error reading version data");
 
-  // Check the serialized type. Will throw std::runtime_error in case it doesn't match.
-  // This will implicitely check both the type of T and the number of dimensions.
-  Traits<KDTreeType>::check_serialized_type(in, endianness);
-
   // Check supported file versions.
-  if (version[0] != KDTreeType::version[0] || version[1] != KDTreeType::version[1]) {
+  if (version[0] != KDTree::version[0] || version[1] != KDTree::version[1]) {
     std::string error_msg = "unsupported kd-tree version: required ";
-    error_msg += KDTree<T, D>::version[0];
+    error_msg += KDTree::version[0];
     error_msg += ".";
-    error_msg += KDTree<T, D>::version[1];
+    error_msg += KDTree::version[1];
     error_msg += ", found ";
     error_msg += version[0];
     error_msg += ".";
@@ -111,148 +122,78 @@ std::istream & operator >> (std::istream &in, KDTree<T, D> &kdtree) {
     throw std::runtime_error(error_msg);
   }
 
-  // Read the kd-tree data set. Will also check the type and dimensions of the tree.
-  DataSetType dataset;
-  in >> dataset;
+  // Read the kd-tree data set.
+  data_.reset(new DataSet());
+  in >> *data_;
 
-  // Allocate and read the permutation array.
-  uint32_t num_elements = dataset.size();
-  ScopedArray<uint32_t> permutation(new uint32_t[num_elements]);
-  deserialize_array(permutation.get(), num_elements, in, endianness);
-  if (!in.good())
-    throw std::runtime_error("error reading kd-tree data permutation");
-
-  // Build and validate the inverse permutation array.
-  ScopedArray<uint32_t> inverse_permutation(new uint32_t[num_elements]);
-  memset(inverse_permutation.get(), 0xFF, num_elements * sizeof(uint32_t));
-
-  for (uint32_t i=0; i<num_elements; ++i) {
-    if (permutation[i] >= num_elements || inverse_permutation[permutation[i]] != 0xFFFFFFFF)
-      throw std::runtime_error("invalid kd-tree permutation data");
-    inverse_permutation[permutation[i]] = i;
-  }
+  if (!data_->size())
+    return;
 
   // Read the tree structure from the stream.
-  typedef KDNode<T, D> NodeType;
-  ScopedPtr<NodeType> root(new NodeType(in, endianness));
+  root_.reset(new KDNode(in, endianness));
 
-  // Read the signature value.
+  // Read and check the signature value.
   uint16_t signature;
   deserialize(signature, in, endianness);
-  if (in.fail() || signature != kdtree.signature)
-    throw std::runtime_error("error reading kd-tree signature");
+  if (in.fail() || signature != KDTree::signature)
+    throw std::runtime_error("error reading kd-tree signature, data might be corrupted or incomplete");
 
   // Verify kd-tree contents if enabled by the settings. Will throw std::runtime_error if not valid.
-  VerifyKDTreeContents<Settings::verify_kdtree_after_deserializing>::verify(root.get(), dataset);
-
-  // Set the kd-tree contents. The dataset vectors are reference-counted.
-  kdtree.data = dataset;
-  swap(kdtree.root, root);
-  swap(kdtree.permutation, permutation);
-  swap(kdtree.inverse_permutation, inverse_permutation);
-
-  // Return the input stream.
-  return in;
+  VerifyKDTreeContents<Settings::verify_kdtree_after_deserializing>::verify(root_.get(), *data_);
 }
 
 /**
- * Standard output stream operator.
- * Saves the kd-tree into a stream in binary format.
+ * \brief Swaps the contents of two kd-trees.
  *
- * \param out Output stream.
- * \param kdtree Kd-tree being saved.
- * \return Output stream after writting the data.
- * \exception std::runtime_error Thrown in case of error writing the kd-tree.
+ * Used to prevent corrupting objects in case of partial deserializations.
+ *
+ * \param kdtree The kd-tree object whose contents should swap with.
  */
-template <typename T, const unsigned int D>
-std::ostream & operator << (std::ostream &out, const KDTree<T, D> &kdtree) {
-
-  // Check the state of the output stream.
-  if (!out.good())
-    throw std::runtime_error("output stream not ready");
-
-  // Serialize the endianness being used.
-  uint8_t endianness_raw = Endianness::endianness();
-  serialize(endianness_raw, out);
-  if (!out.good())
-    throw std::runtime_error("error writing endianness information");
-
-  // Write file version.
-  typedef KDTree<T, D> KDTreeType;
-  serialize(KDTreeType::version, out);
-  if (!out.good())
-    throw std::runtime_error("error writing kd-tree format version");
-
-  // Serialize the KDTree type into the stream. This implicitely serializes both the type T and the number of dimensions.
-  Traits<KDTreeType>::serialize_type(out);
-  if (!out.good())
-    throw std::runtime_error("error serializing the type information");
-
-  // Write the tree data set. Will throw std::runtime_error on failure.
-  out << kdtree.data;
-
-  // Write the tree data permutation.
-  serialize_array(kdtree.permutation.get(), kdtree.size(), out);
-  if (!out.good())
-    throw std::runtime_error("error writing the kd-tree permutation data");
-
-  // Write the kd-tree structure recursively. Will throw std::runtime_error on failure.
-  kdtree.root->write_to_binary_stream(out);
-
-  // Write a 2-byte signature at the end: simplifies error checking.
-  serialize(kdtree.signature, out);
-  if (!out.good())
-    throw std::runtime_error("error writing the file signature");
-
-  // Return the output stream.
-  return out;
+template <typename T, unsigned int D, typename L>
+void KDTree<T, D, L>::swap(KDTree &kdtree) {
+  kdtree.data_.swap(data_);
+  kdtree.root_.swap(root_);
 }
 
 /**
- * Build a kd-tree branch node from the data in a binary input stream.
- * \warning A std::runtime_error exception may be thrown in case of error reading the data.
+ * \brief Build a kd-tree branch node from the data in a binary input stream.
  *
  * \param in Input stream.
- * \param endianness Endianness of the serialized data. Defaults to host's endianness.
+ * \param endianness Endianness of the serialized data.
  * \exception std::runtime_error Thrown in case of error reading or processing the node data.
  */
-template <typename T, const unsigned int D>
+template <typename T, unsigned int D>
 KDNode<T, D>::KDNode(std::istream &in, Endianness::Type endianness)
-  : left_branch(NULL),
-    right_branch(NULL) {
+    : left_branch(NULL),
+      right_branch(NULL) {
 
   // Read node data.
-  deserialize(split_value, in, endianness);
+  deserialize(split_element, in, endianness);
   deserialize(is_leaf, in, endianness);
   if (!in.good())
     throw std::runtime_error("error reading node data");
 
-  // Type aliases.
-  typedef KDNode<T, D> NodeType;
-  typedef KDLeaf<T, D> LeafType;
-
   // Process the left branch or leaf.
   if (is_leaf & left_bit)
-    left_leaf = new LeafType(in);
+    left_leaf = new KDLeaf(in, endianness);
   else
-    left_branch = new NodeType(in);
+    left_branch = new KDNode(in, endianness);
 
   // Process the right branch or leaf.
   if (is_leaf & right_bit)
-    right_leaf = new LeafType(in);
+    right_leaf = new KDLeaf(in, endianness);
   else
-    right_branch = new NodeType(in);
+    right_branch = new KDNode(in, endianness);
 }
 
 /**
- * Build a kd-tree branch node from the data in a binary input stream.
- * \warning A std::runtime_error exception may be thrown in case of error reading the data.
+ * \brief Build a kd-tree branch node from the data in a binary input stream.
  *
  * \param in Input stream.
- * \param endianness Endianness of the serialized data. Defaults to host's endianness.
+ * \param endianness Endianness of the serialized data.
  * \exception std::runtime_error Thrown in case of error reading or processing the leaf node data.
  */
-template <typename T, const unsigned int D>
+template <typename T, unsigned int D>
 KDLeaf<T, D>::KDLeaf(std::istream &in, Endianness::Type endianness) {
 
   // Read leaf node data.
@@ -263,45 +204,45 @@ KDLeaf<T, D>::KDLeaf(std::istream &in, Endianness::Type endianness) {
 }
 
 /**
- * Write a kd-tree branch node to a binary ouput stream.
+ * \brief Write a kd-tree branch node to a binary ouput stream.
  *
  * \param out Output stream.
  * \exception std::runtime_error Thrown in case of error writing the data.
  */
-template <typename T, const unsigned int D>
-void KDNode<T, D>::write_to_binary_stream(std::ostream &out) {
+template <typename T, unsigned int D>
+void KDNode<T, D>::serialize(std::ostream &out) {
 
   // Write split value and node axis/leaf information.
-  serialize(split_value, out);
-  serialize(is_leaf, out);
+  kche_tree::serialize(split_element, out);
+  kche_tree::serialize(is_leaf, out);
   if (!out.good())
     throw std::runtime_error("error writing internal node data");
 
   // Process the left branch or leaf.
   if (is_leaf & left_bit)
-    left_leaf->write_to_binary_stream(out);
+    left_leaf->serialize(out);
   else
-    left_branch->write_to_binary_stream(out);
+    left_branch->serialize(out);
 
   // Process the right branch or leaf.
   if (is_leaf & right_bit)
-    right_leaf->write_to_binary_stream(out);
+    right_leaf->serialize(out);
   else
-    right_branch->write_to_binary_stream(out);
+    right_branch->serialize(out);
 }
 
 /**
- * Write a kd-tree leaf node to a binary ouput stream.
+ * \brief Write a kd-tree leaf node to a binary ouput stream.
  *
  * \param out Output stream.
  * \exception std::runtime_error Thrown in case of error writing the data.
  */
-template <typename T, const unsigned int D>
-void KDLeaf<T, D>::write_to_binary_stream(std::ostream &out) {
+template <typename T, unsigned int D>
+void KDLeaf<T, D>::serialize(std::ostream &out) {
 
   // Write left leaf node information.
-  serialize(first_index, out);
-  serialize(num_elements, out);
+  kche_tree::serialize(first_index, out);
+  kche_tree::serialize(num_elements, out);
   if (!out.good())
     throw std::runtime_error("error writing leaf node data");
 }

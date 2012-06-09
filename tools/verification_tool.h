@@ -40,12 +40,25 @@
  * results with an exhaustive search. More extra functionalities can be tested by the use
  * of the command line options.
  *
- * \tparam T Type of the element being tested. Requires an additional constructor T(float value) to intialize contents.
- * \tparam D Number of dimensions being tested.
+ * \tparam ElementType Type of the element being tested. Requires an additional constructor T(float value) to intialize contents.
+ * \tparam NumDimensions Number of dimensions being tested.
+ * \tparam LabelType Type of the labels in the data sets.
  */
-template <typename T, const unsigned int D>
-class VerificationTool : public ToolBase<T, D, VerificationOptions> {
+template <typename ElementType, const unsigned int NumDimensions, typename LabelType>
+class VerificationTool : public ToolBase<ElementType, NumDimensions, LabelType, VerificationOptions> {
 public:
+  /// Type of the elements in the test.
+  typedef ElementType Element;
+
+  /// Number of dimensions in the test.
+  static unsigned const int Dimensions = NumDimensions;
+
+  /// Type of the labels associated to the feature vectors. Equals to void if no labels are used.
+  typedef LabelType Label;
+
+  /// Use the DataSet type from ToolBase.
+  typedef typename ToolBase<Element, Dimensions, Label, VerificationOptions>::DataSet DataSet;
+
   // Tool constructor.
   template <typename RandomEngineType>
   VerificationTool(int argc, char *argv[], RandomEngineType &random_engine);

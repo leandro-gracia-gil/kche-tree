@@ -30,6 +30,8 @@
 // Includes for the SSE instruction set and aligned memory allocation.
 #if !defined(__APPLE__)
 #include <malloc.h>
+#else
+#include <cstdlib>
 #endif
 
 namespace kche_tree {

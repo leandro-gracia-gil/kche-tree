@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,7 +27,7 @@
 #ifndef _KCHE_TREE_UTILS_H_
 #define _KCHE_TREE_UTILS_H_
 
-#include "compile_assert.h"
+#include "cpp1x.h"
 
 namespace kche_tree {
 
@@ -35,17 +35,17 @@ namespace kche_tree {
 #define KCHE_TREE_NEEDS_TO_BE_IMPLEMENTED() KCHE_TREE_NOT_REACHED()
 
 #define KCHE_TREE_CHECK_CONCEPT(type, base) \
-    KCHE_TREE_COMPILE_ASSERT((is_base_of<base, type>::value), "Concept error. " # type " should implement " # base ".")
+    KCHE_TREE_COMPILE_ASSERT((IsBaseOf<base, type>::value), "Concept error. " # type " should implement " # base ".")
 
 // Utility classes.
 
 /**
  * \brief Base class for non-copyable objects.
  *
- * Leaves undefined or deletes (if C++0x is enabled) the copy constructor and the assignment operator.
+ * Leaves undefined or deletes (if C++1x is enabled) the copy constructor and the assignment operator.
  */
 class NonCopyable {
-#ifdef KCHE_TREE_DISABLE_CPP0X
+#ifdef KCHE_TREE_DISABLE_CPP1X
   NonCopyable(const NonCopyable &);
   NonCopyable &operator = (const NonCopyable &);
 #else
@@ -95,17 +95,10 @@ struct TypeBranch<false, A, B> {
 template <typename T>
 struct RParam {
   typedef typename TypeBranch<
-#ifdef KCHE_TREE_DISABLE_CPP0X
-      std::tr1::is_pod<T>::value &&
-      std::tr1::has_trivial_constructor<T>::value &&
-      std::tr1::has_trivial_copy<T>::value &&
-      std::tr1::has_trivial_destructor<T>::value &&
-#else
-      std::is_pod<T>::value &&
-      std::has_trivial_default_constructor<T>::value &&
-      std::has_trivial_copy_constructor<T>::value &&
-      std::has_trivial_destructor<T>::value &&
-#endif
+      IsPOD<T>::value &&
+      HasTrivialDefaultConstructor<T>::value &&
+      HasTrivialCopyConstructor<T>::value &&
+      HasTrivialDestructor<T>::value &&
       sizeof(T) <= sizeof(const T&), T, const T&>::Result Type;
 };
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,49 +27,20 @@
 #ifndef _KCHE_TREE_TRAITS_H_
 #define _KCHE_TREE_TRAITS_H_
 
-// Include exact-width integer types for serialization and type traits.
-#ifdef KCHE_TREE_DISABLE_CPP0X
-#include <tr1/cstdint>
-#include <tr1/random>
-#include <tr1/type_traits>
-#else
-#include <cstdint>
-#include <random>
-#include <type_traits>
-#endif
-
 // Demangling functions for the GNU C++ compiler.
 #ifdef __GNUG__
 #include <cxxabi.h>
 #endif
 
-// Include STL exceptions and numeric limits.
-#include <stdexcept>
+#include <iterator>
 #include <limits>
+#include <stdexcept>
 
-// Include compile-time assertions, endianness operations, smart pointers and optimized params.
-#include "compile_assert.h"
+#include "cpp1x.h"
 #include "endianness.h"
 #include "utils.h"
 
 namespace kche_tree {
-
-// Bring to the local namespace the type traits from either TR1 or C++0x STL.
-#ifdef KCHE_TREE_DISABLE_CPP0X
-using std::tr1::is_fundamental;
-using std::tr1::is_same;
-using std::tr1::has_trivial_copy;
-using std::tr1::is_base_of;
-#else
-using std::is_fundamental;
-using std::is_same;
-using std::has_trivial_copy_constructor;
-using std::is_base_of;
-#endif
-
-/// Determine if a type is a fundamental one. This is basically an alias to the equivalent STL or TR1 type trait.
-template <typename T>
-struct IsFundamental : is_fundamental<T> {};
 
 /**
  * \brief Specify if a given type uses a non-trivial equality operator to enable optimizations.
@@ -106,86 +77,138 @@ struct HasTrivialSerialization : IsFundamental<T> {};
 
 // Forward-declare the templates provided here.
 template <typename T> struct Traits;
-template <typename T> struct AccumulationTraits;
-template <typename T, bool isFundamental = IsFundamental<T>::value> struct NumericTraits;
-template <typename T, bool hasTrivialEqual = HasTrivialEqual<T>::value> struct EqualTraits;
-template <typename T, bool hasTrivialSerialization = HasTrivialSerialization<T>::value> struct SerializationTraits;
-
-template <typename T, bool hasTrivialCopy =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  has_trivial_copy<T>::value
-#else
-  has_trivial_copy_constructor<T>::value
-#endif
-  > struct CopyTraits;
-
-template <typename T, bool is_fundamental = IsFundamental<T>::value>
-struct EndiannessTraits;
+template <typename T, bool is_arithmetic = IsArithmetic<T>::value> struct NumericTraits;
+template <typename T, bool is_arithmetic = IsArithmetic<T>::value> struct DistanceNumericTraits;
+template <typename T, bool is_fundamental = IsFundamental<T>::value> struct RandomGenerationTraits;
+template <typename T, bool has_trivial_equal = HasTrivialEqual<T>::value> struct EqualTraits;
+template <typename T, bool has_trivial_copy = HasTrivialCopyConstructor<T>::value> struct CopyTraits;
+template <typename T, bool has_trivial_serialization = HasTrivialSerialization<T>::value> struct SerializationTraits;
+template <typename T, bool is_fundamental = IsFundamental<T>::value> struct EndiannessTraits;
 
 /**
- * \brief Specify the type that should be used when accumulating elements of type \a T.
+ * \brief Basic numeric traits and operations for fundamental types.
  *
- * Provides a way to specifiy the accumulator that should be used when accumulating elements of type \a T.
- * Defaults to \a T itself.
- *
- * \warning Specializations of this trait won't work with the SSE-optimized metrics.
- * \tparam T Type which information is being provided.
- */
-template <typename T>
-struct AccumulationTraits {
-  typedef T AccumulatorType; ///< Type that should be used when accumulating elements of type \a T.
-};
-
-/// Define the default random number engine to use.
-typedef
-    #ifdef KCHE_TREE_DISABLE_CPP0X
-    std::tr1::minstd_rand
-    #else
-    std::default_random_engine
-    #endif
-    DefaultRandomEngine;
-
-/**
- * \brief Provide the null and identity elements for the type \a T.
- * Especialization for fundamental values, returing 0 and 1.
+ * Provides the basic operations and types, including how to encode distances and calculate them from a pair of elements.
  */
 template <typename T>
 struct NumericTraits<T, true> {
-  static T max() { return std::numeric_limits<T>::max(); } ///< Return the maximum finite value of the type \a T.
-  static T zero() { return T(); } ///< Returns the zero value.
-  static T one() { return static_cast<T>(1.0); } ///< Returns the value one.
-  static void negate(T &value) { value = -value; } ///< Replace \a value with its negative (additive inverse).
-  static void invert(T &value) { value = one() / value; } ///< Replace \a value with its multiplicative inverse.
+  /// Type used to represent distances between elements of type \a T.
+  typedef T Distance;
 
-  typedef T AbsoluteValueType; ///< Type of the result returned by the absolute value function.
-  static AbsoluteValueType abs(T value) { return fabs(value); } ///< Return the absolute value of \a value.
+  /// Returns the distance between two given elements.
+  static Distance distance(typename RParam<T>::Type a, typename RParam<T>::Type b) { return a - b; }
 
-  /// Generate a random value using the provided generator.
-  template <typename RandomGeneratorType>
-  static T random(RandomGeneratorType &generator) { return generator(); }
+  /// Returns the zero value or an object representing the mathematical null element for the type \a T.
+  static T zero() { return T(); }
 
-  typedef T ExpectedDistributionElementType; ///< Defines the type of the elements generated by the random distribution provided on random number generation.
+  /// Return the mean element from a list of elements provided by an iterator.
+  template <typename BidirectionalElementIterator>
+  static T mean(const BidirectionalElementIterator &begin, const BidirectionalElementIterator &end) {
+    T acc = Traits<T>::zero();
+    unsigned int n = 0;
+    for (BidirectionalElementIterator it = begin; it != end; ++it) {
+      acc += *it;
+      ++n;
+    }
+    return acc /= n;
+  }
 };
 
 /**
- * \brief Provide the null and identity elements for the type \a T.
- * Especialization for custom types. The \c one method needs to be defined.
+ * \brief Basic numeric traits and operations for custom types.
+ *
+ * Provides the basic operations and types, including how to encode distances and calculate them from a pair of elements.
  */
 template <typename T>
 struct NumericTraits<T, false> {
-  static T max() { std::numeric_limits<T>::max(); } ///< Return the maximum finite value of the type \a T. Needs to be defined for custom types.
-  static T zero() { return T(); } ///< Returns the zero value or an object representing the null element for the type \a T.
-  static T one(); ///< Returns the value one or an object representing the identity element for the type \a T. Needs to be defined for custom types that make use of the matrix calculations related to the Mahalanobis metric.
-  static void negate(T &value); ///< Replace \a value with its negative (additive inverse). Needs to be defined for custom types that use matrix calculations related to the Mahalanobis metric.
-  static void invert(T &value); ///< Replace \a value with its multiplicative inverse. Needs to be defined for custom types that use the matrix calculations related to the Mahalanobis metric and for making use of the verification tool.
+  /// Type used to represent distances between elements of type \a T. Defaults to float and may be redefined for custom types.
+  typedef float Distance;
 
-  typedef T AbsoluteValueType; ///< Type of the result returned by the absolute value function. May be useful for custom types such as complex numbers.
-  static AbsoluteValueType abs(const T &value); ///< Return the absolute value of \a value. Needs to be defined for custom types that make use of the verification tool.
+  /// Returns the distance between two given elements. Should be redefined for custom types.
+  static Distance distance(typename RParam<T>::Type a, typename RParam<T>::Type b);
 
-  template <typename RandomGeneratorType>
-  static T random(RandomGeneratorType &generator); ///< Generate a random value using the provided generator. Needs to be defined for custom types that make use of DataSet::init_to_random and the verification tool.
+  /// Return the mean value from an array of elements. Needs to be defined for custom types that use set_inverse_covariance(DataSet) method of the Mahalanobis metric object.
+  template <typename BidirectionalElementIterator>
+  static T mean(const BidirectionalElementIterator &begin, const BidirectionalElementIterator &end);
+};
 
-  typedef T ExpectedDistributionElementType; ///< Defines the type of the elements generated by the random distribution provided on random number generation. May be redefined by custom types that use random number generation. Otherwise STL template specializations are likely to be needed.
+/// Traits required for types encoding distances in fundamental types.
+template <typename T>
+struct DistanceNumericTraits<T, true> {
+  /// Returns the value one.
+  static T one() { return static_cast<T>(1.0); }
+
+  /// Return the maximum finite value of the type \a T. Used by the verification tool only.
+  static T max() { return std::numeric_limits<T>::max(); }
+
+  /// Replace \a value with its negative (additive inverse).
+  static void negate(T &value) { value = -value; }
+
+  /// Replace \a value with its multiplicative inverse.
+  static void invert(T &value) { value = one() / value; }
+
+  /// Type of the result returned by the absolute value function.
+  typedef T AbsoluteValue;
+
+  /// Return the absolute value of \a value.
+  static AbsoluteValue abs(T value) { return fabs(value); }
+};
+
+/// Traits required for types encoding distances in custom types.
+template <typename T>
+struct DistanceNumericTraits<T, false> {
+  /// Returns the value one or an object representing the identity element for the type \a T. Needs to be defined for custom distance types that make use of the matrix calculations related to the Mahalanobis metric.
+  static T one();
+
+  /// Return the maximum finite value of the type \a T. Needs to be defined custom types making use of the verification tool.
+  static T max();
+
+  /// Replace \a value with its negative (additive inverse). Needs to be defined for custom distance types that use matrix calculations related to the Mahalanobis metric.
+  static void negate(T &value);
+
+  /// Replace \a value with its multiplicative inverse. Needs to be defined for custom distance types that use the matrix calculations related to the Mahalanobis metric and for making use of the verification tool.
+  static void invert(T &value);
+
+  /// Type of the result returned by the absolute value function. May be useful for custom distance types such as complex numbers.
+  typedef T AbsoluteValue;
+
+  /// Return the absolute value of \a value. Needs to be defined for custom distance types that make use of the verification tool.
+  static AbsoluteValue abs(const T &value);
+};
+
+/// Default random distributions to use for a type. May be redefined by custom types in order to provide integer or floating point versions as appropriate.
+template <typename T>
+struct DefaultRandomDistribution {
+  /// Type of the corresponding uniform distribution. Defaults to UniformInt for integral values and UniformReal otherwise.
+  typedef typename TypeBranch<IsIntegral<T>::value, UniformInt<T>, UniformReal<T> >::Result UniformDistribution;
+};
+
+/// Traits for generating random elements of arithmetic types.
+template <typename T>
+struct RandomGenerationTraits<T, true> {
+  /// Type of the random distribution elements. Defines the output type of the random generator argument that the random method uses to create elements.
+  typedef T RandomDistributionElement;
+
+  /// Type of the uniform distribution used in the generated expected by the random method.
+  typedef typename DefaultRandomDistribution<RandomDistributionElement>::UniformDistribution UniformDistribution;
+
+  /// Generate a random value using the provided generator.
+  template <typename RandomGenerator>
+  static T random(RandomGenerator &generator) { return generator(); }
+};
+
+/// Traits for generating random elements of custom types.
+template <typename T>
+struct RandomGenerationTraits<T, false> {
+  /// Type of the random distribution elements. Defines the output type of the random generator argument that the random method uses to create elements. May be redefined by custom types that use random number generation.
+  typedef T RandomDistributionElement;
+
+  /// Type of the uniform distribution used in the generated expected by the random method.
+  typedef typename DefaultRandomDistribution<RandomDistributionElement>::UniformDistribution UniformDistribution;
+
+  /// Generate a random value using the provided generator. Needs to be defined for custom types that make use of DataSet::set_random_values.
+  template <typename RandomGenerator>
+  static T random(RandomGenerator &generator);
 };
 
 /// Provides optimized operations for types that have a trivial equality comparison.
@@ -217,8 +240,8 @@ template <typename T>
 struct SerializationTraits<T, true> {
   static void serialize(const T &element, std::ostream &out);
   static void serialize_array(const T *array, unsigned int size, std::ostream &out);
-  static void deserialize(T &element, std::istream &in, Endianness::Type endianness = Endianness::endianness());
-  static void deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness = Endianness::endianness());
+  static void deserialize(T &element, std::istream &in, Endianness::Type endianness = Endianness::host_endianness());
+  static void deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness = Endianness::host_endianness());
 };
 
 
@@ -227,8 +250,8 @@ template <typename T>
 struct SerializationTraits<T, false> {
   static void serialize(const T &element, std::ostream &out);
   static void serialize_array(const T *array, unsigned int size, std::ostream &out);
-  static void deserialize(T &element, std::istream &in, Endianness::Type endianness = Endianness::endianness());
-  static void deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness = Endianness::endianness());
+  static void deserialize(T &element, std::istream &in, Endianness::Type endianness = Endianness::host_endianness());
+  static void deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness = Endianness::host_endianness());
 };
 
 // Serialization functions.
@@ -237,22 +260,9 @@ template <typename T> void serialize_array(const T *array, unsigned int size, st
 template <typename T, const size_t Size> void serialize(const T (&array)[Size], std::ostream &out);
 
 // Deserialization functions.
-template <typename T> void deserialize(T &element, std::istream &in, Endianness::Type endianness = Endianness::endianness());
-template <typename T> void deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness = Endianness::endianness());
-template <typename T, const size_t Size> void deserialize(T (&array)[Size], std::istream &in, Endianness::Type endianness = Endianness::endianness());
-
-/// Provide mechanisms for type serialization and checking.
-template <typename T>
-struct TypeSerializationTraits {
-  static void serialize_type(std::ostream &out);
-  static void check_serialized_type(std::istream &in, Endianness::Type endianness = Endianness::endianness());
-};
-
-/// Provides functionality related to the name of the type being described.
-template <typename T>
-struct NameTraits {
-  static const char *name();
-};
+template <typename T> void deserialize(T &element, std::istream &in, Endianness::Type endianness = Endianness::host_endianness());
+template <typename T> void deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness = Endianness::host_endianness());
+template <typename T, const size_t Size> void deserialize(T (&array)[Size], std::istream &in, Endianness::Type endianness = Endianness::host_endianness());
 
 /// Provides endianness swapping for fundamental types.
 template <typename T>
@@ -278,13 +288,12 @@ template <typename T, const size_t Size> void swap_endianness(T (&array)[Size]);
  * \tparam T Type which information is being provided.
  */
 template <typename T>
-struct Traits : AccumulationTraits<T>,
-                NumericTraits<T>,
-                NameTraits<T>,
+struct Traits : NumericTraits<T>,
+                DistanceNumericTraits<T>,
+                RandomGenerationTraits<T>,
                 CopyTraits<T>,
                 EqualTraits<T>,
                 SerializationTraits<T>,
-                TypeSerializationTraits<T>,
                 EndiannessTraits<T> {
   /// Type the traits are describing.
   typedef T Type;

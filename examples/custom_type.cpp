@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,108 +24,112 @@
  * \author Leandro Graciá Gil
  */
 
-// C Standard Library includes.
-#include <cstdio>
-#include <cstdlib>
+// C and C++ Standard Library includes.
 #include <cmath>
 #include <ctime>
+#include <iomanip>
+#include <iostream>
 
 // Include the kche-tree templates.
 #include "kche-tree/kche-tree.h"
-using namespace kche_tree;
 
-/// Our very simple custom type. Encapsulates a floating point value.
+using namespace kche_tree;
+using namespace std;
+
+// ------------------------------------------------------- //
+//            Custom type definition and traits.           //
+// ------------------------------------------------------- //
+
+/// Simple custom type embedding a floating point value.
 class Custom {
 public:
-  /**
-   * Initialize to zero.
-   *
-   * In case our default constructor didn't do this, we should provide a way to initialize to zero by specializing kche_tree::Traits<T>::zero().
-   */
+  /// Initialize to zero.
+  /// In case our default constructor didn't do this, we should provide an alternate way by specializing kche_tree::NumericTraits<Custom>::zero().
   Custom() : value_(0.0f) {}
 
   // Operators required by KDTree. Using default copy constructor and asignment operator.
   bool operator < (const Custom &a) const { return value_ < a.value_; }
   bool operator > (const Custom &a) const { return value_ > a.value_; }
-  bool operator <= (const Custom &a) const { return value_ <= a.value_; }
-  bool operator >= (const Custom &a) const { return value_ >= a.value_; } // Required only if Settings::verify_kdtree_after_deserializing is enabled;
   bool operator == (const Custom &a) const { return value_ == a.value_; }
 
-  // Extra operators required by the Euclidean metric and its incremental calculations.
-  Custom& operator += (const Custom &a) { value_ += a.value_; return *this; }
-  Custom& operator -= (const Custom &a) { value_ -= a.value_; return *this; }
-  Custom& operator *= (const Custom &a) { value_ *= a.value_; return *this; }
-
-  // Serialization methods: only required if we want to serialize the kd-tree or the data sets. Otherwise it can be safely ignored.
-  // Read from a stream. Required like this instead of the >> operator since it doesn't provide the byte endianness of the data being read.
-  Custom(std::istream &in, Endianness::Type endianness) { deserialize(value_, in, endianness); }
-
-  // Standard << stream operator.
-  friend std::ostream & operator << (std::ostream &out, const Custom &object);
-
-  // Non kche-tree methods:
-  /// Get the encapsulated value.
-  float value() const { return value_; }
-
-  /// Initialize to a random value between -100 and 100.
-  void set_random() {
-    value_ = 100.0f * (rand() / (2.0f * RAND_MAX) - 1.0f);
-  }
+  // Methods not required by the kche-tree library.
+  float value() const { return value_; } ///< Get the encapsulated value.
+  void set_value(float value) { value_ = value; } ///< Set the encapsulated value.
 
 private:
-  float value_;
+  float value_; ///< Encapsulated value.
 };
 
-// Write the contents into a stream. Will use the local endianness.
-std::ostream& operator << (std::ostream& out, const Custom &object) {
-  serialize(object.value_, out);
-  return out;
-}
-
-// Now provide some traits information to enable internal optimizations.
+// Now provide some traits information to tell the library how to use our custom type.
 namespace kche_tree {
 
-  // C++ type traits don't provide a way to find out if a type implements the equality operator or not.
-  // With this, we're telling kche-tree that our custom type can be compared by just raw memcmp and enable some optimizations.
-  // Your type should satisfy std::tr1::is_pod<T> before doing this.
+  /// Example numeric traits for a custom type.
+  /// Defines the type and the method used when calculating distances between elements.
   template <>
-  struct HasTrivialEqual<Custom> {
-    static const bool value = true;
+  struct NumericTraits<Custom> {
+    /// Distances between custom elements are encoded and calculated using floats.
+    typedef float Distance;
+
+    /// This is how calculate the direct distance between two Custom objects. RParam<Custom>::Type is just a const reference.
+    static Distance distance(typename RParam<Custom>::Type a, typename RParam<Custom>::Type b) {
+      return a.value() - b.value();
+    }
+
+    /// Equivalent to the zero value for Custom objects.
+    static Custom zero() { return Custom(); }
+
+    /// Creates a mean object from a list defined by the iterators.
+    /// This is required in order to calculate the inverse covariance matrix of a data set as part of the Mahalanobis distance.
+    /// It is safe to leave a dummy implementation as the method kche_tree::MahalanobisMetric<T, D>::set_inverse_covariance for data sets is not used.
+    template <typename BidirectionalElementIterator>
+    static Custom mean(const BidirectionalElementIterator &begin, const BidirectionalElementIterator &end) {
+      return Custom();
+    }
   };
 
-  // C++ type traits don't provide either a way to find out if a type implements the stream operators or not.
-  // With this, we're telling kche-tree that our custom type can be serialized by just reading/writing its memory and enable some optimizations.
-  // Your type should satisfy std::tr1::is_pod<T> before doing this.
+  /// Example random generation traits for a custom type.
+  /// Specifies how new random Custom objects can be created by the library, and based in which random type.
   template <>
-  struct HasTrivialSerialization<Custom> {
-    static const bool value = true;
+  struct RandomGenerationTraits<Custom> {
+    /// Defines the type of the objects returned by the random generator. In this case, random floats are used to build Custom objects.
+    typedef float RandomDistributionElement;
+
+    /// Type of the uniform distribution used to generate the input random floats.
+    typedef UniformReal<RandomDistributionElement> UniformDistribution;
+
+    /// Defines how to construct Custom objects from a random data generator.
+    template <typename RandomGenerator>
+    static Custom random(RandomGenerator &generator) { Custom object; object.set_value(generator()); return object; }
   };
 }
 
-/// Number of dimensions to use in this example.
-const unsigned int D = 24;
+// ------------------------------------------------------- //
+// ------------------------------------------------------- //
 
-/// Alias for the specific KDTree and data set types being used.
-typedef KDTree<Custom, D> KDTreeTest;
-typedef DataSet<Custom, D> DataSetTest;
+// Data type and number of dimensions to use in this example.
+typedef Custom Type;
+const unsigned int Dimensions = 24;
 
-/**
- * Tool entry point.
- */
+// Alias for the specific KDTree and data set types being used.
+typedef KDTree<Type, Dimensions> KDTreeTest;
+typedef DataSet<Type, Dimensions> DataSetTest;
+
 int main(int argc, char *argv[]) {
 
-  // Note: this tool has been designed for illustrative purposes only.
-  //       For result testing please use test_kdtree and its variations.
-  //       For benchmarking use speed_kdtree and its variations.
-
   // Initialize the random seed.
-  srand(time(NULL));
+  DefaultRandomEngine random_engine;
+  random_engine.seed(time(NULL));
+
+  // Create a uniform distribution between -100 and 100.
+  typedef Traits<Type>::UniformDistribution UniformDistribution;
+  UniformDistribution value_distribution(-100.0f, 100.0f);
+
+  // Bind them together into a random number generator. Use operator () to get random numbers.
+  RandomGenerator<DefaultRandomEngine, UniformDistribution> generator(random_engine, value_distribution);
 
   // Generate 500000 random feature vectors for training.
   DataSetTest train_set(500000);
-  for(unsigned int i=0; i<train_set.size(); ++i)
-    for(unsigned int d=0; d<D; ++d)
-      train_set[i][d].set_random();
+  train_set.set_random_values(generator);
 
   // Create and build a new kd-tree with the training set.
   KDTreeTest kdtree;
@@ -133,30 +137,32 @@ int main(int argc, char *argv[]) {
 
   // Generate 5 random feature vectors for testing.
   DataSetTest test_set(5);
-  for(unsigned int i=0; i<test_set.size(); ++i)
-    for(unsigned int d=0; d<D; ++d)
-      test_set[i][d].set_random();
+  test_set.set_random_values(generator);
 
   // Set the number of neighbours to retrieve.
   const unsigned int K = 3;
 
   // For each test case...
   for (unsigned int i=0; i<test_set.size(); ++i) {
+    // Retrieve the K nearest neighbors. KNeighbours is just a vector of Neighbor objects, which are
+    // basically tuples of index and squared distances.
+    KDTreeTest::KNeighbors neighbors;
 
-    // Retrieve the K nearest neighbours.
-    std::vector<KDTreeTest::NeighbourType> neighbours;
-    #ifdef KCHE_TREE_DISABLE_CPP0X
-    // The Euclidean metric is used by default if C++0x is enabled, but explicitely required if disabled.
-    kdtree.knn<KVector>(test_set[i], K, neighbours, EuclideanMetric<Custom, D>());
+    #ifdef KCHE_TREE_DISABLE_CPP1X
+    // C++1x allows the use of default template method arguments, which lets us to automatically use
+    // K-Vectors (vectors holding the K closer values) and the Euclidean metric unless specified.
+    // Unfortunately, without C++1x explicit values are required.
+    kdtree.knn<KVector>(test_set[i], K, neighbors, EuclideanMetric<Type, Dimensions>());
     #else
-    kdtree.knn(test_set[i], K, neighbours);
+    kdtree.knn(test_set[i], K, neighbors);
     #endif
 
     // Print distances to the K nearest neighbours.
-    printf("Distance to the %d nearest neighbours in test case %d: ", K, i + 1);
+    cout << "Distance to the " << K << " nearest neighbours in test case " << (i + 1) << ": ";
+    cout << fixed;
     for (unsigned int k=0; k<K; ++k)
-      printf("%.4f ", sqrtf(neighbours[k].squared_distance.value()));
-    printf("\n");
+      cout << setprecision(4) << sqrtf(neighbors[k].squared_distance()) << " ";
+    cout << endl;
   }
 
   return 0;

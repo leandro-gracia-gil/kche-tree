@@ -24,8 +24,8 @@
  * \author Leandro Graciá Gil
  */
 
-// Include scoped arrays.
 #include "scoped_ptr.h"
+#include "serializable.h"
 
 namespace kche_tree {
 
@@ -120,7 +120,7 @@ void SerializationTraits<T, true>::serialize_array(const T *array, unsigned int 
 template <typename T>
 void SerializationTraits<T, true>::deserialize(T &element, std::istream &in, Endianness::Type endianness) {
   in.read(reinterpret_cast<char *>(&element), sizeof(T));
-  if (sizeof(T) > 1 && endianness != Endianness::endianness())
+  if (sizeof(T) > 1 && endianness != Endianness::host_endianness())
     Traits<T>::swap_endianness(element);
 }
 
@@ -137,10 +137,56 @@ void SerializationTraits<T, true>::deserialize(T &element, std::istream &in, End
 template <typename T>
 void SerializationTraits<T, true>::deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness) {
   in.read(reinterpret_cast<char *>(array), size * sizeof(T));
-  if (sizeof(T) > 1 && endianness != Endianness::endianness())
+  if (sizeof(T) > 1 && endianness != Endianness::host_endianness())
     for (unsigned int i=0; i<size; ++i)
       Traits<T>::swap_endianness(array[i]);
 }
+
+// Forward declaration of auxiliar type.
+template <typename T, bool isSerializable = IsBaseOf<kche_tree::Serializable<T>, T>::value>
+struct SerializeArrayInternal;
+
+/**
+ * \brief Auxiliar structure to serialize arrays of objects depending if they implement the Serializable concept.
+ *
+ * This structure prevents compile errors by preventing the instantiation of the code in the case of non-Serializable custom types.
+ * Specialization for objects implementing the kche_tree::Serializable concept.
+ */
+template <typename T>
+struct SerializeArrayInternal<T, true> {
+  /// Custom serialization for kche-tree serializable types.
+  static void serialize_array(const T *array, unsigned int size, std::ostream &out) {
+    for (unsigned int i=0; i<size; ++i)
+      array[i].serialize(out);
+  }
+
+  /// Custom deserialization for kche-tree serializable types.
+  static void deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness) {
+    for (unsigned int i=0; i<size; ++i)
+      array[i] = T(in, endianness);
+  }
+};
+
+/**
+ * \brief Auxiliar structure to serialize arrays of objects depending if they implement the Serializable concept.
+ *
+ * This structure prevents compile errors by preventing the instantiation of the code in the case of non-Serializable custom types.
+ * Specialization for objects that don't implement the kche_tree::Serializable concept.
+ */
+template <typename T>
+struct SerializeArrayInternal<T, false> {
+  /// Standard serialization for arrays.
+  static void serialize_array(const T *array, unsigned int size, std::ostream &out) {
+    for (unsigned int i=0; i<size; ++i)
+      out << array[i];
+  }
+
+  /// Standard deserialization for arrays.
+  static void deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness) {
+    for (unsigned int i=0; i<size; ++i)
+      in >> array[i];
+  }
+};
 
 /**
  * \brief Serialize an element into the provided stream.
@@ -166,8 +212,7 @@ void SerializationTraits<T, false>::serialize(const T &element, std::ostream &ou
  */
 template <typename T>
 void SerializationTraits<T, false>::serialize_array(const T *array, unsigned int size, std::ostream &out) {
-  for (unsigned int i=0; i<size; ++i)
-    serialize(array[i], out);
+  SerializeArrayInternal<T>::serialize_array(array, size, out);
 }
 
 /**
@@ -196,8 +241,7 @@ void SerializationTraits<T, false>::deserialize(T &element, std::istream &in, En
  */
 template <typename T>
 void SerializationTraits<T, false>::deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness) {
-  for (unsigned int i=0; i<size; ++i)
-    deserialize(array[i], in, endianness);
+  SerializeArrayInternal<T>::deserialize_array(array, size, in, endianness);
 }
 
 /**
@@ -279,76 +323,6 @@ void deserialize(T (&array)[Size], std::istream &in, Endianness::Type endianness
 template <typename T>
 void deserialize_array(T *array, unsigned int size, std::istream &in, Endianness::Type endianness) {
   SerializationTraits<T>::deserialize_array(array, size, in, endianness);
-}
-
-/**
- * \brief Serialize the information identifying a type into an output stream.
- *
- * Writes the name (demangled if possible) of the type into the stream.
- * \note Data is serialized with the same endianness as the local host.
- * \param out Output stream.
- */
-template <typename T>
-void TypeSerializationTraits<T>::serialize_type(std::ostream &out) {
-  uint32_t name_length = strlen(Traits<T>::name());
-  serialize(name_length, out);
-  serialize_array(Traits<T>::name(), name_length, out);
-}
-
-/**
- * \brief Deserialize the type information from an input stream.
- *
- * Checks the type name and throws an exception if it doesn't match.
- * \param in Input stream.
- * \param endianness Endianness of the serialized data. Defaults to host's endianness.
- * \exception std::runtime_error Thrown when the serialized type doesn't match \a T.
- */
-template <typename T>
-void TypeSerializationTraits<T>::check_serialized_type(std::istream &in, Endianness::Type endianness) {
-
-  // Read type name length.
-  uint32_t name_length;
-  deserialize(name_length, in, endianness);
-  if (!in.good())
-    throw std::runtime_error("error reading type name length data");
-
-  // Read type name.
-  ScopedArray<char> type_name(new char[name_length + 1]);
-  deserialize_array(type_name.get(), name_length, in);
-  if (!in.good())
-    throw std::runtime_error("error reading type name");
-  type_name[name_length] = '\0';
-
-  // Check type name.
-  // WARNING: The value returned by Traits<T>::name() is the demangled (if supported) version of typeid::name()
-  //          and hence is implementation-dependent.
-  //          There is a possibility of incompatible files when porting data between different platforms.
-  if (strcmp(Traits<T>::name(), type_name.get())) {
-    std::string error_msg = "type doesn't match: found ";
-    error_msg += type_name.get();
-    error_msg += ", expected ";
-    error_msg += Traits<T>::name();
-    throw std::runtime_error(error_msg);
-  }
-}
-
-/**
- * \brief Provide if possible the demangled name of the type \a T.
- *
- * The returned value is highly dependent on the platform and the compiler.
- * This method intends to return a full C++ style readable version of the type.
- * It should be extended in the future to include support for extra compilers and platforms.
- */
-template <typename T>
-const char *NameTraits<T>::name() {
-  static const char *typeid_name = typeid(T).name();
-  #ifdef __GNUG__
-  static int status;
-  static const char *realname = abi::__cxa_demangle(typeid_name, 0, 0, &status);
-  if (!status)
-    return realname;
-  #endif
-  return typeid_name;
 }
 
 /**

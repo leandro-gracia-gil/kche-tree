@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -28,10 +28,12 @@
 #include <algorithm>
 #include <functional>
 
+#include "neighbor.h"
+
 namespace kche_tree {
 
 /**
- * Build a kd-tree recursively.
+ * \brief Build a kd-tree recursively.
  *
  * \param data Base of the data array.
  * \param indices Array of indices to D-dimensional data vectors.
@@ -41,8 +43,8 @@ namespace kche_tree {
  * \param processed Number of elements already processed and stored in the tree. Updated as the building expands.
  * \return Node of the tree completely initialized.
  */
-template <typename T, const unsigned int D>
-KDNode<T, D> *KDNode<T, D>::build(const DataSetType &data, unsigned int *indices, unsigned int n,
+template <typename T, unsigned int D>
+KDNode<T, D>* KDNode<T, D>::build(const DataSet &data, unsigned int *indices, unsigned int n,
     KDNode *parent, unsigned int bucket_size, unsigned int &processed) {
 
   // Handle empty nodes (only for degenerate bucket sizes).
@@ -53,7 +55,7 @@ KDNode<T, D> *KDNode<T, D>::build(const DataSetType &data, unsigned int *indices
   KDNode *node = new KDNode();
 
   // Split the data with a basic cycle over the dimension indices.
-  node->axis = parent ? (parent->axis + 1) % D : 0;
+  node->axis = parent ? (parent->axis + 1) % Dimensions : 0;
 
   // Create a sorter for the current axis.
   AxisComparer comparer = { data, node->axis };
@@ -66,14 +68,14 @@ KDNode<T, D> *KDNode<T, D>::build(const DataSetType &data, unsigned int *indices
   unsigned int right_elements = n - left_elements;
   unsigned int *right_indices = indices + left_elements;
 
-  // Store the axis-th value of the pivot used to split the hyperspace in two.
-  node->split_value = data[indices[pivot]][node->axis];
+  // Store the axis-th element of the pivot used to split the hyperspace in two.
+  node->split_element = data[indices[pivot]][node->axis];
 
   // Process the left part recursively, creating a leaf is remaining data is not greater than the bucket size.
   if (left_elements > bucket_size)
     node->left_branch = build(data, indices, left_elements, node, bucket_size, processed);
   else {
-    node->left_leaf = new KDLeaf<T, D>(processed, left_elements);
+    node->left_leaf = new KDLeaf(processed, left_elements);
     node->is_leaf |= left_bit;
     processed += left_elements;
   }
@@ -82,7 +84,7 @@ KDNode<T, D> *KDNode<T, D>::build(const DataSetType &data, unsigned int *indices
   if (right_elements > bucket_size)
     node->right_branch = build(data, right_indices, right_elements, node, bucket_size, processed);
   else {
-    node->right_leaf = new KDLeaf<T, D>(processed, right_elements);
+    node->right_leaf = new KDLeaf(processed, right_elements);
     node->is_leaf |= right_bit;
     processed += right_elements;
   }
@@ -92,7 +94,8 @@ KDNode<T, D> *KDNode<T, D>::build(const DataSetType &data, unsigned int *indices
 }
 
 /**
- * Split the provided data subset by one dimension. Should be near to the median to get a balanced kd-tree.
+ * \brief Split the provided data subset by one dimension. Should be near to the median to get a balanced kd-tree.
+ *
  * The dimension used to split the data is also decided by this method.
  * Any index sorting or partitioning must be also performed here.
  *
@@ -101,9 +104,9 @@ KDNode<T, D> *KDNode<T, D>::build(const DataSetType &data, unsigned int *indices
  * \param comparer Functor object used to compare data elements. Can be used with STL comparison-based algorithms.
  *
  * \return The index of the pivot element in the index array used to split the space.
- * All data in the left half must be less than the value associated to this index.
+ * All data in the left half must be less or equal than the value associated to this index.
  */
-template <typename T, const unsigned int D>
+template <typename T, unsigned int D>
 unsigned int KDNode<T, D>::split(unsigned int *indices, unsigned int n, const AxisComparer &comparer) {
 
   // Avoid sorting when less than 2 elements (base case).
@@ -119,10 +122,11 @@ unsigned int KDNode<T, D>::split(unsigned int *indices, unsigned int n, const Ax
 }
 
 /**
- * Default node destructor.
+ * \brief Default node destructor.
+ *
  * Delete the tree recursively handling branches and leaf nodes appropiately.
  */
-template <typename T, const unsigned int D>
+template <typename T, unsigned int D>
 KDNode<T, D>::~KDNode() {
 
   // Delete left branch / leaf.
@@ -139,44 +143,24 @@ KDNode<T, D>::~KDNode() {
 }
 
 /**
- * Initialize a data searching structure with incremental hyperrectangle intersection calculation.
- *
- * \param p Reference point being used in the search.
- * \param data Permutated training set stored by the tree.
- * \param metric Metric functor used for the distance calculations.
- * \param K Number of neighbours to retrieve.
- * \param ignore_null_distances_arg Indicate that points with null distance should be ignored.
- */
-template <typename T, const unsigned int D, typename M>
-KDSearchData<T, D, M>::KDSearchData(const VectorType &p, const DataSetType &data, const M &metric, unsigned int K, bool ignore_null_distances_arg)
-  : M::IncrementalUpdaterType::SearchDataExtras(p, data),
-    p(p),
-    data(data),
-    metric(metric),
-    K(K),
-    hyperrect_distance(Traits<T>::zero()),
-    farthest_distance(Traits<T>::zero()),
-    ignore_null_distances(ignore_null_distances_arg) {}
-
-/**
- * Traverse the kd-tree looking for nearest neighbours candidates, but do not discard any regions of the space.
+ * \brief Traverse the kd-tree looking for nearest neighbours candidates, but do not discard any regions of the space.
  *
  * \param parent Parent node of the one being explored.
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
-template <typename T, const unsigned int D> template <typename M, typename C>
-void KDNode<T, D>::explore(const KDNode *parent, KDSearchData<T, D, M> &search_data, C &candidates) const {
+template <typename T, unsigned int D> template <typename Metric, typename Container>
+void KDNode<T, D>::explore(const KDNode *parent, KDSearch<T, D, Metric> &search_data, Container &candidates) const {
 
   // Intersection data is updated incrementally when the object is created, and restored when destroyed.
-  typename M::IncrementalUpdaterType incremental_update(this, parent, search_data);
+  typename Metric::IncrementalUpdater incremental_update(this, parent, search_data);
 
   // Check which branch should be explored first.
-  KDNode<T, D> *first_branch = NULL, *second_branch = NULL;
-  KDLeaf<T, D> *first_leaf = NULL, *second_leaf = NULL;
+  KDNode *first_branch = NULL, *second_branch = NULL;
+  KDLeaf *first_leaf = NULL, *second_leaf = NULL;
 
   // Left branch first or same point.
-  if (!(search_data.p[axis & axis_mask] > split_value)) {
+  if (!(search_data.p[axis & axis_mask] > split_element)) {
     if (is_leaf & left_bit)
       first_leaf = left_leaf;
     else
@@ -232,17 +216,17 @@ void KDNode<T, D>::explore(const KDNode *parent, KDSearchData<T, D, M> &search_d
 }
 
 /**
- * Traverse the kd-tree while discarding regions of space with hyperrectangle intersections.
+ * \brief Traverse the kd-tree while discarding regions of space with hyperrectangle intersections.
  *
  * \param parent Parent node of the one being explored.
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
-template <typename T, const unsigned int D> template <typename M, typename C>
-void KDNode<T, D>::intersect(const KDNode<T, D> *parent, KDSearchData<T, D, M> &search_data, C &candidates) const {
+template <typename T, unsigned int D> template <typename Metric, typename Container>
+void KDNode<T, D>::intersect(const KDNode *parent, KDSearch<T, D, Metric> &search_data, Container &candidates) const {
 
   // Intersection data is updated incrementally when the object is created, and restored when destroyed.
-  typename M::IncrementalUpdaterType incremental_update(this, parent, search_data);
+  typename Metric::IncrementalUpdater incremental_update(this, parent, search_data);
 
   // Check if the volume defined by the distance from current worst neighbour candidate intersects the region hyperrectangle.
   if (!(search_data.hyperrect_distance < search_data.farthest_distance))
@@ -270,135 +254,171 @@ void KDNode<T, D>::intersect(const KDNode<T, D> *parent, KDSearchData<T, D, M> &
 }
 
 /**
- * Process a leaf node that contains many buckets. Do not use any upper bounds in distance calculation (otherwise best candidates may be skipped).
+ * \brief Process a leaf node without using any upper bounds in distance calculation.
  *
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
-template <typename T, const unsigned int D> template <typename M, typename C>
-void KDLeaf<T, D>::explore(KDSearchData<T, D, M> &search_data, C &candidates) const {
+template <typename T, unsigned int D> template <typename Metric, typename Container>
+void KDLeaf<T, D>::explore(KDSearch<T, D, Metric> &search_data, Container &candidates) const {
 
   if (search_data.ignore_null_distances) {
-
     // Process only the bucket elements different to p.
     for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
-      ConstRef_T distance = search_data.metric(search_data.p, search_data.data[i]);
-      if (distance > Traits<T>::zero())
-        candidates.push_back(VectorDistance<T>(i, search_data.metric(search_data.p, search_data.data[i])));
+      ConstRef_Distance distance = search_data.metric(search_data.p, search_data.data.get_permuted(i));
+      if (distance > Traits<Distance>::zero())
+        candidates.push_back(Neighbor<Distance>(i, search_data.metric(search_data.p, search_data.data.get_permuted(i))));
     }
 
   } else {
     // Process all the buckets in the node.
     for (unsigned int i=first_index; i < first_index + num_elements; ++i)
       // Create a new neighbour candidate with the point referenced by this node and push it into the K best ones.
-      candidates.push_back(VectorDistance<T>(i, search_data.metric(search_data.p, search_data.data[i])));
+      candidates.push_back(Neighbor<Distance>(i, search_data.metric(search_data.p, search_data.data.get_permuted(i))));
   }
 
   // Update current farthest nearest neighbour distance.
   if (!candidates.empty())
-    search_data.farthest_distance = candidates.front().squared_distance;
+    search_data.farthest_distance = candidates.front().squared_distance();
 }
 
 /**
- * Process a leaf node that contains many buckets without trying to discard them.
+ * \brief Process a leaf node using an upper bound in the corresponding metric.
  *
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
-template <typename T, const unsigned int D> template <typename M, typename C>
-void KDLeaf<T, D>::intersect(KDSearchData<T, D, M> &search_data, C &candidates) const {
+template <typename T, unsigned int D> template <typename Metric, typename Container>
+void KDLeaf<T, D>::intersect(KDSearch<T, D, Metric> &search_data, Container &candidates) const {
 
   // Process all the buckets in the node.
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
 
     // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
-    ConstRef_T new_distance = search_data.metric(search_data.p, search_data.data[i], search_data.farthest_distance);
+    ConstRef_Distance new_distance = search_data.metric(search_data.p, search_data.data.get_permuted(i), search_data.farthest_distance);
 
     // If less or equal than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
     if (!(new_distance > search_data.farthest_distance)) {
 
       // Push it in the nearest neighbour container (will reject the previous farthest one).
-      candidates.push_back(VectorDistance<T>(i, new_distance));
+      candidates.push_back(Neighbor<Distance>(i, new_distance));
 
       // Update the distance to the new farthest nearest neighbour.
-      search_data.farthest_distance = candidates.front().squared_distance;
+      search_data.farthest_distance = candidates.front().squared_distance();
     }
   }
 }
 
 /**
- * Process a leaf node that contains many buckets without trying to discard them.
- * Ignore any points with distance 0.
+ * \brief Process a leaf node using an upper bound in the corresponding metric. Ignores any points with distance 0.
  *
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param candidates STL container-like object holding the current neighbour candidates.
  */
-template <typename T, const unsigned int D> template <typename M, typename C>
-void KDLeaf<T, D>::intersect_ignoring_same(KDSearchData<T, D, M> &search_data, C &candidates) const {
+template <typename T, unsigned int D> template <typename Metric, typename Container>
+void KDLeaf<T, D>::intersect_ignoring_same(KDSearch<T, D, Metric> &search_data, Container &candidates) const {
 
   // Process all the buckets in the node.
   for (unsigned int i=first_index; i < first_index + num_elements; ++i) {
 
     // Calculate the distance to the new candidate, upper bounded by the farthest nearest neighbour distance.
-    ConstRef_T new_distance = search_data.metric(search_data.p, search_data.data[i], search_data.farthest_distance);
-    if (new_distance == Traits<T>::zero())
+    ConstRef_Distance new_distance = search_data.metric(search_data.p, search_data.data.get_permuted(i), search_data.farthest_distance);
+    if (new_distance == Traits<Distance>::zero())
       continue;
 
     // If less or equal than the current farthest nearest neighbour then it's a valid candidate (equal is left for the all_in_range method).
     if (!(new_distance > search_data.farthest_distance)) {
 
       // Push it in the nearest neighbour container (will reject the previous farthest one).
-      candidates.push_back(VectorDistance<T>(i, new_distance));
+      candidates.push_back(Neighbor<Distance>(i, new_distance));
 
       // Update the distance to the new farthest nearest neighbour.
-      search_data.farthest_distance = candidates.front().squared_distance;
+      search_data.farthest_distance = candidates.front().squared_distance();
     }
   }
 }
 
-template <typename T, const unsigned int D>
-void KDNode<T, D>::verify_properties(const DataSetType &data, int axis) const {
+/**
+ * \brief Verifies the structural integrity of the kd-tree branch hanging by this node.
+ *
+ * This method will check that the expected structural properties of the kd-tree hold.
+ * Specifically, it will ensure that elements left and right of the split value are respectively <= or >= than it
+ * in every dimension along the tree branch.
+ *
+ * \param data Data set the branch refers to.
+ * \param axis Index of the dimension where the kd-tree properties should be verified.
+ * \exception std::runtime_error if the structure is invalid.
+ */
+template <typename T, unsigned int D>
+void KDNode<T, D>::verify_properties(const DataSet &data, unsigned int axis) const {
 
   // Alias to STL comparison functors.
-  typedef std::less<T> LessFunc; // Negated to get greater_equal without requiring additional operators.
-  typedef std::greater<T> GreaterFunc; // Negated to get less_equal without requiring additional operators.
+  typedef std::less<Element> LessFunc; // Negated to get greater_equal without requiring additional operators.
+  typedef std::greater<Element> GreaterFunc; // Negated to get less_equal without requiring additional operators.
 
-  if (is_leaf & left_bit)
-    left_leaf->verify_properties(data, split_value, axis, std::binary_negate<GreaterFunc>(GreaterFunc()));
+  bool is_left_leaf = is_leaf & left_bit;
+  bool is_right_leaf = is_leaf & right_bit;
+
+  // Verify the structural properties along this dimension in the rest of the tree.
+  if (is_left_leaf)
+    left_leaf->verify_properties(data, axis, split_element, std::binary_negate<GreaterFunc>(GreaterFunc()));
   else
-    left_branch->verify_properties(data, split_value, axis, std::binary_negate<GreaterFunc>(GreaterFunc()));
+    left_branch->verify_properties(data, axis, split_element, std::binary_negate<GreaterFunc>(GreaterFunc()));
 
-  if (is_leaf & right_bit)
-    right_leaf->verify_properties(data, split_value, axis, std::binary_negate<LessFunc>(LessFunc()));
+  if (is_right_leaf)
+    right_leaf->verify_properties(data, axis, split_element, std::binary_negate<LessFunc>(LessFunc()));
   else
-    right_branch->verify_properties(data, split_value, axis, std::binary_negate<LessFunc>(LessFunc()));
+    right_branch->verify_properties(data, axis, split_element, std::binary_negate<LessFunc>(LessFunc()));
 
-  if (!(is_leaf & left_bit))
-    left_branch->verify_properties(data, (axis + 1) % D);
+  // Recursively verify the next dimensions.
+  if (!is_left_leaf)
+    left_branch->verify_properties(data, (axis + 1) % Dimensions);
 
-  if (!(is_leaf & right_bit))
-    right_branch->verify_properties(data, (axis + 1) % D);
+  if (!is_right_leaf)
+    right_branch->verify_properties(data, (axis + 1) % Dimensions);
 }
 
-template <typename T, const unsigned int D> template <typename Op>
-void KDNode<T, D>::verify_properties(const DataSetType &data, ConstRef_T value, int axis, const Op &op) const {
+/**
+ * \brief Verifies the structural integrity of a kd-tree branch in the provided dimension.
+ *
+ * Checks that all elements in a dimension verify a provided comparison related to its split element.
+ *
+ * \param data Data set the branch refers to.
+ * \param axis Index of the dimension where the kd-tree properties should be verified.
+ * \param split_element Value splitting the \a axis dimension in two.
+ * \param op Comparison operation to apply between the stored elements and the split value.
+ * \exception std::runtime_error if the structure is invalid.
+ */
+template <typename T, unsigned int D> template <typename Op>
+void KDNode<T, D>::verify_properties(const DataSet &data, unsigned int axis, ConstRef_Element split_element, const Op &op) const {
 
+  // Recursively perform the verification over all the kd-tree.
   if (is_leaf & left_bit)
-    left_leaf->verify_properties(data, value, axis, op);
+    left_leaf->verify_properties(data, axis, split_element, op);
   else
-    left_branch->verify_properties(data, value, axis, op);
+    left_branch->verify_properties(data, axis, split_element, op);
 
   if (is_leaf & right_bit)
-    right_leaf->verify_properties(data, value, axis, op);
+    right_leaf->verify_properties(data, axis, split_element, op);
   else
-    right_branch->verify_properties(data, value, axis, op);
+    right_branch->verify_properties(data, axis, split_element, op);
 }
 
-template <typename T, const unsigned int D> template <typename Op>
-void KDLeaf<T, D>::verify_properties(const DataSetType &data, ConstRef_T value, int axis, const Op &op) const {
+/**
+ * \brief Verifies the structural integrity of a kd-tree leaf node.
+ *
+ * \param data Data set the branch refers to.
+ * \param axis Index of the dimension where the kd-tree properties should be verified.
+ * \param split_element Value splitting the \a axis dimension in two.
+ * \param op Comparison operation to apply between the stored elements and the split value.
+ * \exception std::runtime_error if the structure is invalid.
+ */
+template <typename T, unsigned int D> template <typename Op>
+void KDLeaf<T, D>::verify_properties(const DataSet &data, unsigned int axis, ConstRef_Element split_element, const Op &op) const {
 
+  // Verify the bucket contained by the leaf node.
   for (uint32_t i=first_index; i < first_index + num_elements; ++i) {
-    if (!op(data[i][axis], value)) {
+    if (!op(data.get_permuted(i)[axis], split_element)) {
       std::string error_msg = "kd-tree structural error on axis ";
       error_msg += axis;
       throw std::runtime_error(error_msg);

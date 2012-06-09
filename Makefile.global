@@ -7,36 +7,37 @@ INSTALL=install
 PREFIX=/usr/include
 INSTALL_FOLDER=kche-tree
 
-CFLAGS=-O3 -Wall $(CPP0XFLAGS)
+CFLAGS=-O3 -Wall $(CPP1XFLAGS)
 
 COMPILE_NOTIFY="  [CC]\t$@"
 MAKEFILE_DEPS=Makefile.global Makefile
 
-# Kche-tree assumes C++0x support by default. Define KCHE_TREE_DISABLE_CPP0X in your code to disable it.
-# Use make C++0x=disabled to disable when building tools and examples.
-ifeq ($(disable),C++0x)
-  DISABLE_CPP0X:=1
+# Kche-tree assumes C++1x support by default. Define KCHE_TREE_DISABLE_CPP1X in your code to disable it.
+# Use make C++1x=disabled to disable when building tools and examples.
+ifeq ($(disable),C++1x)
+  DISABLE_CPP1X:=1
 endif
 
-ifeq ($(disable),c++0x)
-  DISABLE_CPP0X:=1
+ifeq ($(disable),c++1x)
+  DISABLE_CPP1X:=1
 endif
 
-ifeq ($(DISABLE_CPP0X),1)
-  CPP0XFLAGS:=-DKCHE_TREE_DISABLE_CPP0X
+ifeq ($(DISABLE_CPP1X),1)
+  CPP1XFLAGS:=-DKCHE_TREE_DISABLE_CPP1X
 else
-  CPP0XFLAGS:=-std=c++0x
+  CPP1XFLAGS:=-std=c++0x
 endif
 
 # Add any new kche-tree template files here.
 KCHE_TREE= kche-tree.h kd-tree.h kd-tree.tpp kd-tree_io.tpp
-KCHE_TREE+= kd-node.h kd-node.tpp
+KCHE_TREE+= kd-node.h kd-node.tpp neighbor.h
 KCHE_TREE+= k-heap.h k-heap.tpp indirect_heap.h indirect_heap.tpp
 KCHE_TREE+= k-vector.h k-vector.tpp
 KCHE_TREE+= vector.h vector.tpp dataset.h dataset.tpp
-KCHE_TREE+= traits.h traits.tpp endianness.h compile_assert.h
-KCHE_TREE+= scoped_ptr.h shared_ptr.h deleter.h
-KCHE_TREE+= allocator.h aligned_array.h utils.h
+KCHE_TREE+= labeled_dataset.h labeled_dataset.tpp
+KCHE_TREE+= traits.h traits.tpp serializable.h serializable.tpp
+KCHE_TREE+= endianness.h scoped_ptr.h shared_ptr.h deleter.h
+KCHE_TREE+= allocator.h aligned_array.h cpp1x.h utils.h
 KCHE_TREE+= metrics.h metrics_euclidean.tpp metrics_euclidean_sse.tpp
 KCHE_TREE+= metrics_mahalanobis.tpp metrics_mahalanobis_sse.tpp
 KCHE_TREE+= incremental.h incremental.tpp incremental_euclidean.tpp

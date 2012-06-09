@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,43 +27,20 @@
 #ifndef _KCHE_TREE_DATASET_H_
 #define _KCHE_TREE_DATASET_H_
 
-// STL streams, exceptions and runtime type information.
 #include <iostream>
 #include <stdexcept>
-#include <typeinfo>
 
 // Include shared arrays, type traits and feature vectors.
 #include "shared_ptr.h"
+#include "serializable.h"
 #include "traits.h"
 #include "vector.h"
 
 namespace kche_tree {
 
-// Forward-declaration of the class.
-template <typename T, const unsigned int D>
-class DataSet;
-
-/**
- * \brief Load the contents of the input stream from the data set.
- * The original contents of the \a dataset object are not modified in case of error.
- *
- * \param in Input stream.
- * \param dataset DataSet to be deserialized.
- * \exception std::runtime_error Thrown in case of reading or validation error.
- */
-template <typename T, const unsigned int D>
-std::istream & operator >> (std::istream &in, DataSet<T, D> &dataset);
-
-/**
- * \brief Save the contents of the data set to the output stream.
- *
- * \note Data is serialized with the same endianness as the local host.
- * \param out Output stream.
- * \param dataset DataSet to be serialized.
- * \exception std::runtime_error Thrown in case of writing error.
- */
-template <typename T, const unsigned int D>
-std::ostream & operator << (std::ostream &out, const DataSet<T, D> &dataset);
+// Forward declarations.
+template <typename ElementType, unsigned int NumDimensions, typename LabelType>
+class KDTree;
 
 /**
  * \brief Object containing a reference-counted set of feature vectors.
@@ -71,52 +48,97 @@ std::ostream & operator << (std::ostream &out, const DataSet<T, D> &dataset);
  * Encapsulates a set of D-dimensional feature vectors that are shared
  * between different sets.
  *
- * \tparam T Data type of the elements in each vector.
- * \tparam D Number of dimensions of each vector.
+ * \tparam ElementType Type of the elements in the feature vectors.
+ * \tparam NumDimensions Number of dimensions of the feature vectors.
  */
-template <typename T, const unsigned int D>
-class DataSet {
+template <typename ElementType, unsigned int NumDimensions>
+class DataSet : public Serializable<DataSet<ElementType, NumDimensions> > {
 public:
   /// Type of the elements in the data set.
-  typedef T ElementType;
+  typedef ElementType Element;
 
   /// Number of dimensions of the vectors in the data set.
-  static const unsigned int Dimensions = D;
+  static const unsigned int Dimensions = NumDimensions;
 
-  /// Use the global vector type by default.
-  typedef typename TypeSettings<T, D>::VectorType VectorType;
+  /// Use the same vector type as the corresponding kd-tree.
+  typedef typename KDTree<Element, Dimensions, void>::Vector Vector;
 
-  // Constructors and destructors;
-  DataSet(); ///< Create an empty data set.
-  DataSet(unsigned int size); ///< Create a data set of the specified size.
-  DataSet(SharedArray<VectorType> vectors, unsigned int size); ///< Create a data set object over shared vector array of the specified size.
+  // Constructors and destructors.
+  DataSet();
+  DataSet(unsigned int size);
+  DataSet(const Vector *vectors, unsigned int size);
+  DataSet(SharedArray<Vector> vectors, unsigned int size);
+  DataSet(const DataSet &dataset, unsigned int *permutation);
+  virtual ~DataSet();
 
   // Initialization methods.
-  void reset_to_size(unsigned int size); ///< Reset the data set to an uninitialized version of the specified size.
+  virtual void reset_to_size(unsigned int size);
 
-  template <typename RandomGeneratorType>
-  void reset_to_random(unsigned int size, RandomGeneratorType &generator); ///< Reset the data set to a randomly-initialized version of the specified size.
+  template <typename RandomGenerator>
+  void set_random_values(RandomGenerator &generator);
 
-  // Attributes.
+  // Generic attributes.
   unsigned int size() const { return size_; } ///< Returns the number of vectors in the data set.
-  const SharedArray<VectorType> vectors() const { return vectors_; } ///< Return the shared pointer of all contiguous vectors.
+  const SharedArray<Vector> vectors() const { return vectors_; } ///< Return the shared pointer of all contiguous vectors.
   long use_count() const { return vectors_.use_count(); } ///< Return the number of references to the cointained vectors.
 
+  // Index permutation methods.
+  unsigned int get_permuted_index(unsigned int index) const;
+  unsigned int get_original_index(unsigned int index) const;
+
+  // Permutation-sensitive accessors.
+  const Vector& get_permuted(unsigned int permuted_index) const;
+  Vector& get_permuted(unsigned int permuted_index);
+
   // Subscript operators.
-  const VectorType &operator [] (unsigned int index) const { return vectors_[index]; } ///< Access vectors of the data set without modifying them.
-  VectorType &operator [] (unsigned int index); ///< Access vectors of the data set. Will make a separate copy of the contents if shared with something else.
+  const Vector& operator [] (unsigned int index) const;
+  Vector& operator [] (unsigned int index);
 
   // Comparison operators.
-  bool operator == (const DataSet& dataset) const; ///< Check if the data set is equal to some other. May be optimized if \link kche_tree::HasTrivialEqual HasTrivialEqual::value\endlink is \c true.
-  bool operator != (const DataSet& dataset) const; ///< Check if the data set is different to some other. May be optimized if \link kche_tree::HasTrivialEqual HasTrivialEqual::value\endlink is \c true.
+  bool operator == (const DataSet &dataset) const;
+  bool operator != (const DataSet &dataset) const;
 
-  // Stream operators.
-  friend std::istream & operator >> <>(std::istream &in, DataSet &dataset);
-  friend std::ostream & operator << <>(std::ostream &out, const DataSet &dataset);
+  /// Const iterator for the columns of the data set. Iterates through the i-dimensional element of each vector.
+  class ColumnConstIterator : public std::iterator<std::bidirectional_iterator_tag, Element> {
+  public:
+    ColumnConstIterator(const DataSet &dataset, unsigned int column, unsigned int row);
+    ColumnConstIterator(const ColumnConstIterator &iterator);
 
-private:
-  SharedArray<VectorType> vectors_; ///< Array of the vectors in the data set. Optionally aligned to the 16-byte boundary for SSE optimizations.
-  uint32_t size_; ///< Number of vectors in the data set.
+    bool operator == (const ColumnConstIterator &iterator) const;
+    bool operator != (const ColumnConstIterator &iterator) const;
+
+    ColumnConstIterator& operator ++ ();
+    ColumnConstIterator operator ++ (int);
+
+    ColumnConstIterator& operator -- ();
+    ColumnConstIterator operator -- (int);
+
+    const Element& operator * ();
+    const Element* operator -> ();
+
+  private:
+    const DataSet &dataset_;
+    unsigned int column_;
+    unsigned int row_;
+  };
+
+  // Iterators to access columns of the data set.
+  ColumnConstIterator column_begin(unsigned int column) const;
+  ColumnConstIterator column_end(unsigned int column) const;
+
+protected:
+  // Implementation of the serializable concept.
+  DataSet(std::istream &in, Endianness::Type endianness);
+  void serialize(std::ostream &out) const;
+  void swap(DataSet &dataset);
+
+  friend std::istream& operator >> <>(std::istream &in, Serializable<DataSet> &dataset);
+  friend std::ostream& operator << <>(std::ostream &out, const Serializable<DataSet> &dataset);
+
+  SharedArray<Vector> vectors_; ///< Array of the vectors in the data set. Optionally aligned to the 16-byte boundary for SSE optimizations.
+  ScopedArray<unsigned int> permuted_to_original_; ///< Index array to transform from permuted indices to original ones.
+  ScopedArray<unsigned int> original_to_permuted_; ///< Index array to transform from original indices to permuted ones.
+  unsigned int size_; ///< Number of vectors in the data set.
   static const uint16_t version[2]; ///< Tuple of major and minor version of the current data set serialization format.
 };
 

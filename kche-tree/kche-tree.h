@@ -80,17 +80,17 @@
  * - \c KCHE_TREE_VERIFY_KDTREE_AFTER_DESERIALIZING: if enabled, the structural properties of the kd-tree are verified after loading it from a file.
  *   This can be disabled for performance reasons if set to \c false. Defaults to \c true.
  *
- * \section CPP0x About C++0x
- * Kche-trees use by default C++0x features available in the most modern compilers to enhance its use and operations.
- * If C++0x is not supported by your compiler it can be disabled by simply defining the macro \c KCHE_TREE_DISABLE_CPP0X before including the library.
- * Additionally it can be disabled when building the examples and tools by using \c make \c disable=c++0x.
+ * \section CPP1x About C++1x
+ * Kche-trees use by default C++1x features available in the most modern compilers to enhance its use and operations.
+ * If C++1x is not supported by your compiler it can be disabled by simply defining the macro \c KCHE_TREE_DISABLE_CPP1X before including the library.
+ * Additionally it can be disabled when building the examples and tools by using \c make \c disable=c++1x.
  *
- * However, be aware that disabling C++0x has some consequences:
- * - When calling the \link kche_tree::KDTree::knn knn\endlink method it will be required to explicitly provide the K-Neighbour container template type, where in the C++0x version it automatically defaults to \link kche_tree::KVector KVector\endlink. See the \c knn_simple example for details.
+ * However, be aware that disabling C++1x has some consequences:
+ * - When calling the \link kche_tree::KDTree::knn knn\endlink method it will be required to explicitly provide the K-Neighbour container template type, where in the C++1x version it automatically defaults to \link kche_tree::KVector KVector\endlink. See the \c knn_simple example for details.
  * - Any static assert that the library may make will leave no explanation message, just some kind of compiler error mentioning COMPILE_ASSERT_FAILURE.
  * - Some type traits might not be available, leading to possible misses of automatic optimization chances.
  *
- * Expect the previous list to grow and the possible future addition of C++0x-only features. It is also possible that the support for non-C++0x code can be completely removed in future releases.
+ * Expect the previous list to grow and the possible future addition of C++1x-only features. It is also possible that the support for non-C++1x code can be completely removed in future releases.
 */
 
 /**
@@ -147,11 +147,12 @@ namespace kche_tree {
 #endif
 
 // Code not reached macros.
-#define KCHE_TREE_NOT_REACHED() assert(false)
+#define KCHE_TREE_NOT_REACHED() exit(1)
 
 // Forward-declare data sets and vectors.
-template <typename T, const unsigned int D> class DataSet;
-template <typename T, const unsigned int D> class Vector;
+template <typename T, unsigned int D> class Vector;
+template <typename T, unsigned int D> class DataSet;
+template <typename T, unsigned int D, typename L> class LabeledDataSet;
 
 /**
  * \brief Compile-time settings for the Kche-tree library.
@@ -170,24 +171,6 @@ struct Settings {
   /// Enable SSE optimizations. Any specific required flags are assumed to be passed to the compiler.
   /// \warning This only works with some metrics, types (including accumulator types) and the number of dimensions should be a multiple of 4.
   static const bool enable_sse = KCHE_TREE_ENABLE_SSE;
-};
-
-/**
- * \brief Compile-time type settings for the Kche-tree library.
- *
- * Defines the main types vector and data set types to be used by the different
- * classes of the library. Specialize the template to redefine.
- *
- * \tparam Type of the elements used by the library to which the options apply.
- * \tparam D Number of dimensions used by the library to which the options apply.
- */
-template <typename T, const unsigned int D>
-struct TypeSettings {
-  /// Type of the data set to use.
-  typedef DataSet<T, D> DataSetType;
-
-  /// Type of the vectors to be used.
-  typedef Vector<T, D> VectorType;
 };
 
 } // namespace kche_tree

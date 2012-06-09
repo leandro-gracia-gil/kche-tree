@@ -69,8 +69,8 @@ struct MapReduce<T, D, Index, D_max, BlockSize, false> {
    * \param b Second input array. Optional.
    * \param extra Extra arguments provided to the map-reduce function. Optional.
    */
-  template <typename MapReduceFunctor, typename AccumulatorType>
-  static inline void run(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const T *a, const T *b = NULL, const void *extra = NULL) {
+  template <typename MapReduceFunctor, typename Accumulator>
+  static inline void run(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const T *a, const T *b = NULL, const void *extra = NULL) {
     KCHE_TREE_CHECK_CONCEPT(MapReduceFunctor, MapReduceFunctorConcept<T>);
     static const unsigned int StepSize = Min<BlockSize, D_max - Index>::value;
     static const unsigned int NextStep = Min<StepSize, D_max - Index - StepSize>::value;
@@ -83,8 +83,8 @@ template <typename T, unsigned int D, unsigned int D_max, unsigned int BlockSize
 struct MapReduce<T, D, D_max, D_max, BlockSize, false> {
 
   /// Nothing needs to be done in this base case.
-  template <typename MapReduceFunctor, typename AccumulatorType>
-  static inline void run(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const T *a, const T *b = NULL, const void *extra = NULL) {
+  template <typename MapReduceFunctor, typename Accumulator>
+  static inline void run(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const T *a, const T *b = NULL, const void *extra = NULL) {
     KCHE_TREE_CHECK_CONCEPT(MapReduceFunctor, MapReduceFunctorConcept<T>);
   }
 };
@@ -101,8 +101,8 @@ struct MapReduce<T, D, D_max, D_max, BlockSize, false> {
  * \param i_max Index of the last (non-inclusive) dimension to operate. Optional, defaults to \a D.
  * \param block_size Number of consecutive dimensions to process in each call to \a map_reduce. Optional, defaults to \c 1.
  */
-template <typename T, unsigned int D, typename MapReduceFunctor, typename AccumulatorType>
-inline void non_unrolled_map_reduce(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const T *a, const T *b = NULL, const void *extra = NULL, unsigned int i = 0, unsigned int i_max = D, unsigned int block_size = 1) {
+template <typename T, unsigned int D, typename MapReduceFunctor, typename Accumulator>
+inline void non_unrolled_map_reduce(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const T *a, const T *b = NULL, const void *extra = NULL, unsigned int i = 0, unsigned int i_max = D, unsigned int block_size = 1) {
   KCHE_TREE_CHECK_CONCEPT(MapReduceFunctor, MapReduceFunctorConcept<T>);
   while (i < i_max) {
     unsigned int step_size = std::min(block_size, i_max - i);
@@ -115,8 +115,8 @@ inline void non_unrolled_map_reduce(const MapReduceFunctor &map_reduce, Accumula
 template <typename T, unsigned int D, unsigned int Index, unsigned int D_max, unsigned int BlockSize>
 struct MapReduce<T, D, Index, D_max, BlockSize, true> {
   /// Run the loop-based version of the map reduce operation.
-  template <typename MapReduceFunctor, typename AccumulatorType>
-  static inline void run(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const T *a, const T *b = NULL, const void *extra = NULL) {
+  template <typename MapReduceFunctor, typename Accumulator>
+  static inline void run(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const T *a, const T *b = NULL, const void *extra = NULL) {
     non_unrolled_map_reduce<T, D>(map_reduce, accumulator, a, b, extra, Index, D_max, BlockSize);
   }
 };
@@ -153,10 +153,10 @@ struct BoundedMapReduce<BoundCheckFreq, T, D, Index, D_max, BlockSize, NextCheck
    * \param b Second input array.
    * \param extra Extra arguments provided to the map-reduce functor. Optional, defaults to \c NULL.
    */
-  template <typename MapReduceFunctor, typename AccumulatorType, typename BoundaryCheckFunctor, typename BoundaryType>
-  static inline void run(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const BoundaryCheckFunctor& check, const BoundaryType &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
+  template <typename MapReduceFunctor, typename Accumulator, typename BoundaryCheckFunctor, typename Boundary>
+  static inline void run(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const BoundaryCheckFunctor& check, const Boundary &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
     KCHE_TREE_CHECK_CONCEPT(MapReduceFunctor, MapReduceFunctorConcept<T>);
-    KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<BoundaryType>);
+    KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<Boundary>);
     static const unsigned int StepSize = Min<BlockSize, D_max - Index>::value;
     static const unsigned int NextStep = Min<StepSize, D_max - Index - StepSize>::value;
     BoundedMapReduce<BoundCheckFreq, T, D, Index + StepSize, D_max, NextStep, NextCheck - 1>::run(map_reduce, map_reduce.template operator () <Index, StepSize, D>(accumulator, a, b, extra), check, boundary, a, b, extra);
@@ -168,10 +168,10 @@ template <unsigned int BoundCheckFreq, typename T, unsigned int D, unsigned int 
 struct BoundedMapReduce<BoundCheckFreq, T, D, Index, D_max, BlockSize, 0, false> {
 
   /// Perform the boundary checking with the current value of the accumulator.
-  template <typename MapReduceFunctor, typename AccumulatorType, typename BoundaryCheckFunctor, typename BoundaryType>
-  static inline void run(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const BoundaryCheckFunctor &check, const BoundaryType &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
+  template <typename MapReduceFunctor, typename Accumulator, typename BoundaryCheckFunctor, typename Boundary>
+  static inline void run(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const BoundaryCheckFunctor &check, const Boundary &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
     KCHE_TREE_CHECK_CONCEPT(MapReduceFunctor, MapReduceFunctorConcept<T>);
-    KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<BoundaryType>);
+    KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<Boundary>);
     if (check(accumulator, boundary))
       return;
     BoundedMapReduce<BoundCheckFreq, T, D, Index, D_max, BlockSize, BoundCheckFreq>::run(map_reduce, accumulator, check, boundary, a, b, extra);
@@ -183,10 +183,10 @@ template <unsigned int BoundCheckFreq, typename T, unsigned int D, unsigned int 
 struct BoundedMapReduce<BoundCheckFreq, T, D, D_max, D_max, 0, NextCheck, false> {
 
   /// Nothing needs to be done in this base case.
-  template <typename MapReduceFunctor, typename AccumulatorType, typename BoundaryCheckFunctor, typename BoundaryType>
-  static inline void run(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const BoundaryCheckFunctor& check, const BoundaryType &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
+  template <typename MapReduceFunctor, typename Accumulator, typename BoundaryCheckFunctor, typename Boundary>
+  static inline void run(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const BoundaryCheckFunctor& check, const Boundary &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
     KCHE_TREE_CHECK_CONCEPT(MapReduceFunctor, MapReduceFunctorConcept<T>);
-    KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<BoundaryType>);
+    KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<Boundary>);
   }
 };
 
@@ -195,10 +195,10 @@ template <unsigned int BoundCheckFreq, typename T, unsigned int D, unsigned int 
 struct BoundedMapReduce<BoundCheckFreq, T, D, D_max, D_max, 0, 0, false> {
 
   /// Nothing needs to be done in this base case.
-  template <typename MapReduceFunctor, typename AccumulatorType, typename BoundaryCheckFunctor, typename BoundaryType>
-  static inline void run(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const BoundaryCheckFunctor &check, const BoundaryType &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
+  template <typename MapReduceFunctor, typename Accumulator, typename BoundaryCheckFunctor, typename Boundary>
+  static inline void run(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const BoundaryCheckFunctor &check, const Boundary &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
     KCHE_TREE_CHECK_CONCEPT(MapReduceFunctor, MapReduceFunctorConcept<T>);
-    KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<BoundaryType>);
+    KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<Boundary>);
   }
 };
 
@@ -207,10 +207,10 @@ template <typename T, unsigned int D, unsigned int Index, unsigned int D_max, un
 struct BoundedMapReduce<0, T, D, Index, D_max, BlockSize, NextCheck, false> {
 
   /// This case should never be reached and contains a false assertion.
-  template <typename MapReduceFunctor, typename AccumulatorType, typename BoundaryCheckFunctor, typename BoundaryType>
-  static inline void run(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const BoundaryCheckFunctor &check, const BoundaryType &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
+  template <typename MapReduceFunctor, typename Accumulator, typename BoundaryCheckFunctor, typename Boundary>
+  static inline void run(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const BoundaryCheckFunctor &check, const Boundary &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
     KCHE_TREE_CHECK_CONCEPT(MapReduceFunctor, MapReduceFunctorConcept<T>);
-    KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<BoundaryType>);
+    KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<Boundary>);
 
     // This case should never be reached. BoundCheckFreq == 0 would lead to an infinite loop.
     KCHE_TREE_NOT_REACHED();
@@ -234,10 +234,10 @@ struct BoundedMapReduce<0, T, D, Index, D_max, BlockSize, NextCheck, false> {
  * \param block_size Number of consecutive dimensions to process in each call to \a map_reduce. Optional, defaults to \c 1.
  * \param next_check Number of iterations left before the next boundary check.
  */
-template <unsigned int BoundCheckFreq, typename T, unsigned int D, typename MapReduceFunctor, typename AccumulatorType, typename BoundaryCheckFunctor, typename BoundaryType>
-inline void non_unrolled_bounded_map_reduce(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const BoundaryCheckFunctor &check, const BoundaryType &boundary, const T *a, const T *b = NULL, const void *extra = NULL, unsigned int i = 0, unsigned int i_max = D, unsigned int block_size = 1, unsigned int next_check = BoundCheckFreq) {
+template <unsigned int BoundCheckFreq, typename T, unsigned int D, typename MapReduceFunctor, typename Accumulator, typename BoundaryCheckFunctor, typename Boundary>
+inline void non_unrolled_bounded_map_reduce(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const BoundaryCheckFunctor &check, const Boundary &boundary, const T *a, const T *b = NULL, const void *extra = NULL, unsigned int i = 0, unsigned int i_max = D, unsigned int block_size = 1, unsigned int next_check = BoundCheckFreq) {
   KCHE_TREE_CHECK_CONCEPT(MapReduceFunctor, MapReduceFunctorConcept<T>);
-  KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<BoundaryType>);
+  KCHE_TREE_CHECK_CONCEPT(BoundaryCheckFunctor, BoundaryCheckFunctorConcept<Boundary>);
 
   unsigned int count = next_check;
   while (i < i_max) {
@@ -256,8 +256,8 @@ inline void non_unrolled_bounded_map_reduce(const MapReduceFunctor &map_reduce, 
 template <unsigned int BoundCheckFreq, typename T, unsigned int D, unsigned int Index, unsigned int D_max, unsigned int BlockSize, unsigned int NextCheck>
 struct BoundedMapReduce<BoundCheckFreq, T, D, Index, D_max, BlockSize, NextCheck, true> {
 
-  template <typename MapReduceFunctor, typename AccumulatorType, typename BoundaryCheckFunctor, typename BoundaryType>
-  static inline void run(const MapReduceFunctor &map_reduce, AccumulatorType &accumulator, const BoundaryCheckFunctor &check, const BoundaryType &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
+  template <typename MapReduceFunctor, typename Accumulator, typename BoundaryCheckFunctor, typename Boundary>
+  static inline void run(const MapReduceFunctor &map_reduce, Accumulator &accumulator, const BoundaryCheckFunctor &check, const Boundary &boundary, const T *a, const T *b = NULL, const void *extra = NULL) {
     non_unrolled_bounded_map_reduce<BoundCheckFreq, T, D>(map_reduce, accumulator, check, boundary, a, b, extra, Index, D_max, BlockSize, NextCheck);
   }
 };

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010, 2011 by Leandro Graciá Gil                        *
+ *   Copyright (C) 2010, 2011, 2012 by Leandro Graciá Gil                  *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -34,21 +34,21 @@
  * Create a new benchmark tool using the options provided in the command line.
  * Data sets are automatically loaded or generated.
  *
- * \tparam RandomEngineType Type of the random number generation engine used.
+ * \tparam RandomEngine Type of the random number generation engine used.
  * \param argc Number of params in command line.
  * \param argv Params of command line.
  * \param random_engine Random number generator used to initialize the contents of the train and test sets if required by the arguments.
  */
-template <typename T, const unsigned int D> template <typename RandomEngineType>
-BenchmarkTool<T, D>::BenchmarkTool(int argc, char *argv[], RandomEngineType &random_engine)
-    : ToolBase<T, D, BenchmarkOptions>(argc, argv, random_engine) {}
+template <typename T, unsigned int D, typename L> template <typename RandomEngine>
+BenchmarkTool<T, D, L>::BenchmarkTool(int argc, char *argv[], RandomEngine &random_engine)
+    : ToolBase<T, D, L, BenchmarkOptions>(argc, argv, random_engine) {}
 
 /// Validate the values from the provided options.
-template <typename T, const unsigned int D>
-bool BenchmarkTool<T, D>::validate_options() const {
+template <typename T, unsigned int D, typename L>
+bool BenchmarkTool<T, D, L>::validate_options() const {
 
   // Validate the base options from the parent class.
-  if (!ToolBase<T, D, BenchmarkOptions>::validate_options())
+  if (!ToolBase<T, D, L, BenchmarkOptions>::validate_options())
     return false;
 
   // Validate benchmark toll specific options.
@@ -76,11 +76,11 @@ bool BenchmarkTool<T, D>::validate_options() const {
  * Will measure the time required to build the tree and search its k-nearest neighbours
  * for each test sample according to the provided options.
  *
- * \tparam MetricType Type of the metric being used during the test.
+ * \tparam Metric Type of the metric being used during the test.
  * \param metric Metric object to be used during the test.
  */
-template <typename T, const unsigned int D> template <typename MetricType>
-bool BenchmarkTool<T, D>::run(const MetricType &metric) {
+template <typename T, unsigned int D, typename L> template <typename Metric>
+bool BenchmarkTool<T, D, L>::run(const Metric &metric) {
 
   // Check if the tool is ready.
   if (!this->is_ready())
@@ -89,9 +89,12 @@ bool BenchmarkTool<T, D>::run(const MetricType &metric) {
   // Use the kche_tree namespace locally for simplicity.
   using namespace kche_tree;
 
+  // Type aliases.
+  typedef kche_tree::KDTree<T, D, L> KDTree;
+
   // Build the kd-tree.
   clock_t t1_build = clock();
-  KDTree<T, D> kdtree;
+  KDTree kdtree;
   kdtree.build(this->train_set_, this->options_->bucket_size_arg);
   clock_t t2_build = clock();
 
@@ -100,7 +103,7 @@ bool BenchmarkTool<T, D>::run(const MetricType &metric) {
   for (unsigned int i=0; i < this->test_set_.size(); ++i) {
 
     // Get the K nearest neighbours.
-    std::vector<typename KDTree<T, D>::NeighbourType> knn;
+    std::vector<typename KDTree::Neighbor> knn;
     if (this->options_->use_k_heap_flag)
       kdtree.template knn<KHeap>(this->test_set_[i], this->options_->knn_arg, knn, metric, this->options_->epsilon_arg, this->options_->ignore_existing_flag);
     else
@@ -117,7 +120,7 @@ bool BenchmarkTool<T, D>::run(const MetricType &metric) {
 
   // Report results.
   std::cout << std::fixed;
-  std::cout << "Kd-tree testing with D = " << D << ", " << this->options_->knn_arg
+  std::cout << "Kd-tree testing with D = " << Dimensions << ", " << this->options_->knn_arg
       << " neighbours, epsilon " << std::setprecision(2) << this->options_->epsilon_arg
       << ", training set size " << this->train_set_.size() << ", test set size " << this->test_set_.size() << std::endl;
   std::cout << "Build time: " << std::setprecision(3) << time_build << " sec (" << std::setprecision(2) << build_percent << "%)" << std::endl;

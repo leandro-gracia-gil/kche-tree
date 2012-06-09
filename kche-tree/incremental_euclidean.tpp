@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -37,11 +37,13 @@ struct EuclideanIncrementalFunctor {
   /// Metric associated with this incremental calculation.
   typedef EuclideanMetric<T, D> Metric;
 
+  /// Type encoding the distances between elements.
+  typedef typename Metric::Distance Distance;
+
   /// Use optimized const reference types.
   typedef typename RParam<T>::Type ConstRef_T;
 
-  inline T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
-      const KDSearchData<T, D, Metric> &search_data) const;
+  inline Distance& operator () (Distance &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearch<T, D, Metric> &search_data) const;
 };
 
 /**
@@ -73,22 +75,19 @@ struct EuclideanIncrementalFunctor {
  * \return The reference to the current distance to the hyperrectangle. Should have been updated.
  */
 template <typename T, const unsigned int D>
-T& EuclideanIncrementalFunctor<T, D>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearchData<T, D, Metric> &search_data) const {
-  const typename IncrementalBase<T, D, Metric>::SearchDataExtras::AxisData &current_axis = search_data.axis[axis];
+typename EuclideanIncrementalFunctor<T, D>::Distance& EuclideanIncrementalFunctor<T, D>::operator () (Distance &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearch<T, D, Metric> &search_data) const {
+  const typename IncrementalBase<T, D, Metric>::SearchExtras::AxisData &current_axis = search_data.axis[axis];
   // Equivalent to: return current_distance += (split_value - current_axis.nearest) * (current_axis.nearest + split_value - current_axis.p * 2.0);
-  T acc1 = split_value;
-  acc1 -= current_axis.nearest;
-  T acc2 = split_value;
-  acc2 += current_axis.nearest;
-  acc2 -= current_axis.p;
-  acc2 -= current_axis.p;
+  Distance acc1 = Traits<T>::distance(split_value, current_axis.nearest);
+  Distance acc2 = Traits<T>::distance(split_value, current_axis.p);
+  acc2 += Traits<T>::distance(current_axis.nearest, current_axis.p);
   acc1 *= acc2;
   return current_distance += acc1;
 }
 
 /// Update the current incremental distance using the Euclidean metric.
 template <typename T, const unsigned int D>
-EuclideanIncrementalUpdater<T, D>::EuclideanIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D, Metric> &search_data)
+EuclideanIncrementalUpdater<T, D>::EuclideanIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearch<T, D, Metric> &search_data)
     : IncrementalBase<T, D, Metric>(search_data) {
   IncrementalBase<T, D, Metric>::update(node, parent, search_data, EuclideanIncrementalFunctor<T, D>());
 }

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,48 +27,33 @@
 #ifndef _KCHE_TREE_KD_NODE_H_
 #define _KCHE_TREE_KD_NODE_H_
 
-// Include type traits, feature vectors and optimized params.
+#include "kd-search.h"
 #include "traits.h"
 #include "vector.h"
 #include "utils.h"
 
 namespace kche_tree {
 
-/**
- * \brief Structure holding the data specific to search in the tree.
- *
- * Will be expanded with any extra data provided by the associated incremental calculation type.
- */
-template <typename T, const unsigned int D, typename M>
-struct KDSearchData : M::IncrementalUpdaterType::SearchDataExtras {
-
-  /// Use the global data set type by default.
-  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
-
-  /// Use the global vector type by default.
-  typedef typename TypeSettings<T, D>::VectorType VectorType;
-
-  const VectorType &p; ///< Reference input point.
-  const DataSetType &data; ///< Permutated training set.
-  const M &metric; ///< Metric functor used to calculate distances between points.
-  unsigned int K; ///< Number of neighbours to retrieve.
-
-  T hyperrect_distance; ///< Distance to the current nearest point in the hyperrectangle.
-  T farthest_distance; ///< Current distance from the farthest nearest neighbour to the reference point.
-  bool ignore_null_distances;  ///< Used to exclude the source point if it's already in the tree.
-
-  /// Initialize data for a tree search with incremental intersection calculation.
-  KDSearchData(const VectorType &p, const DataSetType &data, const M &metric, unsigned int K, bool ignore_p_in_tree);
-};
-
 /// Kd-tree leaf node.
-template <typename T, const unsigned int D>
+template <typename ElementType, unsigned int NumDimensions>
 struct KDLeaf {
-  /// Use the global data set type by default.
-  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
+  /// Type of the elements used in the incremental calculation.
+  typedef ElementType Element;
 
-  /// Use optimized const reference types.
-  typedef typename RParam<T>::Type ConstRef_T;
+  /// Number of dimensions of the feature vectors.
+  static const unsigned int Dimensions = NumDimensions;
+
+  /// Distance type associated with the elements.
+  typedef typename Traits<Element>::Distance Distance;
+
+  /// Alias of compatible non-labeled data sets.
+  typedef typename kche_tree::DataSet<Element, Dimensions> DataSet;
+
+  /// Use optimized const reference types for elements.
+  typedef typename RParam<Element>::Type ConstRef_Element;
+
+  /// Use optimized const reference types for distances.
+  typedef typename RParam<Distance>::Type ConstRef_Distance;
 
   uint32_t first_index; ///< Index of the first element contained by the leaf node.
   uint32_t num_elements; ///< Number of elements contained by the node.
@@ -77,50 +62,64 @@ struct KDLeaf {
   KDLeaf(uint32_t first_index, uint32_t num_elements) :
     first_index(first_index), num_elements(num_elements) {}
 
-  /// Construct from an input stream.
-  KDLeaf(std::istream &input, Endianness::Type endianness = Endianness::endianness());
+  // Construct from an input stream.
+  KDLeaf(std::istream &input, Endianness::Type endianness = Endianness::host_endianness());
 
-  /// Process a leaf node with many buckets on it. Do not use any upper bounds on distance.
-  template <typename M, typename C>
-  void explore(KDSearchData<T, D, M> &data, C &candidates) const;
+  // Process a leaf node with many buckets on it. Do not use any upper bounds on distance.
+  template <typename Metric, typename Container>
+  void explore(KDSearch<Element, NumDimensions, Metric> &data, Container &candidates) const;
 
-  /// Process a leaf node with many buckets on it. Allows partial distance calculations.
-  template <typename M, typename C>
-  void intersect(KDSearchData<T, D, M> &data, C &candidates) const;
+  // Process a leaf node with many buckets on it. Allows partial distance calculations.
+  template <typename Metric, typename Container>
+  void intersect(KDSearch<Element, NumDimensions, Metric> &data, Container &candidates) const;
 
-  /// Process a leaf node ignoring any existing instances of the reference point defined in \a data.
-  template <typename M, typename C>
-  void intersect_ignoring_same(KDSearchData<T, D, M> &data, C &candidates) const;
+  // Process a leaf node ignoring any existing instances of the reference point defined in data.
+  template <typename Metric, typename Container>
+  void intersect_ignoring_same(KDSearch<Element, NumDimensions, Metric> &data, Container &candidates) const;
 
-  /// Write to stream.
-  void write_to_binary_stream(std::ostream &out);
+  // Write to stream.
+  void serialize(std::ostream &out);
 
-  /// Verify the kd-tree properties using the provided functor. Throws std::runtime_error if invalid.
+  // Verify the kd-tree properties using the provided functor. Throws std::runtime_error if invalid.
   template <typename Op>
-  void verify_properties(const DataSetType &data, ConstRef_T value, int axis, const Op &op) const;
+  void verify_properties(const DataSet &data, unsigned int axis, ConstRef_Element split_element, const Op &op) const;
 };
 
 /// Kd-tree branch node.
-template <typename T, const unsigned int D>
+template <typename ElementType, unsigned int NumDimensions>
 struct KDNode {
+  /// Type of the elements used in the incremental calculation.
+  typedef ElementType Element;
 
-  /// Use the global data set type by default.
-  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
+  /// Number of dimensions of the feature vectors.
+  static const unsigned int Dimensions = NumDimensions;
 
-  /// Use optimized const reference types.
-  typedef typename RParam<T>::Type ConstRef_T;
+  /// Distance type associated with the elements.
+  typedef typename Traits<Element>::Distance Distance;
+
+  /// Alias of compatible non-labeled data sets.
+  typedef typename kche_tree::DataSet<Element, Dimensions> DataSet;
+
+  /// Define the type of the associated leaf node.
+  typedef kche_tree::KDLeaf<Element, Dimensions> KDLeaf;
+
+  /// Use optimized const reference types for elements.
+  typedef typename RParam<Element>::Type ConstRef_Element;
+
+  /// Use optimized const reference types for distances.
+  typedef typename RParam<Distance>::Type ConstRef_Distance;
 
   union {
-    KDNode<T, D> *left_branch; ///< Left branch.
-    KDLeaf<T, D> *left_leaf; ///< Left leaf.
+    KDNode *left_branch; ///< Left branch.
+    KDLeaf *left_leaf; ///< Left leaf.
   };
 
   union {
-    KDNode<T, D> *right_branch; ///< Right branch.
-    KDLeaf<T, D> *right_leaf; ///< Right leaf.
+    KDNode *right_branch; ///< Right branch.
+    KDLeaf *right_leaf; ///< Right leaf.
   };
 
-  T split_value; ///< Value used to split the hyperspace in two.
+  Element split_element; ///< Element used to split the hyperspace in two.
 
   // The leaf flags use the two uppermost bits of the axis index. Won't handle more than 2^30 dimensions.
   union {
@@ -135,19 +134,19 @@ struct KDNode {
 
   // Constructors and destructor.
   KDNode() : left_branch(NULL), right_branch(NULL), is_leaf(0) {} ///< Default constructor.
-  KDNode(std::istream &input, Endianness::Type endianness = Endianness::endianness()); ///< Construct from an input stream.
+  KDNode(std::istream &input, Endianness::Type endianness); ///< Construct from an input stream.
   ~KDNode(); ///< Default destructor.
 
-  /// Verify the kd-tree properties from the local node. Throws std::runtime_error if invalid.
-  void verify_properties(const DataSetType &data, int axis) const;
+  // Verify the kd-tree properties from the local node. Throws std::runtime_error if invalid.
+  void verify_properties(const DataSet &data, unsigned int axis) const;
 
-  /// Verify the kd-tree properties using the provided functor. Throws std::runtime_error if invalid.
+  // Verifies the structural integrity of a kd-tree branch in the provided dimension. Throws std::runtime_error if invalid.
   template <typename Op>
-  void verify_properties(const DataSetType &data, ConstRef_T value, int axis, const Op &op) const;
+  void verify_properties(const DataSet &data, unsigned int axis, ConstRef_Element split_element, const Op &op) const;
 
   /// Per axis element comparison functor. Used to apply STL sorting algorithms to individual axes.
   struct AxisComparer {
-    const DataSetType &data; ///< Input training set.
+    const DataSet &data; ///< Input training set.
     unsigned int axis; ///< Current axis used for sorting.
 
     /// Axis-th element comparison. Used to perform per-dimension data sorting.
@@ -158,27 +157,27 @@ struct KDNode {
 
   // --- Training-related --- //
 
-  /// Build the kd-tree recursively.
-  static KDNode *build(const DataSetType &data, unsigned int *index, unsigned int n,
+  // Build the kd-tree recursively.
+  static KDNode* build(const DataSet &data, unsigned int *index, unsigned int n,
       KDNode *parent, unsigned int bucket_size, unsigned int &processed);
 
-  /// Find a pivot to split the space in two by a chosen dimension during training.
+  // Find a pivot to split the space in two by a chosen dimension during training.
   unsigned int split(unsigned int *index, unsigned int n, const AxisComparer &comparer);
 
   // --- Search-related --- //
 
-  /// Traverse the kd-tree looking for nearest neighbours candidates based on Manhattan distances.
-  template <typename M, typename C>
-  void explore(const KDNode<T, D> *parent, KDSearchData<T, D, M> &data, C &candidates) const;
+  // Traverse the kd-tree looking for nearest neighbours candidates based on Manhattan distances.
+  template <typename Metric, typename Container>
+  void explore(const KDNode *parent, KDSearch<Element, NumDimensions, Metric> &data, Container &candidates) const;
 
-  /// Traverse the kd-tree checking hyperrectangle intersections to discard regions of the space.
-  template <typename M, typename C>
-  void intersect(const KDNode<T, D> *parent, KDSearchData<T, D, M> &data, C &candidates) const;
+  // Traverse the kd-tree checking hyperrectangle intersections to discard regions of the space.
+  template <typename Metric, typename Container>
+  void intersect(const KDNode *parent, KDSearch<Element, NumDimensions, Metric> &data, Container &candidates) const;
 
   // --- IO-related --- //
 
-  /// Write to stream.
-  void write_to_binary_stream(std::ostream &out);
+  // Write to stream.
+  void serialize(std::ostream &out);
 };
 
 } // namespace kche_tree

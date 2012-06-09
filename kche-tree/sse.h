@@ -63,7 +63,7 @@ void initSSEAlignmentGap(T *array, unsigned int size) {}
 template <typename T>
 struct SSETraits {
   /// Type of the SSE register to use.
-  typedef void RegisterType;
+  typedef void Register;
 
   /// Auxiliary type for optimized const references.
   typedef typename RParam<T>::Type ConstRef_T;
@@ -72,40 +72,40 @@ struct SSETraits {
   static const unsigned int NumElements = 0;
 
   /// Return a register initialized to zero.
-  static inline RegisterType zero() {}
+  static inline Register zero() {}
 
   /// Return a register initialized to the provided value.
-  static inline RegisterType value(ConstRef_T value) {}
+  static inline Register value(ConstRef_T value) {}
 };
 
 /// SSE information for the float type.
 template <>
 struct SSETraits<float> {
   /// Define __m128 as the single precision floating point SSE register.
-  typedef __m128 RegisterType;
+  typedef __m128 Register;
 
   /// SSE __m128 registers contain 4 floating point values.
   static const unsigned int NumElements = 4;
 
   /// Return a register initialized to zero.
-  static inline RegisterType zero() {
+  static inline Register zero() {
     return _mm_setzero_ps();
   }
 
   /// Return a register with one element initialized to the provided value.
-  static inline RegisterType value(float value) {
+  static inline Register value(float value) {
     return _mm_set1_ps(value);
   }
 
-  static inline RegisterType add(const RegisterType &a, const RegisterType &b) {
+  static inline Register add(const Register &a, const Register &b) {
     return _mm_add_ps(a, b);
   }
 
-  static inline RegisterType sub(const RegisterType &a, const RegisterType &b) {
+  static inline Register sub(const Register &a, const Register &b) {
     return _mm_sub_ps(a, b);
   }
 
-  static inline RegisterType mult(const RegisterType &a, const RegisterType &b) {
+  static inline Register mult(const Register &a, const Register &b) {
     return _mm_mul_ps(a, b);
   }
 };
@@ -120,17 +120,17 @@ template <typename T>
 union SSERegister {
 
   // Ensure the provided type is one supported for SSE.
-  KCHE_TREE_COMPILE_ASSERT((!is_same<typename SSETraits<T>::RegisterType, void>::value || SSETraits<T>::NumElements == 0), "Type not supported for SSE calculations.");
+  KCHE_TREE_COMPILE_ASSERT((!IsSame<typename SSETraits<T>::Register, void>::value || SSETraits<T>::NumElements == 0), "Type not supported for SSE calculations.");
 
-  // Ensure the type T is not configured to use any custom accumulator types.
-  KCHE_TREE_COMPILE_ASSERT((is_same<typename Traits<T>::AccumulatorType, T>::value),
+  // Ensure the type T is also used to encode its distance.
+  KCHE_TREE_COMPILE_ASSERT((IsSame<typename Traits<T>::Distance, T>::value),
       "Accumulation types different than the type itself are not supported by the SSE versions");
 
   /// Type contained by the register.
-  typedef T ElementType;
+  typedef T Element;
 
   /// SSE register to be used in the calculations.
-  typename SSETraits<T>::RegisterType reg;
+  typename SSETraits<T>::Register reg;
 
   /// Auxiliary type for optimized const references.
   typedef typename RParam<T>::Type ConstRef_T;
@@ -192,15 +192,15 @@ template <typename T>
 struct SSEFunctor : public MapReduceFunctorConcept<T> {
 
   /// Implemented by specializations.
-  template <unsigned int Index, unsigned int BlockSize, typename AccumulatorType>
-  inline AccumulatorType& operator () (AccumulatorType &acc, const T *a, const T *b, void *extras) const {
+  template <unsigned int Index, unsigned int BlockSize, typename Accumulator>
+  inline Accumulator& operator () (Accumulator &acc, const T *a, const T *b, void *extras) const {
     KCHE_TREE_NOT_REACHED();
     return acc;
   }
 
   /// Implemented by specializations.
-  template <typename AccumulatorType>
-  inline AccumulatorType& operator () (unsigned int index, unsigned int block_size, AccumulatorType &acc, const T *a, const T *b, void *extras) const {
+  template <typename Accumulator>
+  inline Accumulator& operator () (unsigned int index, unsigned int block_size, Accumulator &acc, const T *a, const T *b, void *extras) const {
     KCHE_TREE_NOT_REACHED();
     return acc;
   }

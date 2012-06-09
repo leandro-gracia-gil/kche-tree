@@ -19,43 +19,31 @@
  ***************************************************************************/
 
 /**
- * \file compile_assert.h
- * \brief Provide compile-time assertions in non-C++0x environments to check invalid template instantiations and conditions.
+ * \file kd-search.tpp
+ * \brief Template iplementation for the data used when searching the kd-tree.
  * \author Leandro Graciá Gil
  */
 
-#ifndef _KCHE_TREE_COMPILE_ASSERT_H_
-#define _KCHE_TREE_COMPILE_ASSERT_H_
-
-#ifdef KCHE_TREE_DISABLE_CPP0X
 namespace kche_tree {
 
-/// Auxiliary struct to provide compile-time assertions. You should see this name on an error if the assertion fails.
-template <bool fail = false> struct COMPILE_ASSERT_FAILURE;
-
-/// Auxiliary struct to provide compile-time assertions. You should see this name on an error if the assertion fails.
-template <> struct COMPILE_ASSERT_FAILURE<true> { enum { x = 1 }; };
-
-/// Auxiliary struct to provide compile-time assertions.
-template <size_t> struct CompileAssertTest {};
+/**
+ * Initialize a data searching structure with incremental hyperrectangle intersection calculation.
+ *
+ * \param p Reference point being used in the search.
+ * \param data Permuted training set stored by the tree.
+ * \param metric Metric functor used for the distance calculations.
+ * \param K Number of neighbours to retrieve.
+ * \param ignore_null_distances_arg Indicate that points with null distance should be ignored.
+ */
+template <typename T, unsigned int D, typename M>
+KDSearch<T, D, M>::KDSearch(const Vector &p, const DataSet &data, const M &metric, unsigned int K, bool ignore_null_distances_arg)
+  : M::IncrementalUpdater::SearchExtras(p, data),
+    p(p),
+    data(data),
+    metric(metric),
+    K(K),
+    hyperrect_distance(Traits<Distance>::zero()),
+    farthest_distance(Traits<Distance>::zero()),
+    ignore_null_distances(ignore_null_distances_arg) {}
 
 } // namespace kche_tree
-
-#define KCHE_TREE_MACRO_CONCATENATE(x, y) x ## y
-#define KCHE_TREE_MACRO_JOIN(x, y) KCHE_TREE_MACRO_CONCATENATE(x, y)
-
-#define KCHE_TREE_COMPILE_ASSERT_INTERNAL(x, msg) \
-  typedef ::kche_tree::CompileAssertTest< \
-  sizeof(::kche_tree::COMPILE_ASSERT_FAILURE<(bool)(x)>)> _CompileAssertType_
-
-// Raises a compile-time assertion if x doesn't evaluate to true.
-// The message argument is discarded in the non-C++0x version.
-#define KCHE_TREE_COMPILE_ASSERT(x, msg) \
-  KCHE_TREE_MACRO_JOIN(KCHE_TREE_COMPILE_ASSERT_INTERNAL(x, msg), __COUNTER__)
-
-#else
-// Raises a compile-time assertion if x doesn't evaluate to true.
-#define KCHE_TREE_COMPILE_ASSERT(x, msg) static_assert((x), msg)
-#endif
-
-#endif

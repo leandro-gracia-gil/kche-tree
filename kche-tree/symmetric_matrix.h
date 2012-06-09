@@ -52,13 +52,14 @@ namespace kche_tree {
  *
  * diagonal: (0,0), (1,1), (2,2), (3,3), (4,4)
  *
- * \tparam T Data type of the elements in the matrix. Requires the -=, *=, /=, *= float scaling operators and the zero, one, negate and invert traits.
+ * \tparam U Data type of the elements in the matrix. Requires the -=, *=, /=, *= float scaling operators and the zero, one, negate and invert traits.
+ * \note The type \a U corresponds to the Distance type for the elements in the kd-tree, not to the elements themselves.
  */
-template <typename T>
+template <typename U>
 class SymmetricMatrix {
 public:
   /// Type of the elements in the matrix.
-  typedef T ElementType;
+  typedef U Element;
 
   // Constructors and initialization methods.
   SymmetricMatrix();
@@ -70,22 +71,22 @@ public:
   SymmetricMatrix& operator = (const SymmetricMatrix &matrix);
 
   // Operators to access the matrix contents.
-  T & operator () (unsigned int row, unsigned int column);
-  const T & operator () (unsigned int row, unsigned int column) const;
+  U & operator () (unsigned int row, unsigned int column);
+  const U & operator () (unsigned int row, unsigned int column) const;
 
   // Properties of the matrix.
   unsigned int size() const { return size_; } ///< Return the size of the matrix.
-  const T *column(unsigned int column) const { return column_[column].get(); } ///< Return a pointer to the column elements before the diagonal.
-  const T *diagonal() const { return diagonal_.get(); } ///< Return a pointer to the diagonal elements.
+  const U *column(unsigned int column) const { return column_[column].get(); } ///< Return a pointer to the column elements before the diagonal.
+  const U *diagonal() const { return diagonal_.get(); } ///< Return a pointer to the diagonal elements.
 
   // Matrix operations.
   bool invert();
 
 private:
   /// Internal method to access the matrix contents.
-  T& m(unsigned int row, unsigned int column);
+  U& m(unsigned int row, unsigned int column);
 
-  typedef ScopedAlignedArray<T> ColumnArray;
+  typedef ScopedAlignedArray<U> ColumnArray;
 
   unsigned int size_; ///< Size of the matrix.
   ScopedArray<ColumnArray> column_; ///< Array pointing to the beginning of each column in the matrix.

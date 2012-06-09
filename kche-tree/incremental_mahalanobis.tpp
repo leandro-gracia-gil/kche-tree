@@ -40,11 +40,13 @@ struct MahalanobisIncrementalFunctor {
   /// Metric associated with this incremental calculation.
   typedef MahalanobisMetric<T, D> Metric;
 
+  /// Type encoding the distances between elements.
+  typedef typename Metric::Distance Distance;
+
   /// Use optimized const reference types.
   typedef typename RParam<T>::Type ConstRef_T;
 
-  inline T& operator () (T &current_distance, unsigned int axis, ConstRef_T split_value,
-      const KDSearchData<T, D, Metric> &search_data) const;
+  inline Distance& operator () (Distance &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearch<T, D, Metric> &search_data) const;
 };
 
 /**
@@ -65,20 +67,17 @@ struct MahalanobisIncrementalFunctor {
  * \return The reference to the current distance to the hyperrectangle. Should have been updated.
  */
 template <typename T, const unsigned int D>
-T& MahalanobisIncrementalFunctor<T, D>::operator () (T &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearchData<T, D, Metric> &search_data) const {
+typename MahalanobisIncrementalFunctor<T, D>::Distance& MahalanobisIncrementalFunctor<T, D>::operator () (Distance &current_distance, unsigned int axis, ConstRef_T split_value, const KDSearch<T, D, Metric> &search_data) const {
 
   // Equivalent to:
-  //  T inc_axis = search_data.axis[axis].nearest - split_value;
-  //  T cur_axis = search_data.axis[axis].p - search_data.axis[axis].nearest;
-  const SymmetricMatrix<T> &S = search_data.metric.inverse_covariance();
-  T inc_axis = search_data.axis[axis].nearest;
-  inc_axis -= split_value;
-  T cur_axis = search_data.axis[axis].p;
-  cur_axis -= search_data.axis[axis].nearest;
+  //  Distance inc_axis = search_data.axis[axis].nearest - split_value;
+  //  Distance cur_axis = search_data.axis[axis].p - search_data.axis[axis].nearest;
+  const SymmetricMatrix<Distance> &S = search_data.metric.inverse_covariance();
+  Distance inc_axis = Traits<T>::distance(search_data.axis[axis].nearest, split_value);
+  Distance cur_axis = Traits<T>::distance(search_data.axis[axis].p, search_data.axis[axis].nearest);
 
-  // Equivalent to: AccumT acc = S(axis, axis) * (inc_axis + cur_axis * 2.0);
-  typedef typename Traits<T>::AccumulatorType AccumT;
-  AccumT acc = cur_axis;
+  // Equivalent to: Distance acc = S(axis, axis) * (inc_axis + cur_axis * 2.0);
+  Distance acc = cur_axis;
   acc += cur_axis;
   acc += inc_axis;
   acc *= S(axis, axis);
@@ -86,10 +85,9 @@ T& MahalanobisIncrementalFunctor<T, D>::operator () (T &current_distance, unsign
   if (!search_data.metric.has_diagonal_covariance()) {
     for (unsigned int i=0; i<axis; ++i) {
       // Equivalent to:
-      //  T cur_i = search_data.axis[i].p - search_data.axis[i].nearest;
+      //  Distance cur_i = search_data.axis[i].p - search_data.axis[i].nearest;
       //  acc += cur_i * S(i, axis) * 2.0;
-      T temp = search_data.axis[i].p;
-      temp -= search_data.axis[i].nearest;
+      Distance temp = Traits<T>::distance(search_data.axis[i].p, search_data.axis[i].nearest);
       temp += temp;
       temp *= S(i, axis);
       acc += temp;
@@ -97,8 +95,7 @@ T& MahalanobisIncrementalFunctor<T, D>::operator () (T &current_distance, unsign
 
     for (unsigned int i=axis+1; i<D; ++i) {
       // Same as the previous loop.
-      T temp = search_data.axis[i].p;
-      temp -= search_data.axis[i].nearest;
+      Distance temp = Traits<T>::distance(search_data.axis[i].p, search_data.axis[i].nearest);
       temp += temp;
       temp *= S(axis, i);
       acc += temp;
@@ -112,7 +109,7 @@ T& MahalanobisIncrementalFunctor<T, D>::operator () (T &current_distance, unsign
 
 /// Update the current incremental distance using the Mahalanobis metric.
 template <typename T, const unsigned int D>
-MahalanobisIncrementalUpdater<T, D>::MahalanobisIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D, Metric> &search_data)
+MahalanobisIncrementalUpdater<T, D>::MahalanobisIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearch<T, D, Metric> &search_data)
     : IncrementalBase<T, D, Metric>(search_data) {
   IncrementalBase<T, D, Metric>::update(node, parent, search_data, MahalanobisIncrementalFunctor<T, D>());
 }

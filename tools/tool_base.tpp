@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -25,22 +25,23 @@
  */
 
 // C Standard Library and C++ STL includes.
-#include <cassert>
 #include <ctime>
 #include <iostream>
 #include <fstream>
+
+#include "kche-tree/cpp1x.h"
 
 /**
  * \brief Create a new benchmark tool using the options provided in the command line.
  * Data sets are automatically loaded or generated.
  *
- * \tparam RandomEngineType Type of the random number generation engine used.
+ * \tparam RandomEngine Type of the random number generation engine used.
  * \param argc Number of params in command line.
  * \param argv Params of command line.
  * \param random_engine Random number generator used to initialize the contents of the train and test sets if required by the arguments.
  */
-template <typename T, const unsigned int D, typename Options> template <typename RandomEngineType>
-ToolBase<T, D, Options>::ToolBase(int argc, char *argv[], RandomEngineType &random_engine)
+template <typename T, unsigned int D, typename L, typename O> template <typename RandomEngine>
+ToolBase<T, D, L, O>::ToolBase(int argc, char *argv[], RandomEngine &random_engine)
     : is_ready_(false) {
 
   // Use gengetopt to parse the command line arguments.
@@ -60,8 +61,8 @@ ToolBase<T, D, Options>::ToolBase(int argc, char *argv[], RandomEngineType &rand
 }
 
 /// Release any command line parsing information.
-template <typename T, const unsigned int D, typename Options>
-ToolBase<T, D, Options>::~ToolBase() {
+template <typename T, unsigned int D, typename L, typename O>
+ToolBase<T, D, L, O>::~ToolBase() {
   if (options_)
     cmdline_parser_free(options_.get());
 }
@@ -73,8 +74,8 @@ ToolBase<T, D, Options>::~ToolBase() {
  * \param argv Params of command line.
  * \return \c false if no arguments are provided, on parse error or if help or the version are required. \c true otherwise, indicating further actions to be done.
 */
-template <typename T, const unsigned int D, typename Options>
-bool ToolBase<T, D, Options>::parse_cmdline(int argc, char *argv[]) {
+template <typename T, unsigned int D, typename L, typename O>
+bool ToolBase<T, D, L, O>::parse_cmdline(int argc, char *argv[]) {
 
   // Print the help if no arguments are provided.
   if (argc == 1) {
@@ -83,7 +84,7 @@ bool ToolBase<T, D, Options>::parse_cmdline(int argc, char *argv[]) {
   }
 
   // Parse the command line arguments.
-  options_.reset(new Options);
+  options_.reset(new CommandLineOptions);
   if (cmdline_parser(argc, argv, options_.get()) != 0) {
     options_.reset();
     std::cerr << "Run " << argv[0] << " --help or -h to see the list of available options_->" << std::endl;
@@ -111,8 +112,8 @@ bool ToolBase<T, D, Options>::parse_cmdline(int argc, char *argv[]) {
  *
  * \return \c true if valid, \c false otherwise.
  */
-template <typename T, const unsigned int D, typename Options>
-bool ToolBase<T, D, Options>::validate_options() const {
+template <typename T, unsigned int D, typename L, typename O>
+bool ToolBase<T, D, L, O>::validate_options() const {
 
   if (options_->train_random_given && options_->train_random_arg <= 0) {
     std::cerr << "Invalid random train set size." << std::endl;
@@ -135,12 +136,12 @@ bool ToolBase<T, D, Options>::validate_options() const {
 /**
  * \brief Initialize data according to the provided options, either loading or randomly-generating it.
  *
- * \tparam RandomEngineType Type of the random number generation engine used.
+ * \tparam RandomEngine Type of the random number generation engine used.
  * \param random_engine Random number generator used to initialize the contents of the train and test sets if required by the arguments.
  * \return \c true if successful, \c false otherwise.
  */
-template <typename T, const unsigned int D, typename Options> template <typename RandomEngineType>
-bool ToolBase<T, D, Options>::initialize_data(RandomEngineType &random_engine) {
+template <typename T, unsigned int D, typename L, typename O> template <typename RandomEngine>
+bool ToolBase<T, D, L, O>::initialize_data(RandomEngine &random_engine) {
 
   // Initialize the random seed.
   if (options_->random_seed_given)
@@ -164,12 +165,12 @@ bool ToolBase<T, D, Options>::initialize_data(RandomEngineType &random_engine) {
  *
  * Data is provided by either reading from a file or randomly generated, using the options passed to the command line.
  *
- * \tparam RandomEngineType Type of the random number generation engine used.
- * \param engine Random number generator engine used to generate the dataset contents.
+ * \tparam RandomEngine Type of the random number generation engine used.
+ * \param random_engine Random number generator engine used to generate the dataset contents.
  * \return \c true if successful, \c false otherwise.
  */
-template <typename T, const unsigned int D, typename Options> template <typename RandomEngineType>
-bool ToolBase<T, D, Options>::prepare_train_set(RandomEngineType &engine) {
+template <typename T, unsigned int D, typename L, typename O> template <typename RandomEngine>
+bool ToolBase<T, D, L, O>::prepare_train_set(RandomEngine &random_engine) {
 
   using namespace std;
   if (options_->train_file_given) {
@@ -181,17 +182,14 @@ bool ToolBase<T, D, Options>::prepare_train_set(RandomEngineType &engine) {
     input >> train_set_;
 
   } else if (options_->train_random_given) {
-    typedef typename kche_tree::Traits<T>::ExpectedDistributionElementType DistElement;
+    // Create a random value generator.
+    typedef typename kche_tree::Traits<T>::UniformDistribution ValueDistribution;
+    typedef typename kche_tree::Traits<T>::RandomDistributionElement DistributionElement;
+    ValueDistribution value_distribution(DistributionElement(options_->random_range_min_arg), DistributionElement(options_->random_range_max_arg));
+    RandomGenerator<RandomEngine, ValueDistribution> value_generator(random_engine, value_distribution);
 
-    #ifdef KCHE_TREE_DISABLE_CPP0X
-    std::tr1::uniform_real<DistElement> value_dist(DistElement(options_->random_range_min_arg), DistElement(options_->random_range_max_arg));
-    std::tr1::variate_generator<RandomEngineType &, std::tr1::uniform_real<DistElement> > value_generator(engine, value_dist);
-    #else
-    std::uniform_real_distribution<DistElement> value_dist(DistElement(options_->random_range_min_arg), DistElement(options_->random_range_max_arg));
-    std::function<DistElement()> value_generator = std::bind(value_dist, std::ref(engine));
-    #endif
-
-    train_set_.reset_to_random(options_->train_random_arg, value_generator);
+    train_set_.reset_to_size(options_->train_random_arg);
+    train_set_.set_random_values(value_generator);
 
     if (options_->train_save_random_given) {
       ofstream output(options_->train_save_random_arg, ios::out | ios::binary);
@@ -203,7 +201,7 @@ bool ToolBase<T, D, Options>::prepare_train_set(RandomEngineType &engine) {
     }
   } else {
     // Should never reach this point. If we do gengetopt is failing.
-    assert(0);
+    KCHE_TREE_NOT_REACHED();
   }
 
   return true;
@@ -215,12 +213,12 @@ bool ToolBase<T, D, Options>::prepare_train_set(RandomEngineType &engine) {
  * Data is provided by either reading from a file or randomly generated, using the options passed to the command line.
  * The test set can have elements copied from the train set. The probability of these copies is provided by the options.
  *
- * \tparam RandomEngineType Type of the random number generation engine used.
- * \param engine Random number generator engine used to generate the dataset contents.
+ * \tparam RandomEngine Type of the random number generation engine used.
+ * \param random_engine Random number generator engine used to generate the dataset contents.
  * \return \c true if successful, \c false otherwise.
  */
-template <typename T, const unsigned int D, typename Options> template <typename RandomEngineType>
-bool ToolBase<T, D, Options>::prepare_test_set(RandomEngineType &engine) {
+template <typename T, unsigned int D, typename L, typename O> template <typename RandomEngine>
+bool ToolBase<T, D, L, O>::prepare_test_set(RandomEngine &random_engine) {
 
   using namespace std;
   if (options_->test_file_given) {
@@ -232,26 +230,19 @@ bool ToolBase<T, D, Options>::prepare_test_set(RandomEngineType &engine) {
     input >> test_set_;
 
   } else if (options_->test_random_given) {
-    typedef typename kche_tree::Traits<T>::ExpectedDistributionElementType DistElement;
+    // Create random generators for elements, probabilities and indices.
+    typedef typename kche_tree::Traits<T>::UniformDistribution ValueDistribution;
+    typedef typename kche_tree::Traits<float>::UniformDistribution ProbabilityDistribution;
+    typedef typename kche_tree::Traits<unsigned int>::UniformDistribution IndexDistribution;
 
-    // Create probability distributions and random number generators.
-    #ifdef KCHE_TREE_DISABLE_CPP0X
-    std::tr1::uniform_real<DistElement> value_dist(DistElement(options_->random_range_min_arg), DistElement(options_->random_range_max_arg));
-    std::tr1::uniform_real<float> probability_dist(0.0f, 100.0f);
-    std::tr1::uniform_int<unsigned int> index_dist(0, train_set_.size() - 1);
+    typedef typename kche_tree::Traits<T>::RandomDistributionElement DistributionElement;
+    ValueDistribution value_distribution(DistributionElement(options_->random_range_min_arg), DistributionElement(options_->random_range_max_arg));
+    ProbabilityDistribution probability_distribution(0.0f, 100.0f);
+    IndexDistribution index_distribution(0, train_set_.size() - 1);
 
-    std::tr1::variate_generator<RandomEngineType &, std::tr1::uniform_real<DistElement> > value_generator(engine, value_dist);
-    std::tr1::variate_generator<RandomEngineType &, std::tr1::uniform_real<float> > probability_generator(engine, probability_dist);
-    std::tr1::variate_generator<RandomEngineType &, std::tr1::uniform_int<unsigned int> > index_generator(engine, index_dist);
-    #else
-    std::uniform_real_distribution<DistElement> value_dist(DistElement(options_->random_range_min_arg), DistElement(options_->random_range_max_arg));
-    std::uniform_real_distribution<float> probability_dist(0.0f, 100.0f);
-    std::uniform_int_distribution<unsigned int> index_dist(0, train_set_.size() - 1);
-
-    std::function<T()> value_generator = std::bind(value_dist, std::ref(engine));
-    std::function<float()> probability_generator = std::bind(probability_dist, std::ref(engine));
-    std::function<unsigned int()> index_generator = std::bind(index_dist, std::ref(engine));
-    #endif
+    RandomGenerator<RandomEngine, ValueDistribution> value_generator(random_engine, value_distribution);
+    RandomGenerator<RandomEngine, ProbabilityDistribution> probability_generator(random_engine, probability_distribution);
+    RandomGenerator<RandomEngine, IndexDistribution> index_generator(random_engine, index_distribution);
 
     float p = options_->test_from_train_arg;
     unsigned int size = options_->test_random_arg;
@@ -277,7 +268,7 @@ bool ToolBase<T, D, Options>::prepare_test_set(RandomEngineType &engine) {
     }
   } else {
     // Should never reach this point. If we do gengetopt is failing.
-    assert(0);
+    KCHE_TREE_NOT_REACHED();
   }
 
   return true;

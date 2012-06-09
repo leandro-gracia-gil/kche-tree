@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -56,25 +56,28 @@ template <typename T, const unsigned int D>
 class EuclideanMetric {
 public:
   /// Type of the elements to which the metrics are applied.
-  typedef T ElementType;
+  typedef T Element;
 
   /// Number of dimensions to which the metrics are applied.
   static unsigned const int Dimensions = D;
 
   /// Type for incremental hyperrectangle intersection calculations when using this metric.
-  typedef EuclideanIncrementalUpdater<T, D> IncrementalUpdaterType;
+  typedef EuclideanIncrementalUpdater<T, D> IncrementalUpdater;
 
-  /// Use the global vector type by default.
-  typedef typename TypeSettings<T, D>::VectorType VectorType;
+  /// Alias for the associated distance type.
+  typedef typename Traits<Element>::Distance Distance;
 
-  /// Use optimized const reference types.
-  typedef typename RParam<T>::Type ConstRef_T;
+  /// Alias for the compatible feature vectors.
+  typedef typename kche_tree::Vector<Element, Dimensions> Vector;
+
+  /// Use optimized const reference type for distance.
+  typedef typename RParam<Distance>::Type ConstRef_Distance;
 
   // Squared distance to a feature vector.
-  inline T operator () (const VectorType &v1, const VectorType &v2) const;
+  inline Distance operator () (const Vector &v1, const Vector &v2) const;
 
   // Squared distance to a feature vector with an upper bound.
-  inline T operator () (const VectorType &v1, const VectorType &v2, ConstRef_T upper_boundary) const;
+  inline Distance operator () (const Vector &v1, const Vector &v2, ConstRef_Distance upper_boundary) const;
 };
 
 /**
@@ -93,49 +96,52 @@ template <typename T, const unsigned int D>
 class MahalanobisMetric {
 public:
   /// Type of the elements to which the metrics are applied.
-  typedef T ElementType;
+  typedef T Element;
 
   /// Number of dimensions to which the metrics are applied.
   static unsigned const int Dimensions = D;
 
   /// Type for incremental hyperrectangle intersection calculations when using this metric.
-  typedef MahalanobisIncrementalUpdater<T, D> IncrementalUpdaterType;
+  typedef MahalanobisIncrementalUpdater<T, D> IncrementalUpdater;
 
-  /// Use the global dataset type by default.
-  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
+  /// Alias for the associated distance type.
+  typedef typename Traits<Element>::Distance Distance;
 
-  /// Use the global vector type by default.
-  typedef typename TypeSettings<T, D>::VectorType VectorType;
+  /// Alias for the compatible feature vectors.
+  typedef typename kche_tree::Vector<Element, Dimensions> Vector;
 
-  /// Use optimized const reference types.
-  typedef typename RParam<T>::Type ConstRef_T;
+  /// Alias for compatible non-labeled data sets.
+  typedef typename kche_tree::DataSet<Element, Dimensions> DataSet;
 
-  /// Type of the vector used to hold partial results for evaluating the metric.
-  typedef Vector<T, KCHE_TREE_SSE_COMPILE_ALIGN(T, D)> CacheVectorType;
+  /// Use optimized const reference type for distance.
+  typedef typename RParam<Distance>::Type ConstRef_Distance;
+
+  /// Type of the vector used to hold partial results while evaluating the metric.
+  typedef kche_tree::Vector<Distance, KCHE_TREE_SSE_COMPILE_ALIGN(Distance, D)> CacheVector;
 
   // Constructors.
   MahalanobisMetric();
-  MahalanobisMetric(const DataSetType &train_set);
+  MahalanobisMetric(const DataSet &train_set);
 
   // Inverse covariance matrix manipulation.
   // Matrix is assumed to have the properties of the inverse of a covariance matrix
   // (symmetric positive-definite, as inverting will fail for non-invertible positive-semidefinite ones).
-  bool set_inverse_covariance(const DataSetType &train_set);
-  bool set_inverse_covariance(const T *inverse_covariance);
-  bool set_diagonal_covariance(const T *diagonal);
+  bool set_inverse_covariance(const DataSet &train_set);
+  bool set_inverse_covariance(const Distance *inverse_covariance);
+  bool set_diagonal_covariance(const Distance *diagonal);
   void force_diagonal_covariance();
 
-  const SymmetricMatrix<T> &inverse_covariance() const { return inv_covariance_; } ///< Retrieve the inverse covariance matrix associated to the metric.
+  const SymmetricMatrix<Distance> &inverse_covariance() const { return inv_covariance_; } ///< Retrieve the inverse covariance matrix associated to the metric.
   bool has_diagonal_covariance() const { return is_diagonal_; } ///< Check if the inverse covariance matrix is diagonal.
 
   // Squared distance to a feature vector.
-  inline T operator () (const VectorType &v1, const VectorType &v2) const;
+  inline Distance operator () (const Vector &v1, const Vector &v2) const;
 
   // Squared distance to a feature vector with an upper bound.
-  inline T operator () (const VectorType &v1, const VectorType &v2, ConstRef_T upper_boundary) const;
+  inline Distance operator () (const Vector &v1, const Vector &v2, ConstRef_Distance upper_boundary) const;
 
 private:
-  SymmetricMatrix<T> inv_covariance_; ///< Inverse covariance matrix associated with the metric instance.
+  SymmetricMatrix<Distance> inv_covariance_; ///< Inverse covariance matrix associated with the metric instance.
   bool is_diagonal_; ///< Flag indicating if the inverse covariance matrix is diagonal and hence enabling severe optimizations.
 };
 
