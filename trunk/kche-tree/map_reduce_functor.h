@@ -63,8 +63,8 @@ struct MapReduceFunctorConcept {
    * \param extra Extra arguments provided to the map-reduce function. May be \c NULL.
    * \return The accumulator \a acc updated with the operation.
    */
-  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename AccumulatorType>
-  inline AccumulatorType& operator () (AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename Accumulator>
+  inline Accumulator& operator () (Accumulator &acc, const T *a, const T *b, const void *extra) const {
     // Use the runtime-based method by default.
     return operator () (Index, BlockSize, D, acc, a, b, extra);
   }
@@ -86,8 +86,8 @@ struct MapReduceFunctorConcept {
    * \param extra Extra arguments provided to the map-reduce function. May be \c NULL.
    * \return The accumulator \a acc updated with the operation.
    */
-  template <unsigned int D, typename AccumulatorType>
-  inline AccumulatorType& operator () (unsigned int index, unsigned int block_size, AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int D, typename Accumulator>
+  inline Accumulator& operator () (unsigned int index, unsigned int block_size, Accumulator &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_NEEDS_TO_BE_IMPLEMENTED();
     return acc;
   }
@@ -108,9 +108,9 @@ struct BoundaryCheckFunctorConcept : public std::binary_function<T, T, bool> {
 };
 
 /// 'Greater than' comparison functor for use with BoundedMapReduce.
-template <typename T>
-struct GreaterThanBoundaryFunctor : public BoundaryCheckFunctorConcept<T>, public std::greater<T> {
-  using std::greater<T>::operator ();
+template <typename Distance>
+struct GreaterThanBoundaryFunctor : public BoundaryCheckFunctorConcept<Distance>, public std::greater<Distance> {
+  using std::greater<Distance>::operator ();
 };
 
 } // namespace kche_tree

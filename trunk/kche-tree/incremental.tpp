@@ -33,7 +33,7 @@ namespace kche_tree {
  * \param data Input data. Unused in this case.
  */
 template <typename T, const unsigned int D, typename M>
-IncrementalBase<T, D, M>::SearchData::SearchData(const VectorType &p, const DataSetType &data) {
+IncrementalBase<T, D, M>::SearchData::SearchData(const Vector &p, const DataSet &data) {
   for (unsigned int d=0; d<D; ++d) {
     axis[d].p = p[d];
     axis[d].nearest = p[d];
@@ -45,13 +45,13 @@ IncrementalBase<T, D, M>::SearchData::SearchData(const VectorType &p, const Data
  *
  * \param search_data Data structure used for tree traversal and incremental calculations.
  */
-template <typename T, const unsigned int D, typename Metric>
-IncrementalBase<T, D, Metric>::IncrementalBase(KDSearchData<T, D, Metric> &search_data)
+template <typename T, const unsigned int D, typename M>
+IncrementalBase<T, D, M>::IncrementalBase(KDSearch &search_data)
   : search_data_(search_data),
     parent_axis_(0),
     modified_(false),
     previous_axis_nearest_(Traits<T>::zero()),
-    previous_hyperrect_distance_(Traits<T>::zero()) { }
+    previous_hyperrect_distance_(Traits<Distance>::zero()) { }
 
 /**
  * Perform an incremental update of the distance to the nearest point in the hyperrectangle.
@@ -62,20 +62,20 @@ IncrementalBase<T, D, Metric>::IncrementalBase(KDSearchData<T, D, Metric> &searc
  * \param search_data Auxiliar data structure used for tree traversal and incremental calculations.
  * \param updater Functor object used to update the current hyperrectangle distance.
  */
-template <typename T, const unsigned int D, typename Metric> template <typename IncrementalFunctor>
-void IncrementalBase<T, D, Metric>::update(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D, Metric> &search_data, const IncrementalFunctor &updater) {
+template <typename T, const unsigned int D, typename M> template <typename IncrementalFunctor>
+void IncrementalBase<T, D, M>::update(const KDNode *node, const KDNode *parent, KDSearch &search_data, const IncrementalFunctor &updater) {
 
   // Check parent.
   if (parent == NULL)
     return;
 
   // Get splitting axis data.
-  parent_axis_ = parent->axis & KDNode<T, D>::axis_mask;
-  typename SearchDataExtras::AxisData *axis_data = &search_data.axis[parent_axis_];
+  parent_axis_ = parent->axis & KDNode::axis_mask;
+  typename SearchExtras::AxisData *axis_data = &search_data.axis[parent_axis_];
 
   // Check if current branch modifies the bounding hyperrectangle.
-  if ((parent->left_branch  == node && parent->split_value > axis_data->nearest) ||
-      (parent->right_branch == node && parent->split_value < axis_data->nearest))
+  if ((parent->left_branch  == node && parent->split_element > axis_data->nearest) ||
+      (parent->right_branch == node && parent->split_element < axis_data->nearest))
     return;
 
   // Store current values before any update.
@@ -84,15 +84,15 @@ void IncrementalBase<T, D, Metric>::update(const KDNode<T, D> *node, const KDNod
   previous_hyperrect_distance_ = search_data.hyperrect_distance;
 
   // Calculate the new distance to the hyperrectangle.
-  updater(search_data_.hyperrect_distance, parent_axis_, parent->split_value, search_data);
+  updater(search_data_.hyperrect_distance, parent_axis_, parent->split_element, search_data);
 
   // Define the new boundaries of the hyperrectangle.
-  axis_data->nearest = parent->split_value;
+  axis_data->nearest = parent->split_element;
 }
 
 /// Restore the updated values to their previous ones, if modified.
-template <typename T, const unsigned int D, typename Metric>
-void IncrementalBase<T, D, Metric>::restore() {
+template <typename T, const unsigned int D, typename M>
+void IncrementalBase<T, D, M>::restore() {
 
   // Restore previous values if modified.
   if (modified_) {

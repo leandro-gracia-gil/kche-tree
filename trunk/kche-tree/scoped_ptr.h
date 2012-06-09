@@ -20,31 +20,26 @@
 
 /**
  * \file scoped_ptr.h
- * \brief Define a basic scoped pointer template if C++0x is not available.
+ * \brief Define a basic scoped pointer template if C++1x is not available.
  * \author Leandro Graciá Gil
  */
 
 #ifndef _KCHE_TREE_SCOPED_PTR_H_
 #define _KCHE_TREE_SCOPED_PTR_H_
 
-#ifdef KCHE_TREE_DISABLE_CPP0X
-#include <tr1/memory>
-#else
-#include <memory>
-#endif
-
 #include "aligned_array.h"
+#include "cpp1x.h"
 #include "deleter.h"
 #include "utils.h"
 
 namespace kche_tree {
 
-#ifdef KCHE_TREE_DISABLE_CPP0X
+#ifdef KCHE_TREE_DISABLE_CPP1X
 /**
  * \brief Basic version of scoped pointers.
  *
  * This doesn't intend to be a full implementation, but a basic version
- * to keep compatibility with the non-C++0x code.
+ * to keep compatibility with the non-C++1x code.
  *
  * \tparam T Type of the smart pointer.
  * \tparam Del Functor providing deletion. Defaults to a standard pointer deleter.
@@ -52,14 +47,14 @@ namespace kche_tree {
 template <typename T, typename Del = PointerDeleter<T> >
 class ScopedPtr : NonCopyable {
 public:
-  typedef T ElementType; ///< Type of the pointer being handled.
+  typedef T Element; ///< Type whose pointer is being handled.
 
   explicit ScopedPtr(T *ptr = 0) : NonCopyable(), ptr_(ptr), deleter_(Del()) {}
   ~ScopedPtr() { deleter_(ptr_); }
 
-  T *get() const { return ptr_; }
-  T & operator *() const { assert(ptr_); return *ptr_; }
-  T * operator ->() const { assert(ptr_); return ptr_; }
+  T* get() const { return ptr_; }
+  T& operator *() const { KCHE_TREE_DCHECK(ptr_); return *ptr_; }
+  T* operator ->() const { KCHE_TREE_DCHECK(ptr_); return ptr_; }
 
   typedef T *(ScopedPtr::*UnspecifiedBoolType);
   operator UnspecifiedBoolType() const { return ptr_ ? &ScopedPtr::ptr_ : 0; }
@@ -70,6 +65,12 @@ public:
       deleter_(ptr_);
       ptr_ = ptr;
     }
+  }
+
+  T* release() {
+    T *temp = ptr_;
+    ptr_ = 0;
+    return temp;
   }
 
   void swap(ScopedPtr &p) { std::swap(ptr_, p.ptr_); }
@@ -83,24 +84,25 @@ protected:
  * \brief Basic version of scoped arrays.
  *
  * This doesn't intend to be a full implementation, but a basic version
- * to keep compatibility with the non-C++0x code.
+ * to keep compatibility with the non-C++1x code.
  *
  * \tparam T Type of the smart pointer.
  */
 template <typename T>
 class ScopedArray : public ScopedPtr<T, ArrayDeleter<T> > {
 public:
+  typedef T Element; ///< Type whose pointer is being handled.
   explicit ScopedArray(T *ptr = 0) : ScopedPtr<T, ArrayDeleter<T> >(ptr) {}
 
-  const T & operator [](size_t index) const { return this->ptr_[index]; }
-  T & operator [](size_t index) { return this->ptr_[index]; }
+  const T& operator [](size_t index) const { return this->ptr_[index]; }
+  T& operator [](size_t index) { return this->ptr_[index]; }
 };
 
 /**
  * \brief Basic version of scoped arrays shifted by a given value.
  *
  * This doesn't intend to be a full implementation, but a basic version
- * to keep compatibility with the non-C++0x code.
+ * to keep compatibility with the non-C++1x code.
  *
  * \tparam T Type of the smart pointer.
  * \tparam Shift Shift value used when deleting the array. For example, use 1 for 1-indexed arrays (0 is out of bounds).
@@ -122,6 +124,7 @@ public:
 template <typename T>
 class ScopedAlignedArray : public ScopedPtr<T, AlignedDeleter<T> > {
 public:
+  typedef T Element; ///< Type whose pointer is being handled.
   explicit ScopedAlignedArray(const AlignedArray<T> &ptr = AlignedArray<T>()) : Base(static_cast<T *>(ptr)) {}
   void reset(const AlignedArray<T> &ptr = AlignedArray<T>()) { Base::reset(static_cast<T *>(ptr)); }
 
@@ -134,37 +137,37 @@ private:
 
 #else
 /**
- * \brief Extended version of STL unique_ptr for compatibility with the non-C++0x code.
+ * \brief Extended version of STL unique_ptr for compatibility with the non-C++1x code.
  *
  * \tparam T Type of the smart pointer.
  */
 template <typename T>
 class ScopedPtr : public std::unique_ptr<T, PointerDeleter<T> > {
 public:
-  typedef T ElementType; ///< Type of the pointer being handled.
+  typedef T Element; ///< Type whose pointer is being handled.
   explicit ScopedPtr(T *ptr = 0) : std::unique_ptr<T, PointerDeleter<T> >(ptr) {}
 };
 
 /**
- * \brief Extended version of STL unique_ptr applied to arrays. Defined for compatibility with the non-C++0x code.
+ * \brief Extended version of STL unique_ptr applied to arrays. Defined for compatibility with the non-C++1x code.
  *
  * STL unique_ptr has support for arrays via the partial specification of T[].
- * Likely to be replaced by a C++0x template alias when available.
+ * Likely to be replaced by a C++1x template alias when available.
  *
  * \tparam T Type of the smart pointer.
  */
 template <typename T>
 class ScopedArray : public std::unique_ptr<T[], ArrayDeleter<T> > {
 public:
-  typedef T ElementType; ///< Type of the pointer being handled.
+  typedef T Element; ///< Type whose pointer is being handled.
   explicit ScopedArray(T *ptr = 0) : std::unique_ptr<T[], ArrayDeleter<T> >(ptr) {}
 };
 
 /**
- * \brief Extended version of STL unique_ptr applied to arrays shifted by a given value. Defined for compatibility with the non-C++0x code.
+ * \brief Extended version of STL unique_ptr applied to arrays shifted by a given value. Defined for compatibility with the non-C++1x code.
  *
  * STL unique_ptr has support for arrays via the partial specification of T[].
- * Likely to be replaced by a C++0x template alias when available.
+ * Likely to be replaced by a C++1x template alias when available.
  *
  * \tparam T Type of the smart pointer.
  * \tparam Shift Shift value used when deleting the array. For example, use 1 for 1-indexed arrays (0 is out of bounds).
@@ -172,7 +175,7 @@ public:
 template <typename T, unsigned int Shift>
 class ShiftedScopedArray : public std::unique_ptr<T[], ShiftedArrayDeleter<T, Shift> > {
 public:
-  typedef T ElementType; ///< Type of the pointer being handled.
+  typedef T Element; ///< Type whose pointer is being handled.
   explicit ShiftedScopedArray(T *ptr = 0) : std::unique_ptr<T[], ShiftedArrayDeleter<T, Shift> >(ptr) {}
 };
 
@@ -184,7 +187,7 @@ public:
 template <typename T>
 class ScopedAlignedArray : public std::unique_ptr<T[], AlignedDeleter<T> > {
 public:
-  typedef T ElementType; ///< Type of the pointer being handled.
+  typedef T Element; ///< Type whose pointer is being handled.
 
   explicit ScopedAlignedArray(const AlignedArray<T> &ptr = AlignedArray<T>()) : Base(static_cast<T *>(ptr)) {}
   void reset(const AlignedArray<T> &ptr = AlignedArray<T>()) { Base::reset(static_cast<T *>(ptr)); }

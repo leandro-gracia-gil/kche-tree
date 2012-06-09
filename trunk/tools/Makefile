@@ -53,17 +53,21 @@ define tool_dimensions
 $(call tool_param,$(1),$(2),2)
 endef
 
+define tool_label
+$(call tool_param,$(1),$(2),3)
+endef
+
 define tool_metric_file
-tool_$(call tool_param,$(1),$(2),3).cpp
+tool_$(call tool_param,$(1),$(2),4).cpp
 endef
 
 define tool_extra_params
-$(call tool_remaining_params,$(1),$(2),4)
+$(call tool_remaining_params,$(1),$(2),5)
 endef
 
 define tool_settings
 $$(patsubst -DCUSTOM_INCLUDE=\"\"$$,,$(call tool_metric_file,$(1),$(2)) -DTYPE=$(call tool_element_type,$(1),$(2)) \
-    -DDIMENSIONS=$(call tool_dimensions,$(1),$(2)) $(call tool_extra_params,$(1),$$@))
+    -DDIMENSIONS=$(call tool_dimensions,$(1),$(2)) -DLABEL=$(call tool_label,$(1),$(2)) $(call tool_extra_params,$(1),$$@))
 endef
 
 define build_tool_rule

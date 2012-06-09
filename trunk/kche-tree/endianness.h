@@ -27,19 +27,11 @@
 #ifndef _KCHE_TREE_ENDIANESS_H_
 #define _KCHE_TREE_ENDIANESS_H_
 
-#ifdef KCHE_TREE_DISABLE_CPP0X
-#include <tr1/cstdint>
-#include <tr1/type_traits>
-#else
-#include <cstdint>
-#include <type_traits>
-#endif
-
 // Include swap.
 #include <algorithm>
+#include <stdexcept>
 
-// Include compile-time assertions.
-#include "compile_assert.h"
+#include "cpp1x.h"
 
 namespace kche_tree {
 
@@ -53,13 +45,36 @@ struct Endianness {
   };
 
   /// Get the endianness of the local host.
-  static Type endianness() { static Type endianness = is_little_endian() ? LittleEndian : BigEndian; return endianness; }
+  static Type host_endianness() { static Type endianness = is_little_endian() ? LittleEndian : BigEndian; return endianness; }
 
   /// Check if the local host uses little endian.
   static bool is_little_endian() { static uint32_t x = 1; return (reinterpret_cast<const uint8_t*>(&x))[0]; }
 
   /// Check if the local host uses big endian.
   static bool is_big_endian() { return !is_little_endian(); }
+
+  /// Serialize a byte endianness value.
+  static void serialize(std::ostream &out, Type endianness = host_endianness()) {
+    uint8_t endianness_raw = endianness;
+    out.write(reinterpret_cast<const char *>(&endianness_raw), sizeof(endianness_raw));
+    if (!out.good())
+      throw std::runtime_error("error writing endianness information");
+  }
+
+  /// Deserialize a byte endianness value.
+  static Endianness::Type deserialize(std::istream &in) {
+    // Read format endianness.
+    uint8_t endianness_raw;
+    in.read(reinterpret_cast<char *>(&endianness_raw), sizeof(endianness_raw));
+    if (!in.good())
+      throw std::runtime_error("error reading endianness type");
+
+    // Validate endianness.
+    Type endianness = static_cast<Type>(endianness_raw);
+    if (endianness != LittleEndian && endianness != BigEndian)
+      throw std::runtime_error("invalid endianness value");
+    return endianness;
+  }
 };
 
 /**
@@ -72,11 +87,7 @@ struct Endianness {
  */
 template <typename T, unsigned int Iter = sizeof(T) / 2, uint32_t Low = 0, uint32_t High = sizeof(T) - 1>
 struct EndiannessSwapper {
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  KCHE_TREE_COMPILE_ASSERT(std::tr1::is_fundamental<T>::value, "EndiannessSwapper can only be applied to fundamental types");
-#else
-  KCHE_TREE_COMPILE_ASSERT(std::is_fundamental<T>::value, "EndiannessSwapper can only be applied to fundamental types");
-#endif
+  KCHE_TREE_COMPILE_ASSERT(IsFundamental<T>::value, "EndiannessSwapper can only be applied to fundamental types");
 
   /**
    * \brief Run the bit swapping operation.

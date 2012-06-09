@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010, 2011 by Leandro Graciá Gil                        *
+ *   Copyright (C) 2010, 2011, 2012 by Leandro Graciá Gil                  *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,58 +24,42 @@
  * \author Leandro Graciá Gil
  */
 
-// C Standard Library includes.
-#include <cstdio>
-#include <cstdlib>
+// C and C++ Standard Library includes.
 #include <cmath>
 #include <ctime>
+#include <iomanip>
+#include <iostream>
 
 // Include the kche-tree templates.
-//
-// Note: in the float and 24 dimensions case we can use an SSE-accelerated version of the
-//       kd-tree by just including the file "../tools/kche-tree_sse_24d.h" instead of "kche-tree.h".
-//       Proper memory alignments are ensured by the specialization of the new operator.
-//       Also remember to set the -msse flag when compiling with g++ or face errors.
-//
 #include "kche-tree/kche-tree.h"
+
 using namespace kche_tree;
+using namespace std;
 
-/// Number of dimensions to use in this example.
-const unsigned int D = 24;
+// Data type and number of dimensions to use in this example.
+typedef float Type;
+const unsigned int Dimensions = 24;
 
-/// Alias for the specific KDTree and data set types being used.
-typedef KDTree<float, D> KDTreeTest;
-typedef DataSet<float, D> DataSetTest;
+// Alias for the specific KDTree and data set types being used.
+typedef KDTree<Type, Dimensions> KDTreeTest;
+typedef DataSet<Type, Dimensions> DataSetTest;
 
-/**
- * Generate and initialize randomly a set of feature vectors.
- *
- * \param dataset Data set to fill with random values.
- */
-void generate_random_set(DataSetTest &dataset) {
-
-  // Initialize it randomly with values between -100 and 100.
-  for (unsigned int i=0; i<dataset.size(); ++i) {
-    for (unsigned int d=0; d<D; ++d)
-      dataset[i][d] = 100.0f * (rand() / (2.0f * RAND_MAX) - 1.0f);
-  }
-}
-
-/**
- * Tool entry point.
- */
 int main(int argc, char *argv[]) {
 
-  // Note: this tool has been designed for illustrative purposes only.
-  //       For result testing please use test_kdtree and its variations.
-  //       For benchmarking use speed_kdtree and its variations.
-
   // Initialize the random seed.
-  srand(time(NULL));
+  DefaultRandomEngine random_engine;
+  random_engine.seed(time(NULL));
+
+  // Create a uniform distribution between -100 and 100.
+  typedef Traits<Type>::UniformDistribution UniformDistribution;
+  UniformDistribution value_distribution(-100.0f, 100.0f);
+
+  // Bind them together into a random number generator. Use operator () to get random numbers.
+  RandomGenerator<DefaultRandomEngine, UniformDistribution> generator(random_engine, value_distribution);
 
   // Generate 500000 random feature vectors for training.
   DataSetTest train_set(500000);
-  generate_random_set(train_set);
+  train_set.set_random_values(generator);
 
   // Create and build a new kd-tree with the training set.
   KDTreeTest kdtree;
@@ -83,28 +67,32 @@ int main(int argc, char *argv[]) {
 
   // Generate 5 random feature vectors for testing.
   DataSetTest test_set(5);
-  generate_random_set(test_set);
+  test_set.set_random_values(generator);
 
   // Set the number of neighbours to retrieve.
   const unsigned int K = 3;
 
   // For each test case...
   for (unsigned int i=0; i<test_set.size(); ++i) {
+    // Retrieve the K nearest neighbors. KNeighbours is just a vector of Neighbor objects, which are
+    // basically tuples of index and squared distances.
+    KDTreeTest::KNeighbors neighbors;
 
-    // Retrieve the K nearest neighbours.
-    std::vector<KDTreeTest::NeighbourType> neighbours;
-    #ifdef KCHE_TREE_DISABLE_CPP0X
-    // The Euclidean metric is used by default if C++0x is enabled, but explicitely required if disabled.
-    kdtree.knn<KVector>(test_set[i], K, neighbours, EuclideanMetric<float, D>());
+    #ifdef KCHE_TREE_DISABLE_CPP1X
+    // C++1x allows the use of default template method arguments, which lets us to automatically use
+    // K-Vectors (vectors holding the K closer values) and the Euclidean metric unless specified.
+    // Unfortunately, without C++1x explicit values are required.
+    kdtree.knn<KVector>(test_set[i], K, neighbors, EuclideanMetric<Type, Dimensions>());
     #else
-    kdtree.knn(test_set[i], K, neighbours);
+    kdtree.knn(test_set[i], K, neighbors);
     #endif
 
     // Print distances to the K nearest neighbours.
-    printf("Distance to the %d nearest neighbours in test case %d: ", K, i + 1);
+    cout << "Distance to the " << K << " nearest neighbours in test case " << (i + 1) << ": ";
+    cout << fixed;
     for (unsigned int k=0; k<K; ++k)
-      printf("%.4f ", sqrtf(neighbours[k].squared_distance));
-    printf("\n");
+      cout << setprecision(4) << sqrtf(neighbors[k].squared_distance()) << " ";
+    cout << endl;
   }
 
   return 0;

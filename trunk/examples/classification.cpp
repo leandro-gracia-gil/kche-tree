@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010, 2011, 2012 by Leandro Graciá Gil                  *
+ *   Copyright (C) 2012 by Leandro Graciá Gil                              *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -19,8 +19,8 @@
  ***************************************************************************/
 
 /**
- * \file mahalanobis_simple.cpp
- * \brief Example program to show how to perform K-Nearest Neighbour searches using the Mahalanobis metric.
+ * \file classification.cpp
+ * \brief Example program to show a simple vector classification using knn.
  * \author Leandro Graciá Gil
  */
 
@@ -39,10 +39,32 @@ using namespace std;
 // Data type and number of dimensions to use in this example.
 typedef float Type;
 const unsigned int Dimensions = 24;
+typedef int Label;
+
+// Number of classes to use in this example.
+const unsigned int Classes = 3;
 
 // Alias for the specific KDTree and data set types being used.
 typedef KDTree<Type, Dimensions> KDTreeTest;
-typedef DataSet<Type, Dimensions> DataSetTest;
+
+// ------------------------------------------------------- //
+//      Note that this time the data set is labeled.       //
+// ------------------------------------------------------- //
+typedef LabeledDataSet<Type, Dimensions, Label> DataSetTest;
+// ------------------------------------------------------- //
+// ------------------------------------------------------- //
+
+void generate_random_labels(DefaultRandomEngine &random_engine, DataSetTest &dataset) {
+
+  // Generate random integer labels for the different classes.
+  typedef Traits<Label>::UniformDistribution UniformLabelDistribution;
+  UniformLabelDistribution label_distribution(0, Classes - 1);
+  RandomGenerator<DefaultRandomEngine, UniformLabelDistribution> label_generator(random_engine, label_distribution);
+
+  // Assign the labels to the vectors in the data set.
+  for (unsigned int i=0; i<dataset.size(); ++i)
+    dataset.label(i) = label_generator();
+}
 
 int main(int argc, char *argv[]) {
 
@@ -61,6 +83,9 @@ int main(int argc, char *argv[]) {
   DataSetTest train_set(500000);
   train_set.set_random_values(generator);
 
+  // Set random labels to the vectors.
+  generate_random_labels(random_engine, train_set);
+
   // Create and build a new kd-tree with the training set.
   KDTreeTest kdtree;
   kdtree.build(train_set);
@@ -69,11 +94,8 @@ int main(int argc, char *argv[]) {
   DataSetTest test_set(5);
   test_set.set_random_values(generator);
 
-  // Prepare the Mahalanobis metric object. This automatically calculates the inverse covariance of the dataset.
-  MahalanobisMetric<Type, Dimensions> mahalanobis_metric(train_set);
-
   // Set the number of neighbours to retrieve.
-  const unsigned int K = 3;
+  const unsigned int K = 5;
 
   // For each test case...
   for (unsigned int i=0; i<test_set.size(); ++i) {
@@ -89,6 +111,9 @@ int main(int argc, char *argv[]) {
     #else
     kdtree.knn(test_set[i], K, neighbors, mahalanobis_metric);
     #endif
+
+    // Get the most frequent class among neighbors.
+    // TODO: use methods in LabeledDataSet.
 
     // Print distances to the K nearest neighbours.
     cout << "Distance to the " << K << " nearest neighbours in test case " << (i + 1) << ": ";

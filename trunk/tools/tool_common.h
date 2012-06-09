@@ -27,6 +27,9 @@
 #ifndef _TOOL_COMMON_H_
 #define _TOOL_COMMON_H_
 
+// STL strings are usual label types.
+#include <string>
+
 // Include for custom types.
 #if defined(CUSTOM_INCLUDE)
 #define __ADD_QUOTES(s) __STRINGIFY(s)
@@ -37,6 +40,7 @@
 // Define the tool parameters.
 typedef TYPE ElementType;
 static const unsigned int Dimensions = DIMENSIONS;
+typedef LABEL LabelType;
 
 // Enabled debug assertions in the verification tests.
 #if defined(VERIFY)
@@ -50,10 +54,10 @@ using namespace kche_tree;
 // Define the appropriate tool type.
 #if defined(BENCHMARK)
 #include "benchmark_tool.h"
-typedef BenchmarkTool<ElementType, Dimensions> ToolType;
+typedef BenchmarkTool<ElementType, Dimensions, LabelType> ToolType;
 #elif defined(VERIFY)
 #include "verification_tool.h"
-typedef VerificationTool<ElementType, Dimensions> ToolType;
+typedef VerificationTool<ElementType, Dimensions, LabelType> ToolType;
 #else
 KCHE_TREE_COMPILE_ASSERT(false, "Error: tool type not defined.");
 #endif

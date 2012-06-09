@@ -26,7 +26,6 @@
 
 // Include required C Standard Library STL files.
 #include <algorithm>
-#include <cassert>
 #include <cstring>
 
 namespace kche_tree {

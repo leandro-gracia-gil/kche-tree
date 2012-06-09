@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2010, 2011 by Leandro Graciá Gil                        *
+ *   Copyright (C) 2010, 2011, 2012 by Leandro Graciá Gil                  *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -35,20 +35,6 @@
 namespace kche_tree {
 
 /**
- * \brief Stream serialization operator.
- *
- * \note This method does not perform any type checking and it's used internally when
- * serializing data sets. For proper vector serialization, use DataSet objects.
- * \note Data is serialized with the same endianness as the local host.
- *
- * \param out Output stream.
- * \param vector Vector to be serialized.
- * \exception std::runtime_error Thrown in case of write error.
- */
-template <typename T, const unsigned int D>
-std::ostream & operator << (std::ostream &out, const Vector<T, D> &vector);
-
-/**
  * \brief Template for D-dimensional feature vectors.
  *
  * Encapsulates D-dimensional contiguous vectors containing feature values.
@@ -57,57 +43,64 @@ std::ostream & operator << (std::ostream &out, const Vector<T, D> &vector);
  * \note For cache reasons it is recommended not to extend this class adding any labels
  * to the vectors, but to have separate label arrays and use the indices to access them.
  *
- * \tparam T Data type of the elements in the vector.
- * \tparam D Number of dimensions of the vector.
+ * \tparam ElementType Type of the elements in the vector.
+ * \tparam NumDimensions Number of dimensions of the vector.
  */
-template <typename T, const unsigned int D>
-class Vector {
+template <typename ElementType, const unsigned int NumDimensions>
+class Vector : public Serializable<Vector<ElementType, NumDimensions> > {
 public:
   /// Type of the elements in the vector.
-  typedef T ElementType;
+  typedef ElementType Element;
 
   /// Number of dimensions (size) of the vector.
-  static const unsigned int Dimensions = D;
+  static const unsigned int Dimensions = NumDimensions;
 
   // Default constructor.
   Vector();
 
-  // Read the vector from an input stream.
-  Vector(std::istream &in, Endianness::Type endianness);
-
   // Direct access to the data array.
-  const T *data() const { return data_; }
-  T *mutable_data() { return data_; }
+  const Element* data() const { return data_; }
+  Element* mutable_data() { return data_; }
 
   // Subscript operators.
-  const T & operator [] (unsigned int index) const { return data_[index]; } ///< Const subscript operator.
-  T & operator [] (unsigned int index) { return data_[index]; } ///< Subscript operator.
+  const Element& operator [] (unsigned int index) const { return data_[index]; } ///< Const subscript operator.
+  Element& operator [] (unsigned int index) { return data_[index]; } ///< Subscript operator.
 
   // Comparison operators.
   bool operator == (const Vector &p) const; ///< Equality comparison operator. May be optimized if \link kche_tree::HasTrivialEqual HasTrivialEqual::value\endlink is \c true.
   bool operator != (const Vector &p) const; ///< Non-equality comparison operator. May be optimized if \link kche_tree::HasTrivialEqual HasTrivialEqual::value\endlink is \c true.
 
-  // Friends for endianness swapping and serialization.
-  friend struct EndiannessTraits<Vector<T, D> >;
-  friend std::ostream & operator << <>(std::ostream &out, const Vector &vector);
-
   // Memory operators to handle automatic alignment in SSE.
-  void *operator new (size_t nbytes);
-  void *operator new [] (size_t nbytes);
+  void* operator new (size_t nbytes);
+  void* operator new [] (size_t nbytes);
   void operator delete (void *p);
   void operator delete [] (void *p);
 
 private:
+  // Implementation of the serializable concept.
+  Vector(std::istream &in, Endianness::Type endianness);
+  void serialize(std::ostream &out) const;
+  void swap(Vector &vector);
+
+  // Friends for endianness swapping and serialization.
+  friend struct EndiannessTraits<Vector>;
+  friend std::istream& operator >> <>(std::istream &in, Serializable<Vector> &vector);
+  friend std::ostream& operator << <>(std::ostream &out, const Serializable<Vector> &vector);
+
   /// Contiguous D-dimensional data array extended to the next multiple of 4 when SSE is enabled.
   /// Extra data is initialized to zero using the appropriate method in traits.
-  T data_[KCHE_TREE_SSE_COMPILE_ALIGN(T, D)];
+  Element data_[KCHE_TREE_SSE_COMPILE_ALIGN(Element, Dimensions)];
 }
 #if KCHE_TREE_ENABLE_SSE
 KCHE_TREE_ALIGNED(16)
 #endif
 ;
 
-/// Vectors have trivial serialization if their contents do.
+/**
+ * \brief Vectors have trivial serialization if their contents do.
+ *
+ * The serializable interface will be only used for custom types.
+ */
 template <typename T, const unsigned int D>
 struct HasTrivialSerialization<Vector<T, D> > {
   static const bool value = HasTrivialSerialization<T>::value;
@@ -126,32 +119,6 @@ struct HasTrivialSerialization<Vector<T, D> > {
 template <typename T, const unsigned int D>
 struct HasTrivialEqual<Vector<T, D> > {
   static const bool value = HasTrivialEqual<T>::value;
-};
-
-/**
- * \brief References a feature vector by its index in the data set and provides the squared distance to it from an implicit vector.
- *
- * Implements its own comparison function with the parenthesis operator for STL-based algorithm use.
- *
- * \tparam T Type used to encode the distance between two feature vectors. Should be the same than the data from the vectors.
- */
-template <typename T>
-struct VectorDistance : public std::binary_function<VectorDistance<T>, VectorDistance<T>, bool> {
-
-  /// Use optimized const reference types.
-  typedef typename RParam<T>::Type ConstRef_T;
-
-  unsigned int index; ///< Index of the feature vector in the data set.
-  T squared_distance; ///< Squared distance of the referenced element to an implicit vector.
-
-  // Default and convenience constructors.
-  VectorDistance() {}
-  VectorDistance(unsigned int index, ConstRef_T squared_distance) : index(index), squared_distance(squared_distance) {}
-
-  /// Distance comparison operator for VectorDistances. Allows VectorDistance objects to be used as STL comparison functors.
-  bool operator () (const VectorDistance &v1, const VectorDistance &v2) const {
-    return v1.squared_distance < v2.squared_distance;
-  }
 };
 
 } // namespace kche_tree

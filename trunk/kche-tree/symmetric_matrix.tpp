@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,8 +30,8 @@
 namespace kche_tree {
 
 /// Create a matrix with size 0.
-template <typename T>
-SymmetricMatrix<T>::SymmetricMatrix() : size_(0) {}
+template <typename U>
+SymmetricMatrix<U>::SymmetricMatrix() : size_(0) {}
 
 /**
  * \brief Create a matrix of the specified size, optionally initialized to the identity.
@@ -39,18 +39,18 @@ SymmetricMatrix<T>::SymmetricMatrix() : size_(0) {}
  * \param size Size of the matrix to be created.
  * \param initialize_to_identity Will initialize the contents to the identity matrix if \c true, or skip content initialization otherwise.
  */
-template <typename T>
-SymmetricMatrix<T>::SymmetricMatrix(unsigned int size, bool initialize_to_identity) {
+template <typename U>
+SymmetricMatrix<U>::SymmetricMatrix(unsigned int size, bool initialize_to_identity) {
   reset_to_size(size, initialize_to_identity);
 }
 
-template <typename T>
-SymmetricMatrix<T>::SymmetricMatrix(const SymmetricMatrix &matrix) {
+template <typename U>
+SymmetricMatrix<U>::SymmetricMatrix(const SymmetricMatrix &matrix) {
   *this = matrix;
 }
 
-template <typename T>
-SymmetricMatrix<T>& SymmetricMatrix<T>::operator = (const SymmetricMatrix &matrix) {
+template <typename U>
+SymmetricMatrix<U>& SymmetricMatrix<U>::operator = (const SymmetricMatrix &matrix) {
   reset_to_size(matrix.size(), false);
   for (unsigned int j=0; j<size_; ++j)
     for (unsigned int i=0; i<=j; ++i)
@@ -65,8 +65,8 @@ SymmetricMatrix<T>& SymmetricMatrix<T>::operator = (const SymmetricMatrix &matri
  * \param size New size of the matrix.
  * \param initialize_to_identity Will initialize the contents to the identity matrix if \c true, or skip content initialization otherwise.
  */
-template <typename T>
-void SymmetricMatrix<T>::reset_to_size(unsigned int size, bool initialize_to_identity) {
+template <typename U>
+void SymmetricMatrix<U>::reset_to_size(unsigned int size, bool initialize_to_identity) {
 
   // Check the empty matrix case.
   size_ = size;
@@ -78,11 +78,11 @@ void SymmetricMatrix<T>::reset_to_size(unsigned int size, bool initialize_to_ide
 
   // Prepare the triangular structure encoding the matrix.
   column_.reset(new ColumnArray[size_]);
-  diagonal_.reset(AlignedArray<T>(KCHE_TREE_SSE_RUNTIME_ALIGN(T, size_)));
+  diagonal_.reset(AlignedArray<U>(KCHE_TREE_SSE_RUNTIME_ALIGN(U, size_)));
   initSSEAlignmentGap(diagonal_.get(), size_);
 
   for (unsigned int i=1; i<size_; ++i) {
-    column_[i].reset(AlignedArray<T>(KCHE_TREE_SSE_RUNTIME_ALIGN(T, i)));
+    column_[i].reset(AlignedArray<U>(KCHE_TREE_SSE_RUNTIME_ALIGN(U, i)));
     initSSEAlignmentGap(column_[i].get(), i);
   }
 
@@ -90,8 +90,8 @@ void SymmetricMatrix<T>::reset_to_size(unsigned int size, bool initialize_to_ide
   if (initialize_to_identity) {
     for (unsigned int j=0; j<size_; ++j) {
       for (unsigned int i=0; i<j; ++i)
-        m(j, i) = Traits<T>::zero();
-      m(j, j) = Traits<T>::one();
+        m(j, i) = Traits<U>::zero();
+      m(j, j) = Traits<U>::one();
     }
   }
 }
@@ -100,11 +100,11 @@ void SymmetricMatrix<T>::reset_to_size(unsigned int size, bool initialize_to_ide
  * Return a reference to the element located in the specified position of the matrix regardless of the way it's stored.
  * This method is meant to be used internally by the methods of the class.
  *
- * \param row Row of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<T>::size_ size_\endlink.
- * \param column Column of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<T>::size_ size_\endlink.
+ * \param row Row of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<U>::size_ size_\endlink.
+ * \param column Column of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<U>::size_ size_\endlink.
  */
-template <typename T>
-T &SymmetricMatrix<T>::m(unsigned int row, unsigned int column) {
+template <typename U>
+U &SymmetricMatrix<U>::m(unsigned int row, unsigned int column) {
   if (row == column)
     return diagonal_[row];
   else if (row > column)
@@ -116,22 +116,22 @@ T &SymmetricMatrix<T>::m(unsigned int row, unsigned int column) {
 /**
  * \brief Return a reference to the element located in the specified position of the matrix regardless of the way it's stored.
  *
- * \param row Row of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<T>::size_ size_\endlink.
- * \param column Column of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<T>::size_ size_\endlink.
+ * \param row Row of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<U>::size_ size_\endlink.
+ * \param column Column of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<U>::size_ size_\endlink.
  */
-template <typename T>
-T &SymmetricMatrix<T>::operator () (unsigned int row, unsigned int column) {
+template <typename U>
+U &SymmetricMatrix<U>::operator () (unsigned int row, unsigned int column) {
   return m(row, column);
 }
 
 /**
  * \brief Return a const reference to the element located in the specified position of the matrix regardless of the way it's stored.
  *
- * \param row Row of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<T>::size_ size_\endlink.
- * \param column Column of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<T>::size_ size_\endlink.
+ * \param row Row of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<U>::size_ size_\endlink.
+ * \param column Column of the matrix to access. Behaviour is undefined if greater or equal than \link SymmetricMatrix<U>::size_ size_\endlink.
  */
-template <typename T>
-const T &SymmetricMatrix<T>::operator () (unsigned int row, unsigned int column) const {
+template <typename U>
+const U &SymmetricMatrix<U>::operator () (unsigned int row, unsigned int column) const {
   if (row == column)
     return diagonal_[row];
   else if (row > column)
@@ -148,27 +148,24 @@ const T &SymmetricMatrix<T>::operator () (unsigned int row, unsigned int column)
  *
  * \return \c true if successfully inverted, \c false if not invertible.
  */
-template <typename T>
-bool SymmetricMatrix<T>::invert() {
+template <typename U>
+bool SymmetricMatrix<U>::invert() {
 
   // Check empty matrices.
   if (size_ == 0)
     return true;
 
-  // Type used for accumulator variables.
-  typedef typename Traits<T>::AccumulatorType AccumT;
-
   // Decompose the matrix into its LDL' decomposition.
   // The LD matrix is the composition of L with D in its diagonal.
-  SymmetricMatrix<T> ld(size_, false);
+  SymmetricMatrix<U> ld(size_, false);
   for (unsigned int j=0; j<size_; ++j) {
 
     // Calculate the strictly lower triangular values.
     for (unsigned int i=0; i<j; ++i) {
 
-      AccumT acc = Traits<AccumT>::zero();
+      U acc = Traits<U>::zero();
       for (unsigned int k=0; k<i; ++k) {
-        T temp = ld(j, k);
+        U temp = ld(j, k);
         temp *= ld(i, k);
         temp *= ld(k, k);
         acc += temp;
@@ -179,14 +176,14 @@ bool SymmetricMatrix<T>::invert() {
       ld(j, i) /= ld(i, i);
 
       // Catch non-invertible matrices.
-      if (ld(i, i) == Traits<T>::zero())
+      if (ld(i, i) == Traits<U>::zero())
         return false;
     }
 
     // Calculate the diagonal value.
-    AccumT acc = Traits<AccumT>::zero();
+    U acc = Traits<U>::zero();
     for (unsigned int k=0; k<j; ++k) {
-      T temp = ld(j, k);
+      U temp = ld(j, k);
       temp *= ld(j, k);
       temp *= ld(k, k);
       acc += temp;
@@ -199,28 +196,28 @@ bool SymmetricMatrix<T>::invert() {
   for (unsigned int j=0; j<size_; ++j) {
     for (unsigned int i=0; i<j; ++i) {
       for (unsigned int k=0; k<i; ++k) {
-        T temp = ld(j, i);
+        U temp = ld(j, i);
         temp *= ld(i, k);
         ld(j, k) -= temp;
       }
-      Traits<T>::negate(ld(j, i));
+      Traits<U>::negate(ld(j, i));
     }
 
     // Catch non-invertible matrices.
-    if (ld(j, j) == Traits<T>::zero())
+    if (ld(j, j) == Traits<U>::zero())
       return false;
 
-    Traits<T>::invert(ld(j, j));
+    Traits<U>::invert(ld(j, j));
   }
 
   // Calculate the inverse matrix from the values of L and D inverted.
   // This stores the result of inv(L)' * inv(D) * inv(L) as the current matrix.
   for (unsigned int j=0; j<size_; ++j) {
     for (unsigned int i=0; i<=j; ++i) {
-      AccumT acc = Traits<AccumT>::zero();
+      U acc = Traits<U>::zero();
       for (unsigned int k=j; k<size_; ++k) {
-        T temp = k == j ? Traits<T>::one() : ld(k, j);
-        temp *= k == i ? Traits<T>::one() : ld(k, i);
+        U temp = k == j ? Traits<U>::one() : ld(k, j);
+        temp *= k == i ? Traits<U>::one() : ld(k, i);
         temp *= ld(k, k);
         acc += temp;
       }

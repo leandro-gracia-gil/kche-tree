@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -43,24 +43,23 @@ struct DifferenceDotFunctor : public MapReduceFunctorConcept<T> {
   typedef typename RParam<T>::Type ConstRef_T;
 
   /// Calculate the dot product of the difference of 2 values.
-  template <typename AccumulatorType>
-  inline AccumulatorType &op(AccumulatorType &acc, ConstRef_T a, ConstRef_T b) const {
-    T temp = a;
-    temp -= b;
+  template <typename Distance>
+  inline Distance &op(Distance &acc, ConstRef_T a, ConstRef_T b) const {
+    Distance temp = Traits<T>::distance(a, b);
     temp *= temp;
     return acc += temp;
   }
 
   /// Loop-based version of the operation.
-  template <unsigned int D, typename AccumulatorType>
-  inline AccumulatorType& operator () (unsigned int index, unsigned int block_size, AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int D, typename Distance>
+  inline Distance& operator () (unsigned int index, unsigned int block_size, Distance &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_DCHECK(block_size == 1);
     return op(acc, a[index], b[index]);
   }
 
   /// 'Unrolled' compile-time version of the operation.
-  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename AccumulatorType>
-  inline AccumulatorType& operator () (AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename Distance>
+  inline Distance& operator () (Distance &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "Expecting BlockSize == 1");
     return op(acc, a[Index], b[Index]);
   }
@@ -69,8 +68,12 @@ struct DifferenceDotFunctor : public MapReduceFunctorConcept<T> {
 /// Provides functions to calculate the Euclidean distance of two \a D dimensional vectors of type \a T.
 template <typename T, const unsigned int D>
 struct EuclideanDistanceCalculator {
-  static inline T distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2);
-  static inline T distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2, typename EuclideanMetric<T, D>::ConstRef_T upper_bound);
+  typedef typename EuclideanMetric<T, D>::Distance Distance;
+  typedef typename EuclideanMetric<T, D>::Vector Vector;
+  typedef typename EuclideanMetric<T, D>::ConstRef_Distance ConstRef_Distance;
+
+  static inline Distance distance(const Vector &v1, const Vector &v2);
+  static inline Distance distance(const Vector &v1, const Vector &v2, ConstRef_Distance upper_bound);
 };
 
 /**
@@ -79,8 +82,12 @@ struct EuclideanDistanceCalculator {
  */
 template <typename T, const unsigned int D>
 struct EuclideanDistanceCalculatorSSE : EuclideanDistanceCalculator<T, D> {
-  static inline T distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2);
-  static inline T distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2, typename EuclideanMetric<T, D>::ConstRef_T upper_bound);
+  typedef typename EuclideanMetric<T, D>::Distance Distance;
+  typedef typename EuclideanMetric<T, D>::Vector Vector;
+  typedef typename EuclideanMetric<T, D>::ConstRef_Distance ConstRef_Distance;
+
+  static inline Distance distance(const Vector &v1, const Vector &v2);
+  static inline Distance distance(const Vector &v1, const Vector &v2, ConstRef_Distance upper_bound);
 };
 
 /**
@@ -91,7 +98,7 @@ struct EuclideanDistanceCalculatorSSE : EuclideanDistanceCalculator<T, D> {
  * \return Euclidean squared distance between the two vectors.
  */
 template <typename T, const unsigned int D>
-T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2) const {
+typename EuclideanMetric<T, D>::Distance EuclideanMetric<T, D>::operator () (const Vector &v1, const Vector &v2) const {
 
   // Delegate the distance calculation depending on the SSE optimization settings.
   typedef typename TypeBranch<Settings::enable_sse, EuclideanDistanceCalculatorSSE<T, D>, EuclideanDistanceCalculator<T, D> >::Result DistanceCalculator;
@@ -108,7 +115,7 @@ T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2
  * \return Euclidean squared distance between the two vectors or a partial result greater than \a upper.
  */
 template <typename T, const unsigned int D>
-T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2, ConstRef_T upper_bound) const {
+typename EuclideanMetric<T, D>::Distance EuclideanMetric<T, D>::operator () (const Vector &v1, const Vector &v2, ConstRef_Distance upper_bound) const {
 
   // Delegate the distance calculation depending on the SSE optimization settings.
   typedef typename TypeBranch<Settings::enable_sse, EuclideanDistanceCalculatorSSE<T, D>, EuclideanDistanceCalculator<T, D> >::Result DistanceCalculator;
@@ -123,11 +130,10 @@ T EuclideanMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2
  * \return Squared Euclidean distance between the two vectors.
  */
 template <typename T, const unsigned int D>
-T EuclideanDistanceCalculator<T, D>::distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2) {
+typename EuclideanDistanceCalculator<T, D>::Distance EuclideanDistanceCalculator<T, D>::distance(const Vector &v1, const Vector &v2) {
 
   // Standard squared distance between two D-dimensional vectors.
-  typedef typename Traits<T>::AccumulatorType AccumT;
-  AccumT acc = Traits<AccumT>::zero();
+  Distance acc = Traits<Distance>::zero();
   MapReduce<T, D>::run(DifferenceDotFunctor<T>(), acc, v1.data(), v2.data());
   return acc;
 }
@@ -141,19 +147,19 @@ T EuclideanDistanceCalculator<T, D>::distance(const typename EuclideanMetric<T, 
  * \return Squared Euclidean distance between the two vectors or the partial result if greater than \a upper_bound.
  */
 template <typename T, const unsigned int D>
-T EuclideanDistanceCalculator<T, D>::distance(const typename EuclideanMetric<T, D>::VectorType &v1, const typename EuclideanMetric<T, D>::VectorType &v2, typename EuclideanMetric<T, D>::ConstRef_T upper_bound) {
+typename EuclideanDistanceCalculator<T, D>::Distance EuclideanDistanceCalculator<T, D>::distance(const Vector &v1, const Vector &v2, ConstRef_Distance upper_bound) {
 
   // Constant calculated empirically.
   const unsigned int D_acc = (unsigned int) (0.4f * D);
 
   // Accumulate the first D_acc dimensions without any kind of check.
-  typename Traits<T>::AccumulatorType acc = Traits<T>::zero();
+  Distance acc = Traits<Distance>::zero();
   MapReduce<T, D, 0, D_acc>::run(DifferenceDotFunctor<T>(), acc, v1.data(), v2.data());
 
   // Calculate the remaining dimensions using an upper bound, and checking it every 4 dimensions.
   // The template metaprogramming makes sure this interval is performed without actually checking any index or iterator at runtime.
   // Has been tested to be faster than a loop with the difference being more acute with greater D values.
-  BoundedMapReduce<4, T, D, D_acc>::run(DifferenceDotFunctor<T>(), acc, GreaterThanBoundaryFunctor<T>(), upper_bound, v1.data(), v2.data());
+  BoundedMapReduce<4, T, D, D_acc>::run(DifferenceDotFunctor<T>(), acc, GreaterThanBoundaryFunctor<Distance>(), upper_bound, v1.data(), v2.data());
   return acc;
 }
 

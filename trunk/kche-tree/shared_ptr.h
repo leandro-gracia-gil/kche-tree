@@ -20,13 +20,14 @@
 
 /**
  * \file shared_ptr.h
- * \brief Define aliases for reference-counted shared pointers either from C++ TR1 or C++0x STL.
+ * \brief Define aliases for reference-counted shared pointers either from C++ TR1 or C++1x STL.
  * \author Leandro Graciá Gil
  */
 
 #ifndef _KCHE_TREE_SHARED_PTR_H_
 #define _KCHE_TREE_SHARED_PTR_H_
 
+#include "cpp1x.h"
 #include "deleter.h"
 #include "aligned_array.h"
 
@@ -36,15 +37,9 @@ namespace kche_tree {
  * \brief Provide a basic interface to shared (reference-counted) pointers.
  *
  * \tparam T Type of the smart pointer.
- * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++0x STL.
+ * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++1x STL.
  */
-template <typename T, typename Base =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::shared_ptr<T>
-#else
-  std::shared_ptr<T>
-#endif
-  >
+template <typename T, typename Base = StdSharedPtr<T> >
 class SharedPtr : public Base {
 public:
   typedef PointerDeleter<T> DeleterType;
@@ -56,15 +51,9 @@ public:
  * \brief Provide a basic interface to shared (reference-counted) arrays.
  *
  * \tparam T Type of the smart pointer.
- * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++0x STL.
+ * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++1x STL.
  */
-template <typename T, typename Base =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::shared_ptr<T>
-#else
-  std::shared_ptr<T>
-#endif
-  >
+template <typename T, typename Base = StdSharedPtr<T> >
 class SharedArray : public Base {
 public:
   typedef T ElementType; ///< Type of the pointer being handled.
@@ -84,15 +73,9 @@ private:
  * Handles and deletes memory-aligned arrays allocated using the AlignedArray template.
  *
  * \tparam T Type of the smart pointer.
- * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++0x STL.
+ * \tparam Base Internal parameter used to derive either from C++ TR1 or from C++1x STL.
  */
-template <typename T, typename Base =
-#ifdef KCHE_TREE_DISABLE_CPP0X
-  std::tr1::shared_ptr<T>
-#else
-  std::shared_ptr<T>
-#endif
-  >
+template <typename T, typename Base = StdSharedPtr<T> >
 class SharedAlignedArray : public Base {
 public:
   typedef T ElementType; ///< Type of the pointer being handled.
@@ -106,6 +89,18 @@ public:
 private:
   typedef AlignedArray<T> Deleter;
 };
+
+/// Swap the contents of two shared pointers.
+template <typename T>
+void swap(SharedPtr<T> &p1, SharedPtr<T> &p2) { p1.swap(p2); }
+
+/// Swap the contents of two shared arrays.
+template <typename T>
+void swap(SharedArray<T> &p1, SharedArray<T> &p2) { p1.swap(p2); }
+
+/// Swap the contents of two shared aligned arrays.
+template <typename T>
+void swap(SharedAlignedArray<T> &p1, SharedAlignedArray<T> &p2) { p1.swap(p2); }
 
 } // namespace kche_tree
 

@@ -25,27 +25,27 @@
  */
 
 // Static data.
-template <typename T, const unsigned int D>
-const char VerificationTool<T, D>::serialization_test_filename[] = "kd-tree.test";
+template <typename T, unsigned int D, typename L>
+const char VerificationTool<T, D, L>::serialization_test_filename[] = "kd-tree.test";
 
 /**
  * \brief Create a new verification tool using the options provided in the command line.
  * Data sets are automatically loaded or generated.
  *
- * \tparam RandomEngineType Type of the random number generation engine used.
+ * \tparam RandomEngine Type of the random number generation engine used.
  * \param argc Number of params in command line.
  * \param argv Params of command line.
  * \param random_engine Random number generator used to initialize the contents of the train and test sets if required by the arguments.
  */
-template <typename T, const unsigned int D> template <typename RandomEngineType>
-VerificationTool<T, D>::VerificationTool(int argc, char *argv[], RandomEngineType &random_engine)
-    : ToolBase<T, D, VerificationOptions>(argc, argv, random_engine) {}
+template <typename T, unsigned int D, typename L> template <typename RandomEngine>
+VerificationTool<T, D, L>::VerificationTool(int argc, char *argv[], RandomEngine &random_engine)
+    : ToolBase<T, D, L, VerificationOptions>(argc, argv, random_engine) {}
 
 /// Validate the values from the provided options.
-template <typename T, const unsigned int D>
-bool VerificationTool<T, D>::validate_options() const {
+template <typename T, unsigned int D, typename L>
+bool VerificationTool<T, D, L>::validate_options() const {
 
-  if (!ToolBase<T, D, VerificationOptions>::validate_options())
+  if (!ToolBase<T, D, L, VerificationOptions>::validate_options())
     return false;
 
   if (this->options_->knn_arg < 0) {
@@ -83,11 +83,11 @@ bool VerificationTool<T, D>::validate_options() const {
  * an exhaustive all to all search according to the provided options.
  * Will print information about any errors found during the process.
  *
- * \tparam MetricType Type of the metric being used during the test.
+ * \tparam Metric Type of the metric being used during the test.
  * \param metric Metric object to be used during the test.
  */
-template <typename T, const unsigned int D> template <typename MetricType>
-bool VerificationTool<T, D>::run(const MetricType &metric) {
+template <typename T, unsigned int D, typename L> template <typename Metric>
+bool VerificationTool<T, D, L>::run(const Metric &metric) {
 
   // Check if the tool is ready.
   if (!this->is_ready())
@@ -99,9 +99,11 @@ bool VerificationTool<T, D>::run(const MetricType &metric) {
   // Define the global result flag.
   bool ok = true;
 
+  // Type aliases.
+  typedef kche_tree::KDTree<T, D, L> KDTree;
+
   // Build the kd-tree.
-  typedef KDTree<T, D> KDTreeTool;
-  KDTreeTool kdtree;
+  KDTree kdtree;
   kdtree.build(this->train_set_, this->options_->bucket_size_arg);
 
   // Test the kd-tree I/O.
@@ -121,7 +123,7 @@ bool VerificationTool<T, D>::run(const MetricType &metric) {
   // Test the subscript operator.
   if (this->options_->subscript_flag) {
     for (unsigned int i=0; i<this->train_set_.size(); ++i) {
-      if (this->train_set_[i] != kdtree[i]) {
+      if (this->train_set_[i] != kdtree.data()[i]) {
         std::cerr << "Non-matching subscript operator value for index " << i << "." << std::endl;
         ok = false;
       }
@@ -129,9 +131,10 @@ bool VerificationTool<T, D>::run(const MetricType &metric) {
   }
 
   // Allocate memory for the exhaustive calculation of nearest neighbours.
-  typedef typename KDTreeTool::NeighbourType NeighbourType;
-  ScopedArray<NeighbourType> nearest(new NeighbourType[this->train_set_.size()]);
-  assert(nearest);
+  typedef typename KDTree::Distance Distance;
+  typedef typename KDTree::Neighbor Neighbor;
+  ScopedArray<Neighbor> nearest(new Neighbor[this->train_set_.size()]);
+  KCHE_TREE_DCHECK(nearest);
 
   // Process each test case.
   for (unsigned int i=0; i<this->test_set_.size(); ++i) {
@@ -139,68 +142,69 @@ bool VerificationTool<T, D>::run(const MetricType &metric) {
     // Create a vector of point-distance tuples to current test point.
     if (this->options_->knn_arg > 0 || this->options_->all_in_range_arg > 0.0f) {
       for (unsigned int n=0; n<this->train_set_.size(); ++n) {
-        T distance = metric(this->train_set_[n], this->test_set_[i]);
+        Distance distance = metric(this->train_set_[n], this->test_set_[i]);
 
         // Check numerical consistency of the distance.
-        if ((distance == Traits<T>::zero() && this->test_set_[i] != this->train_set_[n]) || (!(distance == Traits<T>::zero()) && this->test_set_[i] == this->train_set_[n]))
+        if ((distance == Traits<Distance>::zero() && this->test_set_[i] != this->train_set_[n]) || (!(distance == Traits<Distance>::zero()) && this->test_set_[i] == this->train_set_[n]))
           std::cerr << "Warning: possible numerical precision problem. Distance from a point to itself not strictly zero." << std::endl;
 
         // Exclude the point from the nearest neighbours as knn will do.
-        if (this->options_->ignore_existing_flag && distance == Traits<T>::zero())
-          distance = Traits<T>::max();
+        if (this->options_->ignore_existing_flag && distance == Traits<Distance>::zero())
+          distance = Traits<Distance>::max();
 
-        nearest[n] = NeighbourType(n, distance);
+        nearest[n] = Neighbor(n, distance);
       }
     }
 
     // Sort the training set vectors by its distance to the test point.
-    std::sort(nearest.get(), nearest.get() + this->train_set_.size(), nearest[0]);
+    typename Neighbor::DistanceComparer comparer;
+    std::sort(nearest.get(), nearest.get() + this->train_set_.size(), comparer);
 
     // Test the knn functionality.
     if (this->options_->knn_arg > 0) {
 
       // Get the K nearest neighbours.
       unsigned int K = this->options_->knn_arg;
-      std::vector<typename KDTreeTool::NeighbourType> knn;
+      std::vector<Neighbor> knn;
       if (this->options_->use_k_heap_flag)
-        kdtree.template knn<KHeap>(this->test_set_[i], K, knn, metric, T(this->options_->epsilon_arg), this->options_->ignore_existing_flag);
+        kdtree.template knn<KHeap>(this->test_set_[i], K, knn, metric, Distance(this->options_->epsilon_arg), this->options_->ignore_existing_flag);
       else
-        kdtree.template knn<KVector>(this->test_set_[i], K, knn, metric, T(this->options_->epsilon_arg), this->options_->ignore_existing_flag);
+        kdtree.template knn<KVector>(this->test_set_[i], K, knn, metric, Distance(this->options_->epsilon_arg), this->options_->ignore_existing_flag);
 
       // Check the k nearest neighbours returned.
       unsigned int num_elems = std::min(static_cast<unsigned int>(knn.size()), K);
       for (unsigned int k=0; k<num_elems; ++k) {
 
         // Check if the points in the tree were correctly ignored if requested.
-        if (this->options_->ignore_existing_flag && this->test_set_[i] == this->train_set_[knn[k].index] &&
-            !(nearest[knn[k].index].squared_distance == Traits<T>::max())) {
-          std::cerr << "Nearest neighbour " << k << " failed (in the tree but not ignored): index " << nearest[k].index
-              << "(" << nearest[k].squared_distance << "), expected index " << knn[k].index << " (" << knn[k].squared_distance
+        if (this->options_->ignore_existing_flag && this->test_set_[i] == this->train_set_[knn[k].index()] &&
+            !(nearest[knn[k].index()].squared_distance() == Traits<Distance>::max())) {
+          std::cerr << "Nearest neighbour " << k << " failed (in the tree but not ignored): index " << nearest[k].index()
+              << "(" << nearest[k].squared_distance() << "), expected index " << knn[k].index() << " (" << knn[k].squared_distance()
               << ") in test case " << i << std::endl;
           ok = false;
         }
 
         // Check if distances match with expected ones.
-        T difference = knn[k].squared_distance;
-        difference -= nearest[k].squared_distance;
-        Traits<T>::abs(difference);
-        if (difference > T(this->options_->tolerance_arg)) {
-          std::cerr << "Nearest neighbour " << k << " failed: index " << nearest[k].index << " (" <<nearest[k].squared_distance
-              << "), expected index " << knn[k].index << " (" << knn[k].squared_distance << ") in test case " << i << std::endl;
+        Distance difference = knn[k].squared_distance();
+        difference -= nearest[k].squared_distance();
+        Traits<Distance>::abs(difference);
+        if (difference > Distance(this->options_->tolerance_arg)) {
+          std::cerr << "Nearest neighbour " << k << " failed: index " << nearest[k].index() << " (" <<nearest[k].squared_distance()
+              << "), expected index " << knn[k].index() << " (" << knn[k].squared_distance() << ") in test case " << i << std::endl;
           ok = false;
         }
 
         // Check if distance calculations are correct within a tolerance value.
         // Since the knn method uses incremental calculations, depending on the type used the result
         // values can be slightly different. This can be more accute with higher dimension values.
-        T dist1 = metric(this->train_set_[knn[k].index], this->test_set_[i]);
-        T dist2 = nearest[k].squared_distance;
+        Distance dist1 = metric(this->train_set_[knn[k].index()], this->test_set_[i]);
+        Distance dist2 = nearest[k].squared_distance();
 
         difference = dist1;
         difference -= dist2;
-        Traits<T>::abs(difference);
+        Traits<Distance>::abs(difference);
 
-        T sqr_tolerance(this->options_->tolerance_arg);
+        Distance sqr_tolerance(this->options_->tolerance_arg);
         sqr_tolerance *= sqr_tolerance;
 
         if (difference > sqr_tolerance) {
@@ -221,45 +225,45 @@ bool VerificationTool<T, D>::run(const MetricType &metric) {
     if (this->options_->all_in_range_arg > 0.0f) {
 
       // Calculate the squared range search distance.
-      T search_range = this->options_->all_in_range_arg;
-      T squared_search_range = search_range;
+      Distance search_range = this->options_->all_in_range_arg;
+      Distance squared_search_range = search_range;
       squared_search_range *= squared_search_range;
 
-      T sqr_tolerance(this->options_->tolerance_arg);
+      Distance sqr_tolerance(this->options_->tolerance_arg);
       sqr_tolerance *= sqr_tolerance;
 
-      T tolerance_range = squared_search_range;
+      Distance tolerance_range = squared_search_range;
       tolerance_range += sqr_tolerance;
 
       // Get all the neighbours in a random range.
-      std::vector<NeighbourType> points_in_range;
+      std::vector<Neighbor> points_in_range;
       kdtree.all_in_range(this->test_set_[i], search_range, points_in_range, metric, this->options_->ignore_existing_flag);
 
       // Check the returned neighbours within the range.
       for (unsigned int k=0; k<points_in_range.size(); ++k) {
 
         // Check if the points in the tree were correctly ignored if requested.
-        if (this->options_->ignore_existing_flag && this->test_set_[i] == this->train_set_[points_in_range[k].index] &&
-            !(nearest[points_in_range[k].index].squared_distance == Traits<T>::max())) {
-          std::cerr << "In-range point: index " << points_in_range[k].index << " ("
-              << points_in_range[i].squared_distance << ") in tree but not ignored in test case " << i << std::endl;
+        if (this->options_->ignore_existing_flag && this->test_set_[i] == this->train_set_[points_in_range[k].index()] &&
+            !(nearest[points_in_range[k].index()].squared_distance() == Traits<Distance>::max())) {
+          std::cerr << "In-range point: index " << points_in_range[k].index() << " ("
+              << points_in_range[i].squared_distance() << ") in tree but not ignored in test case " << i << std::endl;
           ok = false;
         }
 
         // Check point lies within the range.
-        if (points_in_range[k].squared_distance > tolerance_range) {
-          std::cerr << "In-range point failed: index " << points_in_range[k].index << " (" << points_in_range[i].squared_distance <<
+        if (points_in_range[k].squared_distance() > tolerance_range) {
+          std::cerr << "In-range point failed: index " << points_in_range[k].index() << " (" << points_in_range[i].squared_distance() <<
               ") greater than requested squared distance " << squared_search_range << " in test case " << i << std::endl;
           ok = false;
         }
 
         // Check if returned distances were properly calculated.
-        T dist1 = metric(this->train_set_[points_in_range[k].index], this->test_set_[i]);
-        T dist2 = points_in_range[k].squared_distance;
+        Distance dist1 = metric(this->train_set_[points_in_range[k].index()], this->test_set_[i]);
+        Distance dist2 = points_in_range[k].squared_distance();
 
-        T difference = dist1;
+        Distance difference = dist1;
         difference -= dist2;
-        Traits<T>::abs(difference);
+        Traits<Distance>::abs(difference);
 
         if (difference > sqr_tolerance) {
           std::cerr << "In-range point failed: returned squared distance doesnt't match (" << dist1 <<
@@ -271,8 +275,8 @@ bool VerificationTool<T, D>::run(const MetricType &metric) {
       // Count number of points in range.
       unsigned int in_range = 0;
       for (unsigned int n=0; n<this->train_set_.size(); ++n) {
-        if (!(nearest[n].squared_distance > squared_search_range)) {
-          assert(!(this->options_->ignore_existing_flag && nearest[n].squared_distance == Traits<T>::zero()));
+        if (!(nearest[n].squared_distance() > squared_search_range)) {
+          KCHE_TREE_DCHECK(!(this->options_->ignore_existing_flag && nearest[n].squared_distance() == Traits<Distance>::zero()));
           ++in_range;
         }
       }

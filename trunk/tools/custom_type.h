@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -34,40 +34,20 @@
 /// Simple custom type embedding a floating point value.
 class Custom {
 public:
-  /**
-   * \brief Initialize to zero.
-   *
-   * In case our default constructor didn't do this, we should provide an alternate way by specializing kche_tree::Traits<T>::zero().
-   */
+  /// Initialize to zero.
+  /// In case our default constructor didn't do this, we should provide an alternate way by specializing kche_tree::NumericTraits<Custom>::zero().
   Custom() : value_(0.0f) {}
-
-  // Constructor based on a floating point value.
-  // Required only by the verification tool template, not to use kche-tree.
-  Custom(float value) : value_(value) {}
 
   // Operators required by KDTree. Using default copy constructor and asignment operator.
   bool operator < (const Custom &a) const { return value_ < a.value_; }
   bool operator > (const Custom &a) const { return value_ > a.value_; }
-  //bool operator <= (const Custom &a) const { return value_ <= a.value_; }
   bool operator == (const Custom &a) const { return value_ == a.value_; }
 
-  // Extra operators required by the Euclidean metric and its incremental calculations.
-  Custom& operator += (const Custom &a) { value_ += a.value_; return *this; }
-  Custom& operator -= (const Custom &a) { value_ -= a.value_; return *this; }
-  Custom& operator *= (const Custom &a) { value_ *= a.value_; return *this; }
-
-  // Operators required for Mahalanobis metric matrix calculations.
-  Custom& operator /= (const Custom &a) { value_ /= a.value_; return *this; }
-
   // Serialization methods: only required if we want to serialize the kd-tree or the data sets. Otherwise it can be safely ignored.
-  /**
-   * \brief Read from a stream.
-   * Required instead of the >> operator since it doesn't provide the byte endianness of the data being read.
-   *
-   * \param in Input stream.
-   * \param endianness Byte endianness of the input data.
-   */
+  // Read from a stream. Required like this instead of the >> operator since it doesn't provide the byte endianness of the data being read.
   Custom(std::istream &in, kche_tree::Endianness::Type endianness) { kche_tree::deserialize(value_, in, endianness); }
+
+  // Standard << stream operator.
   friend std::ostream & operator << (std::ostream &out, const Custom &object); ///< Standard << stream operator.
 
   // Methods not required by the kche-tree library.
@@ -129,23 +109,56 @@ namespace kche_tree {
   /**
    * \brief Example numeric traits for a custom type.
    *
-   * Because of the nature of the kd-tree structure many scalar functionalities are expected from the type used.
-   * This trait defines these, being some of them used only in the Mahalanobis metric or by the verification tool.
+   * Defines the type and the method used when calculating distances between elements.
+   * Additionally, the mean of a list of objects is provided in order to enable the automatic
+   * calculation of the inverse covariance matrix for the Mahalanobis metric cases.
    */
   template <>
   struct NumericTraits<Custom> {
-    static Custom max() { return Custom(Traits<float>::max()); } ///< Maximum finite representable value.
-    static Custom zero() { return Custom(); } ///< Equivalent to the additive identity (zero).
-    static Custom one() { return Custom(1.0f); } ///< Equivalent to the multiplicative identity (one).
-    static void negate(Custom &value) { value.set_value(-value.value()); } ///< Replace the value by its additive inverse (negative value).
-    static void invert(Custom &value) { value.set_value(1.0f / value.value()); } ///< Replace the value by its multiplicative inverse (inverse value).
+    typedef float Distance; ///< Distances between custom elements are encoded and calculated using floats.
 
-    typedef Custom AbsoluteValueType; ///< The absolute value of a Custom object is another custom object.
-    static Custom abs(const Custom &value) { return Custom(fabs(value.value())); } ///< Return the absolute value.
+    /// This is how calculate the direct distance between two Custom objects. RParam<Custom>::Type is just a const reference.
+    static Distance distance(typename RParam<Custom>::Type a, typename RParam<Custom>::Type b) {
+      return a.value() - b.value();
+    }
 
-    template <typename RandomGeneratorType>
-    static Custom random(RandomGeneratorType &generator) { return Custom(generator()); } ///< Generate a random element using the provided generator.
+    /// Equivalent to the zero value for Custom objects.
+    static Custom zero() { return Custom(); }
 
-    typedef float ExpectedDistributionElementType; ///< Random floats are used to generate Custom object's contents.
+    /// Creates a mean object from a list defined by the iterators. This is required in order to calculate
+    /// the inverse covariance matrix of a data set as part of the Mahalanobis distance. It is safe to leave
+    /// a dummy implementation if the method \link kche_tree::MahalanobisMetric<T, D>::set_inverse_covariance set_inverse_covariance \endlink
+    /// for data sets is not used.
+    template <typename BidirectionalElementIterator>
+    static Custom mean(const BidirectionalElementIterator &begin, const BidirectionalElementIterator &end) {
+      float acc = 0.0f;
+      unsigned int num_elements = 0;
+      for (BidirectionalElementIterator it = begin; it != end; ++it) {
+        acc += it->value();
+        ++num_elements;
+      }
+
+      Custom object;
+      object.set_value(acc / num_elements);
+      return object;
+    }
+  };
+
+  /**
+   * \brief Example random generation traits for a custom type.
+   *
+   * Specifies how new random Custom objects can be created by the library, and based in which random type.
+   */
+  template <>
+  struct RandomGenerationTraits<Custom> {
+    /// Defines the type of the objects returned by the random generator. In this case, random floats are used to build Custom objects.
+    typedef float RandomDistributionElement;
+
+    /// Type of the uniform distribution used to generate the input random floats.
+    typedef UniformReal<RandomDistributionElement> UniformDistribution;
+
+    /// Defines how to construct Custom objects from a random data generator.
+    template <typename RandomGenerator>
+    static Custom random(RandomGenerator &generator) { Custom object; object.set_value(generator()); return object; }
   };
 }

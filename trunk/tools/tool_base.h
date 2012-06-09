@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -33,15 +33,31 @@
 /**
  * \brief Provide tool initialization and execution for specific tool types.
  *
- * \tparam T Type of the element being tested.
- * \tparam D Number of dimensions being tested.
- * \tparam CommandLineOptions Gengetopt structure providing parsed command-line options.
+ * \tparam ElementType Type of the element being tested.
+ * \tparam NumDimensions Number of dimensions being tested.
+ * \tparam LabelType Type of the labels in the data sets.
+ * \tparam CommandLineOptionsType Type of the gengetopt structure providing parsed command-line options.
  */
-template <typename T, const unsigned int D, typename CommandLineOptions>
+template <typename ElementType, const unsigned int NumDimensions, typename LabelType, typename CommandLineOptionsType>
 class ToolBase {
 public:
-  /// Use the default DataSet type from kche-tree.
-  typedef typename kche_tree::TypeSettings<T, D>::DataSetType DataSetType;
+  /// Type of the elements in the test.
+  typedef ElementType Element;
+
+  /// Number of dimensions in the test.
+  static unsigned const int Dimensions = NumDimensions;
+
+  /// Type of the labels associated to the feature vectors. Equals to void if no labels are used.
+  typedef LabelType Label;
+
+  /// Type of the command line options structure.
+  typedef CommandLineOptionsType CommandLineOptions;
+
+  /// Corresponding kd-tree type.
+  typedef kche_tree::KDTree<Element, Dimensions, Label> KDTree;
+
+  /// Corresponding data set type.
+  typedef typename KDTree::DataSet DataSet;
 
   // Constructor and destructor.
   template <typename RandomEngineType>
@@ -51,8 +67,8 @@ public:
   // Tool properties.
   bool is_ready() const { return is_ready_; } ///< Check if the tool is ready to be run. May not be the case if the options or the data sets failed.
   const CommandLineOptions &options() const { return options_; } ///< Return the current set of options provided by the command line arguments.
-  const DataSetType &train_set() const { return train_set_; } ///< Return the train set used by the tool.
-  const DataSetType &test_set() const { return test_set_; } ///< Return the test set used by the tool.
+  const DataSet &train_set() const { return train_set_; } ///< Return the train set used by the tool.
+  const DataSet &test_set() const { return test_set_; } ///< Return the test set used by the tool.
 
 protected:
   // Initialization, parsing and validation.
@@ -71,8 +87,8 @@ protected:
   ScopedPtr<CommandLineOptions> options_; ///< Gengetopt structure containing the parsed command line arguments.
   bool is_ready_; ///< Flag indicating if the tool is ready to be run.
 
-  DataSetType train_set_; ///< Train set used by the tool.
-  DataSetType test_set_; ///< Test set used by the tool.
+  DataSet train_set_; ///< Train set used by the tool.
+  DataSet test_set_; ///< Test set used by the tool.
 };
 
 // Template implementation.

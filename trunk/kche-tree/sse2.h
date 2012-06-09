@@ -40,30 +40,30 @@ namespace kche_tree {
 template <>
 struct SSETraits<double> {
   /// Define __m128d as the double precision floating point SSE register.
-  typedef __m128d RegisterType;
+  typedef __m128d Register;
 
   /// SSE __m128d registers contain 2 floating point values.
   static const unsigned int NumElements = 2;
 
   /// Return a register initialized to zero.
-  static inline RegisterType zero() {
+  static inline Register zero() {
     return _mm_setzero_pd();
   }
 
   /// Return a register with one element initialized to the provided value.
-  static inline RegisterType value(double value) {
+  static inline Register value(double value) {
     return _mm_set1_pd(value);
   }
 
-  static inline RegisterType add(const RegisterType &a, const RegisterType &b) {
+  static inline Register add(const Register &a, const Register &b) {
     return _mm_add_pd(a, b);
   }
 
-  static inline RegisterType sub(const RegisterType &a, const RegisterType &b) {
+  static inline Register sub(const Register &a, const Register &b) {
     return _mm_sub_pd(a, b);
   }
 
-  static inline RegisterType mult(const RegisterType &a, const RegisterType &b) {
+  static inline Register mult(const Register &a, const Register &b) {
     return _mm_mul_pd(a, b);
   }
 };

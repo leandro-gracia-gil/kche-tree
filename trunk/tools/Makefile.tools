@@ -18,24 +18,24 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             #
 #=========================================================================#
 
-# Set here the type, dimensions and metric parameters associated with different testing cases.
+# Set here the element type, dimensions, label type and metric parameters associated with different testing cases.
 # Format: test_name = type dimensions metric_base_file [extra_params]
 # Example: if euclidean is provided as metric_base_file it means it will use the tool_euclidean.cpp file as template for building tools.
 # The extra param -DCUSTOM_INCLUDE=include_file.h (no quotes) can be used to add an additional include file for custom types.
-euclidean = float 24 euclidean
-mahalanobis = float 24 mahalanobis
-mahalanobis_diagonal = float 24 mahalanobis_diagonal
-euclidean_no_unroll = float 24 euclidean -DKCHE_TREE_MAX_UNROLL=1
-mahalanobis_no_unroll = float 24 mahalanobis -DKCHE_TREE_MAX_UNROLL=1
-mahalanobis_diagonal_no_unroll = float 24 mahalanobis_diagonal -DKCHE_TREE_MAX_UNROLL=1
-custom_euclidean = Custom 24 euclidean -DCUSTOM_INCLUDE=custom_type.h
-custom_mahalanobis = Custom 24 mahalanobis -DCUSTOM_INCLUDE=custom_type.h
-euclidean_sse = float 24 euclidean -DKCHE_TREE_ENABLE_SSE=true -msse
-euclidean_double_sse = double 25 euclidean -DKCHE_TREE_ENABLE_SSE=true -msse2
-mahalanobis_sse = float 25 mahalanobis -DKCHE_TREE_ENABLE_SSE=true -msse
-mahalanobis_diagonal_sse = float 24 mahalanobis_diagonal -DKCHE_TREE_ENABLE_SSE=true -msse
-euclidean_no_unroll_sse = float 24 euclidean -DKCHE_TREE_MAX_UNROLL=1 -DKCHE_TREE_ENABLE_SSE=true -msse
-mahalanobis_no_unroll_sse = float 24 mahalanobis -DKCHE_TREE_MAX_UNROLL=1 -DKCHE_TREE_ENABLE_SSE=true -msse
+euclidean = float 24 void euclidean
+mahalanobis = float 24 void mahalanobis
+mahalanobis_diagonal = float 24 void mahalanobis_diagonal
+euclidean_no_unroll = float 24 void euclidean -DKCHE_TREE_MAX_UNROLL=1
+mahalanobis_no_unroll = float 24 void mahalanobis -DKCHE_TREE_MAX_UNROLL=1
+mahalanobis_diagonal_no_unroll = float 24 void mahalanobis_diagonal -DKCHE_TREE_MAX_UNROLL=1
+custom_euclidean = Custom 24 void euclidean -DCUSTOM_INCLUDE=custom_type.h
+custom_mahalanobis = Custom 24 void mahalanobis -DCUSTOM_INCLUDE=custom_type.h
+euclidean_sse = float 24 void euclidean -DKCHE_TREE_ENABLE_SSE=true -msse
+euclidean_double_sse = double 25 void euclidean -DKCHE_TREE_ENABLE_SSE=true -msse2
+mahalanobis_sse = float 25 void mahalanobis -DKCHE_TREE_ENABLE_SSE=true -msse
+mahalanobis_diagonal_sse = float 24 void mahalanobis_diagonal -DKCHE_TREE_ENABLE_SSE=true -msse
+euclidean_no_unroll_sse = float 24 void euclidean -DKCHE_TREE_MAX_UNROLL=1 -DKCHE_TREE_ENABLE_SSE=true -msse
+mahalanobis_no_unroll_sse = float 24 void mahalanobis -DKCHE_TREE_MAX_UNROLL=1 -DKCHE_TREE_ENABLE_SSE=true -msse
 
 # Add different testing cases to be built as a specific type of tool (ie. for benchmark, for result verification).
 # Testing cases will only be built if added here to one or more tool types.

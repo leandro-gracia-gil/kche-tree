@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -43,7 +43,7 @@ MahalanobisMetric<T, D>::MahalanobisMetric()
  * \param data_set Data set from which the inverse covariance matrix for the metric will be calculated.
  */
 template <typename T, const unsigned int D>
-MahalanobisMetric<T, D>::MahalanobisMetric(const DataSetType &data_set)
+MahalanobisMetric<T, D>::MahalanobisMetric(const DataSet &data_set)
     : inv_covariance_(D, true),
       is_diagonal_(true) {
   set_inverse_covariance(data_set);
@@ -65,38 +65,28 @@ MahalanobisMetric<T, D>::MahalanobisMetric(const DataSetType &data_set)
  * \return \c true if succesfully set, \c false if the resulting covariance matrix is not invertible.
  */
 template <typename T, const unsigned int D>
-bool MahalanobisMetric<T, D>::set_inverse_covariance(const DataSetType &data_set) {
-
-  // Calculate the set means.
-  typedef typename Traits<T>::AccumulatorType AccumT;
-  AccumT mean[D];
-  for (unsigned int i=0; i<D; ++i)
-    mean[i] = Traits<AccumT>::zero();
+bool MahalanobisMetric<T, D>::set_inverse_covariance(const DataSet &data_set) {
 
   unsigned int N = data_set.size();
   if (N <= 1)
     return false;
 
-  for (unsigned int j=0; j<N; ++j)
-    for (unsigned int i=0; i<D; ++i)
-      mean[i] += data_set[j][i];
-
-  float inv_N = 1.0f / N;
-  for (unsigned int i=0; i<D; ++i)
-    mean[i] *= inv_N;
+  // Calculate the mean of each dimension.
+  T mean[D];
+  for (unsigned int i=0; i<D; ++i) {
+    mean[i] = Traits<T>::mean(data_set.column_begin(i), data_set.column_end(i));
+  }
 
   // Calculate the covariance matrix.
-  SymmetricMatrix<T> new_inv_covariance(inv_covariance_.size());
+  SymmetricMatrix<Distance> new_inv_covariance(inv_covariance_.size());
   float inv_N1 = 1.0f / (N - 1);
   for (unsigned int j=0; j<D; ++j) {
     for (unsigned int i=0; i<=j; ++i) {
 
-      AccumT acc = Traits<AccumT>::zero();
+      Distance acc = Traits<Distance>::zero();
       for (unsigned int k=0; k<N; ++k) {
-        T temp = data_set[k][i];
-        temp -= mean[i];
-        T temp2 = data_set[k][j];
-        temp2 -= mean[j];
+        Distance temp = Traits<T>::distance(data_set[k][i], mean[i]);
+        Distance temp2 = Traits<T>::distance(data_set[k][j], mean[j]);
         temp *= temp2;
         acc += temp;
       }
@@ -133,11 +123,11 @@ bool MahalanobisMetric<T, D>::set_inverse_covariance(const DataSetType &data_set
  * \return \c true if the values are valid, \c false otherwise.
  */
 template <typename T, const unsigned int D>
-bool MahalanobisMetric<T, D>::set_inverse_covariance(const T *inverse_covariance) {
+bool MahalanobisMetric<T, D>::set_inverse_covariance(const Distance *inverse_covariance) {
 
   // Ensure all diagonal values are positive.
   for (unsigned int j=0; j<D; ++j) {
-    if (!(inverse_covariance(j, j) > Traits<T>::zero()))
+    if (!(inverse_covariance(j, j) > Traits<Distance>::zero()))
       return false;
   }
 
@@ -166,17 +156,17 @@ bool MahalanobisMetric<T, D>::set_inverse_covariance(const T *inverse_covariance
  * \return \c true if the values are valid, \c false otherwise.
  */
 template <typename T, const unsigned int D>
-bool MahalanobisMetric<T, D>::set_diagonal_covariance(const T *diagonal) {
+bool MahalanobisMetric<T, D>::set_diagonal_covariance(const Distance *diagonal) {
 
   for (unsigned int j=0; j<D; ++j)
-    if (!(diagonal[j] > Traits<T>::zero()))
+    if (!(diagonal[j] > Traits<Distance>::zero()))
       return false;
 
   for (unsigned int j=0; j<D; ++j) {
     for (unsigned int i=0; i<j; ++i)
-      inv_covariance_(j, i) = Traits<T>::zero();
+      inv_covariance_(j, i) = Traits<Distance>::zero();
     inv_covariance_(j, j) = diagonal[j];
-    Traits<T>::invert(inv_covariance_(j, j));
+    Traits<Distance>::invert(inv_covariance_(j, j));
   }
 
   is_diagonal_ = true;
@@ -193,8 +183,8 @@ template <typename T, const unsigned int D>
 void MahalanobisMetric<T, D>::force_diagonal_covariance() {
   for (unsigned int j=0; j<D; ++j) {
     for (unsigned int i=0; i<j; ++i)
-      inv_covariance_(j, i) = Traits<T>::zero();
-    KCHE_TREE_DCHECK(inv_covariance_(j, j) > Traits<T>::zero());
+      inv_covariance_(j, i) = Traits<Distance>::zero();
+    KCHE_TREE_DCHECK(inv_covariance_(j, j) > Traits<Distance>::zero());
   }
 
   is_diagonal_ = true;
@@ -208,23 +198,22 @@ struct DifferenceFunctor : public MapReduceFunctorConcept<T> {
   typedef typename RParam<T>::Type ConstRef_T;
 
   /// Compute the difference of 2 values.
-  template <typename AccumulatorType>
-  inline void op(AccumulatorType &result, ConstRef_T a, ConstRef_T b) const {
-    result = a;
-    result -= b;
+  template <typename Distance>
+  inline void op(Distance &result, ConstRef_T a, ConstRef_T b) const {
+    result = Traits<T>::distance(a, b);
   }
 
   /// Loop-based version of the operation.
-  template <unsigned int D, typename AccumulatorType>
-  inline AccumulatorType & operator () (unsigned int index, unsigned int block_size, AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int D, typename Distance>
+  inline Distance& operator () (unsigned int index, unsigned int block_size, Distance &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_DCHECK(block_size == 1);
     op(acc[index], a[index], b[index]);
     return acc;
   }
 
   /// Unrolled compile-time version of the operation.
-  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename AccumulatorType>
-  inline AccumulatorType & operator () (AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename Distance>
+  inline Distance& operator () (Distance &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "Expecting BlockSize = 1");
     op(acc[Index], a[Index], b[Index]);
     return acc;
@@ -239,23 +228,23 @@ struct DotFunctor : public MapReduceFunctorConcept<T> {
   typedef typename RParam<T>::Type ConstRef_T;
 
   /// Accumulate the dot product of 2 values.
-  template <typename AccumulatorType>
-  inline AccumulatorType & op(AccumulatorType &acc, ConstRef_T a, ConstRef_T b) const {
+  template <typename Distance>
+  inline Distance& op(Distance &acc, ConstRef_T a, ConstRef_T b) const {
     T temp = a;
     temp *= b;
     return acc += temp;
   }
 
   /// Loop-based version of the operation.
-  template <unsigned int D, typename AccumulatorType>
-  inline AccumulatorType & operator () (unsigned int index, unsigned int block_size, AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int D, typename Distance>
+  inline Distance& operator () (unsigned int index, unsigned int block_size, Distance &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_DCHECK(block_size == 1);
     return op(acc, a[index], b[index]);
   }
 
   /// Unrolled compile-time version of the operation.
-  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename AccumulatorType>
-  inline AccumulatorType & operator () (AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename Distance>
+  inline Distance& operator () (Distance &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "Expecting BlockSize = 1");
     return op(acc, a[Index], b[Index]);
   }
@@ -269,8 +258,8 @@ struct SquaredFirstDotFunctor : public MapReduceFunctorConcept<T> {
   typedef typename RParam<T>::Type ConstRef_T;
 
   // Accumulate a^2 * b for a pair of values a, b.
-  template <typename AccumulatorType>
-  inline AccumulatorType & op(AccumulatorType &acc, ConstRef_T a, ConstRef_T b) const {
+  template <typename Distance>
+  inline Distance& op(Distance &acc, ConstRef_T a, ConstRef_T b) const {
     T temp = a;
     temp *= a;
     temp *= b;
@@ -278,15 +267,15 @@ struct SquaredFirstDotFunctor : public MapReduceFunctorConcept<T> {
   }
 
   /// Loop-based version of the operation.
-  template <unsigned int D, typename AccumulatorType>
-  inline AccumulatorType & operator () (unsigned int index, unsigned int block_size, AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int D, typename Distance>
+  inline Distance& operator () (unsigned int index, unsigned int block_size, Distance &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_DCHECK(block_size == 1);
     return op(acc, a[index], b[index]);
   }
 
   /// Unrolled compile-time version of the operation.
-  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename AccumulatorType>
-  inline AccumulatorType & operator () (AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename Distance>
+  inline Distance& operator () (Distance &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "Expecting BlockSize = 1");
     return op(acc, a[Index], b[Index]);
   }
@@ -296,31 +285,30 @@ struct SquaredFirstDotFunctor : public MapReduceFunctorConcept<T> {
 template <typename T>
 struct MahalanobisDiagonalFunctor : public MapReduceFunctorConcept<T> {
 
-  /// Auxiliary type for optimized const references.
+  /// Auxiliary type for optimized const references to elements.
   typedef typename RParam<T>::Type ConstRef_T;
 
   /// Accumulate (a-b)^2 * c for a pair of values a, b and the diagonal value c.
-  template <typename AccumulatorType>
-  inline AccumulatorType & op(AccumulatorType &acc, ConstRef_T a, ConstRef_T b, ConstRef_T c) const {
-    T temp = a;
-    temp -= b;
+  template <typename Distance>
+  inline Distance& op(Distance &acc, ConstRef_T a, ConstRef_T b, typename RParam<Distance>::Type c) const {
+    Distance temp = Traits<T>::distance(a, b);
     temp *= temp;
     temp *= c;
     return acc += temp;
   }
 
   /// Loop-based version of the operation. The \a extra param holds the matrix diagonal values.
-  template <unsigned int D, typename AccumulatorType>
-  inline AccumulatorType & operator () (unsigned int index, unsigned int block_size, AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int D, typename Distance>
+  inline Distance& operator () (unsigned int index, unsigned int block_size, Distance &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_DCHECK(block_size == 1);
-    return op(acc, a[index], b[index], reinterpret_cast<const T *>(extra)[index]);
+    return op(acc, a[index], b[index], reinterpret_cast<const Distance *>(extra)[index]);
   }
 
   /// Unrolled compile-time version of the operation. The \a extra param holds the matrix diagonal values.
-  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename AccumulatorType>
-  inline AccumulatorType & operator () (AccumulatorType &acc, const T *a, const T *b, const void *extra) const {
+  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename Distance>
+  inline Distance& operator () (Distance &acc, const T *a, const T *b, const void *extra) const {
     KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "Expecting BlockSize = 1");
-    return op(acc, a[Index], b[Index], reinterpret_cast<const T *>(extra)[Index]);
+    return op(acc, a[Index], b[Index], reinterpret_cast<const Distance *>(extra)[Index]);
   }
 };
 
@@ -339,13 +327,12 @@ struct MahalanobisColumnFunctor : public MapReduceFunctorConcept<T> {
    * \param extra Pointer to the inverse covariance matrix object.
    * \return A reference to \a acc after being updated. Provided as syntactic sugar.
    */
-  template <unsigned int D>
-  inline T & operator () (unsigned int index, unsigned int block_size, T &acc, const T *cache, const T *not_used, const void *extra) const {
+  template <unsigned int D, typename Distance>
+  inline Distance& operator () (unsigned int index, unsigned int block_size, Distance &acc, const T *cache, const T *not_used, const void *extra) const {
     KCHE_TREE_DCHECK(block_size == 1);
     KCHE_TREE_DCHECK(not_used == NULL);
 
-    typedef typename Traits<T>::AccumulatorType AccumT;
-    AccumT column_acc = Traits<AccumT>::zero();
+    Distance column_acc = Traits<Distance>::zero();
 
     // Since index is a runtime value we need to use the loop-based version of map reduce.
     const SymmetricMatrix<T> *inv_covariance = reinterpret_cast<const SymmetricMatrix<T> *>(extra);
@@ -363,7 +350,7 @@ struct MahalanobisColumnFunctor : public MapReduceFunctorConcept<T> {
    * \tparam Index Index of the column to process.
    * \tparam BlockSize Number of columns to process.
    * \tparam D Number of dimensions of the vectors.
-   * \tparam AccumulatorType Type of the accumulator being used.
+   * \tparam Distance Type used to encode and accumulate the distance.
    *
    * \param acc Accumulator storing the partial result.
    * \param cache Precalculated vector of differences.
@@ -371,13 +358,12 @@ struct MahalanobisColumnFunctor : public MapReduceFunctorConcept<T> {
    * \param extra Pointer to the inverse covariance matrix object.
    * \return A reference to \a acc after being updated. Provided as syntactic sugar.
    */
-  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename AccumulatorType>
-  inline AccumulatorType & operator () (AccumulatorType &acc, const T *cache, const T *not_used, const void *extra) const {
+  template <unsigned int Index, unsigned int BlockSize, unsigned int D, typename Distance>
+  inline Distance& operator () (Distance &acc, const T *cache, const T *not_used, const void *extra) const {
     KCHE_TREE_COMPILE_ASSERT(BlockSize == 1, "Expecting BlockSize = 1");
     KCHE_TREE_DCHECK(not_used == NULL);
 
-    typedef typename Traits<T>::AccumulatorType AccumT;
-    AccumT column_acc = Traits<AccumT>::zero();
+    Distance column_acc = Traits<Distance>::zero();
 
     // Calculate the dot product of (v1-v2) and the (i-1)-th column of the inverse covariance matrix.
     const SymmetricMatrix<T> *inv_covariance = reinterpret_cast<const SymmetricMatrix<T> *>(extra);
@@ -393,10 +379,13 @@ struct MahalanobisColumnFunctor : public MapReduceFunctorConcept<T> {
 /// Provides functions to calculate the Mahalanobis distance of two \a D dimensional vectors of type \a T.
 template <typename T, const unsigned int D>
 struct MahalanobisDistanceCalculator {
-  static inline T distance(const typename MahalanobisMetric<T, D>::VectorType &v1, const typename MahalanobisMetric<T, D>::VectorType &v2,
-      const MahalanobisMetric<T, D> &metric);
-  static inline T distance(const typename MahalanobisMetric<T, D>::VectorType &v1, const typename MahalanobisMetric<T, D>::VectorType &v2,
-      const MahalanobisMetric<T, D> &metric, typename MahalanobisMetric<T, D>::ConstRef_T upper_bound);
+  typedef MahalanobisMetric<T, D> Metric;
+  typedef typename Metric::Distance Distance;
+  typedef typename Metric::Vector Vector;
+  typedef typename Metric::ConstRef_Distance ConstRef_Distance;
+
+  static inline Distance distance(const Vector &v1, const Vector &v2, const Metric &metric);
+  static inline Distance distance(const Vector &v1, const Vector &v2, const Metric &metric, ConstRef_Distance upper_bound);
 };
 
 /**
@@ -405,10 +394,13 @@ struct MahalanobisDistanceCalculator {
  */
 template <typename T, const unsigned int D>
 struct MahalanobisDistanceCalculatorSSE : MahalanobisDistanceCalculator<T, D> {
-  static inline T distance(const typename MahalanobisMetric<T, D>::VectorType &v1, const typename MahalanobisMetric<T, D>::VectorType &v2,
-      const MahalanobisMetric<T, D> &metric);
-  static inline T distance(const typename MahalanobisMetric<T, D>::VectorType &v1, const typename MahalanobisMetric<T, D>::VectorType &v2,
-      const MahalanobisMetric<T, D> &metric, typename MahalanobisMetric<T, D>::ConstRef_T upper_bound);
+  typedef MahalanobisMetric<T, D> Metric;
+  typedef typename Metric::Distance Distance;
+  typedef typename Metric::Vector Vector;
+  typedef typename Metric::ConstRef_Distance ConstRef_Distance;
+
+  static inline Distance distance(const Vector &v1, const Vector &v2, const Metric &metric);
+  static inline Distance distance(const Vector &v1, const Vector &v2, const Metric &metric, ConstRef_Distance upper_bound);
 };
 
 /**
@@ -419,7 +411,7 @@ struct MahalanobisDistanceCalculatorSSE : MahalanobisDistanceCalculator<T, D> {
  * \return Squared Mahalanobis distance between the two vectors.
  */
 template <typename T, const unsigned int D>
-T MahalanobisMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2) const {
+typename MahalanobisMetric<T, D>::Distance MahalanobisMetric<T, D>::operator () (const Vector &v1, const Vector &v2) const {
 
   // Delegate the distance calculation depending on the SSE optimization settings.
   typedef typename TypeBranch<Settings::enable_sse, MahalanobisDistanceCalculatorSSE<T, D>, MahalanobisDistanceCalculator<T, D> >::Result DistanceCalculator;
@@ -436,7 +428,7 @@ T MahalanobisMetric<T, D>::operator () (const VectorType &v1, const VectorType &
  * \return Squared Mahalanobis distance between the two vectors or a partial result greater than \a upper.
  */
 template <typename T, const unsigned int D>
-T MahalanobisMetric<T, D>::operator () (const VectorType &v1, const VectorType &v2, ConstRef_T upper_bound) const {
+typename MahalanobisMetric<T, D>::Distance MahalanobisMetric<T, D>::operator () (const Vector &v1, const Vector &v2, ConstRef_Distance upper_bound) const {
 
   // Delegate the distance calculation depending on the SSE optimization settings.
   typedef typename TypeBranch<Settings::enable_sse, MahalanobisDistanceCalculatorSSE<T, D>, MahalanobisDistanceCalculator<T, D> >::Result DistanceCalculator;
@@ -452,11 +444,10 @@ T MahalanobisMetric<T, D>::operator () (const VectorType &v1, const VectorType &
  * \return Squared Mahalanobis distance between the two vectors.
  */
 template <typename T, const unsigned int D>
-T MahalanobisDistanceCalculator<T, D>::distance(const typename MahalanobisMetric<T, D>::VectorType &v1, const typename MahalanobisMetric<T, D>::VectorType &v2, const MahalanobisMetric<T, D> &metric) {
+typename MahalanobisDistanceCalculator<T, D>::Distance MahalanobisDistanceCalculator<T, D>::distance(const Vector &v1, const Vector &v2, const Metric &metric) {
 
-  // Initialize the result accumulator.
-  typedef typename Traits<T>::AccumulatorType AccumT;
-  AccumT acc = Traits<AccumT>::zero();
+  // Initialize the distance accumulator.
+  Distance acc = Traits<Distance>::zero();
 
   // Don't precalculate the cache if the covariance matrix is diagonal.
   if (metric.has_diagonal_covariance()) {
@@ -465,15 +456,15 @@ T MahalanobisDistanceCalculator<T, D>::distance(const typename MahalanobisMetric
   }
 
   // Map the difference into a separate vector. No reduction operation is performed.
-  typename MahalanobisMetric<T, D>::CacheVectorType cache;
-  T *cache_data = cache.mutable_data();
+  typename MahalanobisMetric<T, D>::CacheVector cache;
+  Distance *cache_data = cache.mutable_data();
   MapReduce<T, D>::run(DifferenceFunctor<T>(), cache_data, v1.data(), v2.data());
 
   // Operate over the inverse covariance matrix diagonal.
-  MapReduce<T, D>::run(SquaredFirstDotFunctor<T>(), acc, cache.data(), metric.inverse_covariance().diagonal());
+  MapReduce<Distance, D>::run(SquaredFirstDotFunctor<Distance>(), acc, cache.data(), metric.inverse_covariance().diagonal());
 
   // Operate over the rest of the matrix.
-  MapReduce<T, D, 1>::run(MahalanobisColumnFunctor<T>(), acc, cache.data(), NULL, &metric.inverse_covariance());
+  MapReduce<Distance, D, 1>::run(MahalanobisColumnFunctor<Distance>(), acc, cache.data(), NULL, &metric.inverse_covariance());
 
   return acc;
 }
@@ -488,32 +479,31 @@ T MahalanobisDistanceCalculator<T, D>::distance(const typename MahalanobisMetric
  * \return Squared Mahalanobis distance between the two vectors or the partial result if greater than \a upper_bound.
  */
 template <typename T, const unsigned int D>
-T MahalanobisDistanceCalculator<T, D>::distance(const typename MahalanobisMetric<T, D>::VectorType &v1, const typename MahalanobisMetric<T, D>::VectorType &v2, const MahalanobisMetric<T, D> &metric, typename MahalanobisMetric<T, D>::ConstRef_T upper_bound) {
+typename MahalanobisDistanceCalculator<T, D>::Distance MahalanobisDistanceCalculator<T, D>::distance(const Vector &v1, const Vector &v2, const Metric &metric, ConstRef_Distance upper_bound) {
 
   // Constant calculated empirically.
   const unsigned int D_acc = (unsigned int) (0.4f * D);
 
-  // Initialize the result accumulator.
-  typedef typename Traits<T>::AccumulatorType AccumT;
-  AccumT acc = Traits<AccumT>::zero();
+  // Initialize the distance accumulator.
+  Distance acc = Traits<Distance>::zero();
 
   // Don't precalculate the cache if the covariance matrix is diagonal.
   if (metric.has_diagonal_covariance()) {
     // Check the details below to see why this operation is mathematically safe.
     MapReduce<T, D, 0, D_acc>::run(MahalanobisDiagonalFunctor<T>(), acc, v1.data(), v2.data(), metric.inverse_covariance().diagonal());
-    BoundedMapReduce<3, T, D, D_acc, D>::run(MahalanobisDiagonalFunctor<T>(), acc, GreaterThanBoundaryFunctor<T>(), upper_bound, v1.data(), v2.data(), metric.inverse_covariance().diagonal());
+    BoundedMapReduce<3, T, D, D_acc, D>::run(MahalanobisDiagonalFunctor<T>(), acc, GreaterThanBoundaryFunctor<Distance>(), upper_bound, v1.data(), v2.data(), metric.inverse_covariance().diagonal());
     return acc;
   }
 
   // Map the difference into a separate vector. No reduction operation is performed.
-  typename MahalanobisMetric<T, D>::CacheVectorType cache;
-  T *cache_data = cache.mutable_data();
+  typename MahalanobisMetric<T, D>::CacheVector cache;
+  Distance *cache_data = cache.mutable_data();
   MapReduce<T, D>::run(DifferenceFunctor<T>(), cache_data, v1.data(), v2.data());
 
   // Unfortunately this part of the calculation is not monotonically increasing and no early outs based on
   // incremental calculations are possible with this approach. BoundedMapReduce should not be used here.
   // For further mathematical details check the comment below.
-  MapReduce<T, D, 1>::run(MahalanobisColumnFunctor<T>(), acc, cache.data(), NULL, &metric.inverse_covariance());
+  MapReduce<Distance, D, 1>::run(MahalanobisColumnFunctor<Distance>(), acc, cache.data(), NULL, &metric.inverse_covariance());
 
   // The matrix is symmetric and assumed to be positive-definite. This comes from the assumption that it's the inverse of a covariance matrix,
   // which enforces the original covariance matrix to be symmetric positive-semidefinite, and the fact that its invert method fails
@@ -521,8 +511,8 @@ T MahalanobisDistanceCalculator<T, D>::distance(const typename MahalanobisMetric
   // since it's the inverse of another positive-definite matrix and therefore, as a positive-definite Hermian matrix, all the elements
   // in its main diagonal will always be positive. This allows BoundedMapReduce to be safely used, as the distance function becomes
   // monotonically increasing: a sum of squared differences and positive diagonal values.
-  MapReduce<T, D, 0, D_acc>::run(SquaredFirstDotFunctor<T>(), acc, cache.data(), metric.inverse_covariance().diagonal());
-  BoundedMapReduce<3, T, D, D_acc, D>::run(SquaredFirstDotFunctor<T>(), acc, GreaterThanBoundaryFunctor<T>(), upper_bound, cache.data(), metric.inverse_covariance().diagonal());
+  MapReduce<Distance, D, 0, D_acc>::run(SquaredFirstDotFunctor<Distance>(), acc, cache.data(), metric.inverse_covariance().diagonal());
+  BoundedMapReduce<3, Distance, D, D_acc, D>::run(SquaredFirstDotFunctor<Distance>(), acc, GreaterThanBoundaryFunctor<Distance>(), upper_bound, cache.data(), metric.inverse_covariance().diagonal());
 
   return acc;
 }

@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2011 by Leandro Graciá Gil                              *
+ *   Copyright (C) 2011, 2012 by Leandro Graciá Gil                        *
  *   leandro.gracia.gil@gmail.com                                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -35,9 +35,9 @@
 namespace kche_tree {
 
 // Forward declarations.
-template <typename T, const unsigned int D, typename M> class KDSearchData;
-template <typename T, const unsigned int D> class EuclideanMetric;
-template <typename T, const unsigned int D> class MahalanobisMetric;
+template <typename T, unsigned int D, typename M> class KDSearch;
+template <typename T, unsigned int D> class EuclideanMetric;
+template <typename T, unsigned int D> class MahalanobisMetric;
 
 /**
  * \brief Provide the basic operations for an axis-based incremental hyperrectangle distance calculation.
@@ -49,48 +49,66 @@ template <typename T, const unsigned int D> class MahalanobisMetric;
  * \tparam D Number of dimensions in the vectors.
  * \tparam Metric Metric type associated with the incremental calculation.
  */
-template <typename T, const unsigned int D, typename Metric>
+template <typename ElementType, unsigned int NumDimensions, typename MetricType>
 class IncrementalBase {
 public:
-  /// Use the global data set type by default.
-  typedef typename TypeSettings<T, D>::DataSetType DataSetType;
+  /// Type of the elements used in the incremental calculation.
+  typedef ElementType Element;
 
-  /// Use the global vector type by default.
-  typedef typename TypeSettings<T, D>::VectorType VectorType;
+  /// Number of dimensions of the feature vectors.
+  static const unsigned int Dimensions = NumDimensions;
 
-  /// Extra data required in the KDSearchData struct to be able to perform axis-based incremental hyperrectangle intersection calculations.
+  // Type of the metric associated with the incremental calculation.
+  typedef MetricType Metric;
+
+  /// Alias for compatible non-labeled data sets.
+  typedef typename kche_tree::DataSet<Element, Dimensions> DataSet;
+
+  /// Alias for the compatible feature vectors.
+  typedef typename kche_tree::Vector<Element, Dimensions> Vector;
+
+  /// Alias for the compatible kd-tree search structure.
+  typedef typename kche_tree::KDSearch<Element, Dimensions, Metric> KDSearch;
+
+  /// Alias for the compatible kd-nodes.
+  typedef typename kche_tree::KDNode<Element, Dimensions> KDNode;
+
+  /// Alias for the associated distance type.
+  typedef typename Traits<Element>::Distance Distance;
+
+  /// Extra data required in the KDSearch struct to be able to perform axis-based incremental hyperrectangle intersection calculations.
   struct SearchData {
 
     /// Axis-ordered point and hyperrectangle structure. Used internally to increase the cache hits.
     struct AxisData {
-      T p; ///< Per-axis reference input point.
-      T nearest; ///< Per-axis nearest point in the current hyperrectangle.
-    } axis[D]; ///< Per-axis data defined this way to reduce cache misses.
+      Element p; ///< Per-axis reference input point.
+      Element nearest; ///< Per-axis nearest point in the current hyperrectangle.
+    } axis[Dimensions]; ///< Per-axis data defined this way to reduce cache misses.
 
     /// Fill per-axis data contents.
-    SearchData(const VectorType &p, const DataSetType &data);
+    SearchData(const Vector &p, const DataSet &data);
   };
 
-  /// Type of the data extension applied to the KDSearchData object for incremental calculations.
-  typedef SearchData SearchDataExtras;
+  /// Type of the data extension applied to the KDSearch object for incremental calculations.
+  typedef SearchData SearchExtras;
 
   /// Default constructor.
-  IncrementalBase(KDSearchData<T, D, Metric> &search_data);
+  IncrementalBase(KDSearch &search_data);
 
   /// Create an temporary incremental calculator object. Will update the current data according with the selected branch.
   template <typename IncrementalFunctor>
-  void update(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D, Metric> &search_data, const IncrementalFunctor &updater);
+  void update(const KDNode *node, const KDNode *parent, KDSearch &search_data, const IncrementalFunctor &updater);
 
   /// Undo any previous modifications to the incremental data.
   void restore();
 
 protected:
-  KDSearchData<T, D, Metric> &search_data_; ///< Reference to the search data being used.
+  KDSearch &search_data_; ///< Reference to the search data being used.
   unsigned int parent_axis_; ///< Axis that defines the hyperspace splitting.
 
   bool modified_; ///< Flag indicating if the values were modified as part of the incremental update.
-  T previous_axis_nearest_; ///< Previous value of the local axis in the hyperrectangle.
-  T previous_hyperrect_distance_; ///< Previous value of the distance to the nearest point in the hyperrectangle.
+  Element previous_axis_nearest_; ///< Previous value of the local axis in the hyperrectangle.
+  Distance previous_hyperrect_distance_; ///< Previous value of the distance to the nearest point in the hyperrectangle.
 };
 
 /**
@@ -105,7 +123,7 @@ public:
   /// Metric associated with this incremental calculation.
   typedef EuclideanMetric<T, D> Metric;
 
-  EuclideanIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D, Metric> &search_data);
+  EuclideanIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearch<T, D, Metric> &search_data);
   ~EuclideanIncrementalUpdater();
 };
 
@@ -122,7 +140,7 @@ public:
   /// Metric associated with this incremental calculation.
   typedef MahalanobisMetric<T, D> Metric;
 
-  MahalanobisIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearchData<T, D, Metric> &search_data);
+  MahalanobisIncrementalUpdater(const KDNode<T, D> *node, const KDNode<T, D> *parent, KDSearch<T, D, Metric> &search_data);
   ~MahalanobisIncrementalUpdater();
 };
 
