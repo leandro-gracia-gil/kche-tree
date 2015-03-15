@@ -1,0 +1,12 @@
+# Introduction #
+
+We intend to make use of design patterns where necessary. This shall improve reusability.
+
+# Details #
+
+After reviewing the code due to maintenance and support tasks, we believe that it would be valuable to put some effort reviewing some design concepts of the library. First task that should be carried out, is to make use of the "Strategy pattern" to allow the use of different metric functions, when searching for neighbours.
+
+We are also planning to include some UML class diagrams, in the documentation.
+
+That said, it is important to keep in mind that we intend to preserve
+original insight provided by original author, and that the core architecture is not very likely to be changed.
